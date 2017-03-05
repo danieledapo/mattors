@@ -1,0 +1,8 @@
+[package]
+name = "matto"
+version = "0.1.0"
+authors = ["daniele <d.dorazio96@gmail.com>"]
+
+[dependencies]
+num = "0.1"
+image = "0.12"
