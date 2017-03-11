@@ -28,34 +28,56 @@ impl Bound {
 
 
 #[derive(Debug)]
-enum FractalPoint {
-    Inside,
-    Outside(u32),
+struct FractalPoint {
+    is_inside: bool,
+    last_value: u32,
+    iterations: u32,
 }
 
-
 impl FractalPoint {
-    fn is_inside(&self) -> bool {
-        match *self {
-            FractalPoint::Inside => true,
-            FractalPoint::Outside(_) => false,
+    fn mandelbrot(f: C64) -> FractalPoint {
+        FractalPoint::julia(f, f)
+    }
+
+    fn julia(mut f: C64, c: C64) -> FractalPoint {
+        let mut is_inside = true;
+        let mut i = 0;
+
+        while i < 100 {
+            f = f * f + c;
+
+            if f.norm() > 2.0 {
+                is_inside = false;
+                break;
+            }
+
+            i += 1;
+        }
+
+        FractalPoint {
+            last_value: f.norm() as u32,
+            iterations: i,
+            is_inside: is_inside,
         }
     }
 
     fn to_pixels(&self) -> Vec<u8> {
-        if let FractalPoint::Outside(n) = *self {
-            vec![(n >> 16) as u8, (n >> 8) as u8, n as u8]
-        } else {
+        if self.is_inside {
             vec![0, 128, 0]
+        } else {
+            vec![(self.iterations >> 16) as u8, (self.iterations >> 8) as u8, self.iterations as u8]
         }
     }
 }
 
 
 fn main() {
-    assert_eq!(mandelbrot(Complex::new(0.0, 0.0)).is_inside(), true);
-    assert_eq!(mandelbrot(Complex::new(-1.0, 0.0)).is_inside(), true);
-    assert_eq!(mandelbrot(Complex::new(1.0, 0.0)).is_inside(), false);
+    assert_eq!(FractalPoint::mandelbrot(Complex::new(0.0, 0.0)).is_inside,
+               true);
+    assert_eq!(FractalPoint::mandelbrot(Complex::new(-1.0, 0.0)).is_inside,
+               true);
+    assert_eq!(FractalPoint::mandelbrot(Complex::new(1.0, 0.0)).is_inside,
+               false);
 
     let step = 0.003;
 
@@ -70,9 +92,9 @@ fn main() {
 
         let frac = {
             if let Some(c) = *c {
-                gen_fractal(start, end, step, |f| julia(f, c))
+                gen_fractal(start, end, step, |f| FractalPoint::julia(f, c))
             } else {
-                gen_fractal(start, end, step, mandelbrot)
+                gen_fractal(start, end, step, FractalPoint::mandelbrot)
             }
 
         };
@@ -131,27 +153,10 @@ fn gen_fractal<F>(start: &Bound, end: &Bound, step: f64, gen: F) -> Vec<Vec<Frac
     out
 }
 
-fn mandelbrot(f: C64) -> FractalPoint {
-    julia(f, f)
-}
-
-
-fn julia(mut f: C64, c: C64) -> FractalPoint {
-    for i in 0..100 {
-        f = f * f + c;
-
-        if f.norm() > 2.0 {
-            return FractalPoint::Outside(i);
-        }
-    }
-
-    FractalPoint::Inside
-}
-
 // fn print_fractal(frac: &Vec<Vec<FractalPoint>>) {
 //     for row in frac {
 //         for cell in row {
-//             if cell.is_inside() {
+//             if cell.is_inside {
 //                 print!("o");
 //             } else {
 //                 print!(" ");
