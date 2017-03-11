@@ -33,9 +33,9 @@ enum FractalPoint {
 
 impl FractalPoint {
     fn is_inside(&self) -> bool {
-        match self {
-            &FractalPoint::Inside => true,
-            &FractalPoint::Outside(_) => false,
+        match *self {
+            FractalPoint::Inside => true,
+            FractalPoint::Outside(_) => false,
         }
     }
 }
@@ -58,10 +58,10 @@ fn main() {
         let (ref start, ref end, step, ref c) = *row;
 
         let frac = {
-            if let &Some(c) = c {
-                gen_fractal(&start, &end, step, |f| julia(f, c))
+            if let Some(c) = *c {
+                gen_fractal(start, end, step, |f| julia(f, c))
             } else {
-                gen_fractal(&start, &end, step, mandelbrot)
+                gen_fractal(start, end, step, mandelbrot)
             }
 
         };
@@ -74,7 +74,7 @@ fn main() {
 }
 
 
-fn fractal_to_image(path: &str, scalx: u32, scaly: u32, frac: &Vec<Vec<FractalPoint>>) {
+fn fractal_to_image(path: &str, scalx: u32, scaly: u32, frac: &[Vec<FractalPoint>]) {
     let width = frac.len() as u32 * scalx;
     let height = frac[0].len() as u32 * scaly;
 
@@ -93,8 +93,8 @@ fn fractal_to_image(path: &str, scalx: u32, scaly: u32, frac: &Vec<Vec<FractalPo
         };
     }
 
-    let ref mut fout = File::create(&Path::new(path)).unwrap();
-    image::ImageRgb8(imgbuf).save(fout, image::PNG).unwrap();
+    let mut fout = &File::create(&Path::new(path)).unwrap();
+    image::ImageRgb8(imgbuf).save(&mut fout, image::PNG).unwrap();
 }
 
 
