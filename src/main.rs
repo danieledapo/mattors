@@ -46,7 +46,7 @@ fn main() {
     assert_eq!(mandelbrot(Complex::new(-1.0, 0.0)).is_inside(), true);
     assert_eq!(mandelbrot(Complex::new(1.0, 0.0)).is_inside(), false);
 
-    let step = 0.002;
+    let step = 0.003;
 
     let manifest =
         vec![(Bound::new(-3.0, -1.2), Bound::new(1.0, 1.2), step, None),
@@ -69,18 +69,21 @@ fn main() {
         println!("Fractal: {}", i + 1);
 
         // print_fractal(&frac);
-        fractal_to_image(&format!("{}.png", i + 1), &frac);
+        fractal_to_image(&format!("{}.png", i + 1), 3, 3, &frac);
     }
 }
 
 
-fn fractal_to_image(path: &str, frac: &Vec<Vec<FractalPoint>>) {
-    let width = frac.len() as u32;
-    let height = frac[0].len() as u32;
+fn fractal_to_image(path: &str, scalx: u32, scaly: u32, frac: &Vec<Vec<FractalPoint>>) {
+    let width = frac.len() as u32 * scalx;
+    let height = frac[0].len() as u32 * scaly;
 
     let mut imgbuf = image::ImageBuffer::new(width, height);
 
     for (x, y, pix) in imgbuf.enumerate_pixels_mut() {
+        let x = x / scalx;
+        let y = y / scaly;
+
         *pix = {
             if let FractalPoint::Outside(it) = frac[x as usize][y as usize] {
                 u32_to_rgb(it)
