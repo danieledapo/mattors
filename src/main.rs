@@ -1,10 +1,13 @@
 extern crate image;
 extern crate num;
+extern crate rayon;
 
 use std::fs::File;
 use std::path::Path;
 
 use num::complex::Complex;
+
+use rayon::prelude::*;
 
 
 type C64 = Complex<f64>;
@@ -36,6 +39,14 @@ impl FractalPoint {
         match *self {
             FractalPoint::Inside => true,
             FractalPoint::Outside(_) => false,
+        }
+    }
+
+    fn to_pixels(&self) -> Vec<u8> {
+        if let FractalPoint::Outside(n) = *self {
+            vec![(n >> 16) as u8, (n >> 8) as u8, n as u8]
+        } else {
+            vec![0, 128, 0]
         }
     }
 }
@@ -78,20 +89,20 @@ fn fractal_to_image(path: &str, scalx: u32, scaly: u32, frac: &[Vec<FractalPoint
     let width = frac.len() as u32 * scalx;
     let height = frac[0].len() as u32 * scaly;
 
-    let mut imgbuf = image::ImageBuffer::new(width, height);
+    // *this is AWESOME*
+    let v = (0..height)
+        .into_par_iter()
+        .flat_map(move |y| {
+            (0..width).into_par_iter().flat_map(move |x| {
+                let x = (x / scalx) as usize;
+                let y = (y / scaly) as usize;
 
-    for (x, y, pix) in imgbuf.enumerate_pixels_mut() {
-        let x = x / scalx;
-        let y = y / scaly;
+                frac[x][y].to_pixels()
+            })
+        })
+        .collect();
 
-        *pix = {
-            if let FractalPoint::Outside(it) = frac[x as usize][y as usize] {
-                u32_to_rgb(it)
-            } else {
-                image::Rgb([0, 128, 0])
-            }
-        };
-    }
+    let imgbuf = image::ImageBuffer::from_raw(width, height, v).unwrap();
 
     let mut fout = &File::create(&Path::new(path)).unwrap();
     image::ImageRgb8(imgbuf).save(&mut fout, image::PNG).unwrap();
@@ -135,10 +146,6 @@ fn julia(mut f: C64, c: C64) -> FractalPoint {
     }
 
     FractalPoint::Inside
-}
-
-fn u32_to_rgb(n: u32) -> image::Rgb<u8> {
-    image::Rgb([(n >> 16) as u8, (n >> 8) as u8, n as u8])
 }
 
 // fn print_fractal(frac: &Vec<Vec<FractalPoint>>) {
