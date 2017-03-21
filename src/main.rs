@@ -80,11 +80,10 @@ fn main() {
     assert_eq!(FractalPoint::mandelbrot(Complex64::new(1.0, 0.0)).is_inside,
                false);
 
-    let manifest =
-        vec![(Bound::new(-3.0, -1.2), Bound::new(1.0, 1.2), STEP, None),
-             (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), STEP, Some(Complex64::new(-0.4, 0.6))),
-             (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), STEP, Some(Complex64::new(-0.8, 0.156))),
-             (Bound::new(-1.2, -1.2), Bound::new(1.2, 1.0), STEP, Some(Complex64::new(0.285, 0.01)))];
+    let manifest = vec![(Bound::new(-3.0, -1.2), Bound::new(1.0, 1.2), STEP, None),
+                        (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), STEP, Some(Complex64::new(-0.4, 0.6))),
+                        (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), STEP, Some(Complex64::new(-0.8, 0.156))),
+                        (Bound::new(-1.2, -1.2), Bound::new(1.2, 1.0), STEP, Some(Complex64::new(0.285, 0.01)))];
 
     for (i, row) in manifest.iter().enumerate() {
         let (ref start, ref end, step, ref c) = *row;
@@ -116,9 +115,7 @@ fn fractal_to_image(frac: &[Vec<FractalPoint>]) -> image::DynamicImage {
     // *this is AWESOME*
     let v = (0..height)
         .into_par_iter()
-        .flat_map(move |y| {
-            (0..width).into_par_iter().flat_map(move |x| frac[x][y].to_pixels())
-        })
+        .flat_map(move |y| (0..width).into_par_iter().flat_map(move |x| frac[x][y].to_pixels()))
         .collect();
 
     let imgbuf = image::ImageBuffer::from_raw(width as u32, height as u32, v).unwrap();
