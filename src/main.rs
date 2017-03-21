@@ -3,14 +3,16 @@ extern crate num;
 extern crate rayon;
 
 use std::fs::File;
-use std::path::Path;
 
-use num::complex::Complex;
+use image::GenericImage;
+use num::complex::Complex64;
 
 use rayon::prelude::*;
 
 
-type C64 = Complex<f64>;
+const ITERATIONS: u32 = 100;
+const STEP: f64 = 0.002;
+const SCAL: u32 = 1;
 
 
 #[derive(Debug)]
@@ -18,7 +20,6 @@ struct Bound {
     x: f64,
     y: f64,
 }
-
 
 impl Bound {
     pub fn new(x: f64, y: f64) -> Bound {
@@ -35,15 +36,15 @@ struct FractalPoint {
 }
 
 impl FractalPoint {
-    fn mandelbrot(f: C64) -> FractalPoint {
+    fn mandelbrot(f: Complex64) -> FractalPoint {
         FractalPoint::julia(f, f)
     }
 
-    fn julia(mut f: C64, c: C64) -> FractalPoint {
+    fn julia(mut f: Complex64, c: Complex64) -> FractalPoint {
         let mut is_inside = true;
         let mut i = 0;
 
-        while i < 100 {
+        while i < ITERATIONS {
             f = f * f + c;
 
             if f.norm() > 2.0 {
@@ -55,7 +56,7 @@ impl FractalPoint {
         }
 
         FractalPoint {
-            last_value: f.norm() as u32,
+            last_value: (f.norm() * 1_000_000.) as u32,
             iterations: i,
             is_inside: is_inside,
         }
@@ -63,29 +64,27 @@ impl FractalPoint {
 
     fn to_pixels(&self) -> Vec<u8> {
         if self.is_inside {
-            vec![0, 128, 0]
+            u32_to_vec(self.last_value)
         } else {
-            vec![(self.iterations >> 16) as u8, (self.iterations >> 8) as u8, self.iterations as u8]
+            u32_to_vec(self.iterations)
         }
     }
 }
 
 
 fn main() {
-    assert_eq!(FractalPoint::mandelbrot(Complex::new(0.0, 0.0)).is_inside,
+    assert_eq!(FractalPoint::mandelbrot(Complex64::new(0.0, 0.0)).is_inside,
                true);
-    assert_eq!(FractalPoint::mandelbrot(Complex::new(-1.0, 0.0)).is_inside,
+    assert_eq!(FractalPoint::mandelbrot(Complex64::new(-1.0, 0.0)).is_inside,
                true);
-    assert_eq!(FractalPoint::mandelbrot(Complex::new(1.0, 0.0)).is_inside,
+    assert_eq!(FractalPoint::mandelbrot(Complex64::new(1.0, 0.0)).is_inside,
                false);
 
-    let step = 0.003;
-
     let manifest =
-        vec![(Bound::new(-3.0, -1.2), Bound::new(1.0, 1.2), step, None),
-             (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), step, Some(C64::new(-0.4, 0.6))),
-             (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), step, Some(C64::new(-0.8, 0.156))),
-             (Bound::new(-1.2, -1.2), Bound::new(1.2, 1.0), step, Some(C64::new(0.285, 0.01)))];
+        vec![(Bound::new(-3.0, -1.2), Bound::new(1.0, 1.2), STEP, None),
+             (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), STEP, Some(Complex64::new(-0.4, 0.6))),
+             (Bound::new(-3.0, -1.2), Bound::new(2.0, 1.2), STEP, Some(Complex64::new(-0.8, 0.156))),
+             (Bound::new(-1.2, -1.2), Bound::new(1.2, 1.0), STEP, Some(Complex64::new(0.285, 0.01)))];
 
     for (i, row) in manifest.iter().enumerate() {
         let (ref start, ref end, step, ref c) = *row;
@@ -101,38 +100,34 @@ fn main() {
 
         println!("Fractal: {}", i + 1);
 
-        // print_fractal(&frac);
-        fractal_to_image(&format!("{}.png", i + 1), 3, 3, &frac);
+        let img = fractal_to_image(&frac);
+        let img = img.resize(img.width() * SCAL, img.height() * SCAL, image::CatmullRom);
+
+        let mut fout = &File::create(&format!("{}.png", i + 1)).unwrap();
+        img.save(&mut fout, image::PNG).unwrap();
     }
 }
 
 
-fn fractal_to_image(path: &str, scalx: u32, scaly: u32, frac: &[Vec<FractalPoint>]) {
-    let width = frac.len() as u32 * scalx;
-    let height = frac[0].len() as u32 * scaly;
+fn fractal_to_image(frac: &[Vec<FractalPoint>]) -> image::DynamicImage {
+    let width = frac.len();
+    let height = frac[0].len();
 
     // *this is AWESOME*
     let v = (0..height)
         .into_par_iter()
         .flat_map(move |y| {
-            (0..width).into_par_iter().flat_map(move |x| {
-                let x = (x / scalx) as usize;
-                let y = (y / scaly) as usize;
-
-                frac[x][y].to_pixels()
-            })
+            (0..width).into_par_iter().flat_map(move |x| frac[x][y].to_pixels())
         })
         .collect();
 
-    let imgbuf = image::ImageBuffer::from_raw(width, height, v).unwrap();
-
-    let mut fout = &File::create(&Path::new(path)).unwrap();
-    image::ImageRgb8(imgbuf).save(&mut fout, image::PNG).unwrap();
+    let imgbuf = image::ImageBuffer::from_raw(width as u32, height as u32, v).unwrap();
+    image::ImageRgb8(imgbuf).resize_exact(1920, 1080, image::Lanczos3)
 }
 
 
 fn gen_fractal<F>(start: &Bound, end: &Bound, step: f64, gen: F) -> Vec<Vec<FractalPoint>>
-    where F: Fn(C64) -> FractalPoint
+    where F: Fn(Complex64) -> FractalPoint
 {
     let mut out = vec![];
     let mut x = start.x;
@@ -142,7 +137,7 @@ fn gen_fractal<F>(start: &Bound, end: &Bound, step: f64, gen: F) -> Vec<Vec<Frac
         let mut tmp = vec![];
 
         while y < end.y {
-            tmp.push(gen(Complex::new(x, y)));
+            tmp.push(gen(Complex64::new(x, y)));
             y += step;
         }
 
@@ -153,15 +148,7 @@ fn gen_fractal<F>(start: &Bound, end: &Bound, step: f64, gen: F) -> Vec<Vec<Frac
     out
 }
 
-// fn print_fractal(frac: &Vec<Vec<FractalPoint>>) {
-//     for row in frac {
-//         for cell in row {
-//             if cell.is_inside {
-//                 print!("o");
-//             } else {
-//                 print!(" ");
-//             }
-//         }
-//         print!("\n");
-//     }
-// }
+
+fn u32_to_vec(n: u32) -> Vec<u8> {
+    vec![(n >> 16) as u8, (n >> 8) as u8, n as u8]
+}
