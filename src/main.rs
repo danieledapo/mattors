@@ -31,7 +31,7 @@ impl Bound {
 #[derive(Debug)]
 struct FractalPoint {
     is_inside: bool,
-    last_value: u32,
+    last_value: f64,
     iterations: u32,
 }
 
@@ -56,7 +56,7 @@ impl FractalPoint {
         }
 
         FractalPoint {
-            last_value: (f.norm() * 1_000_000.) as u32,
+            last_value: f.norm(),
             iterations: i,
             is_inside: is_inside,
         }
@@ -64,7 +64,12 @@ impl FractalPoint {
 
     fn to_pixels(&self) -> Vec<u8> {
         if self.is_inside {
-            u32_to_vec(self.last_value)
+            let last_value = (self.last_value * 1_000_000.0) as u32;
+
+            // vec![0, 0, 0]
+            // u32_to_vec(self.last_value * 1_000_000.0)
+
+            vec![0, (last_value % 255) as u8, (last_value % 255) as u8]
         } else {
             u32_to_vec(self.iterations)
         }
