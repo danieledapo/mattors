@@ -6,4 +6,4 @@ authors = ["daniele <d.dorazio96@gmail.com>"]
 [dependencies]
 num = "0.1"
 image = "0.12"
-rayon = "0.6"
+rayon = "0.7"
