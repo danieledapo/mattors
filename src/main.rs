@@ -64,11 +64,9 @@ impl FractalPoint {
 
     fn to_pixels(&self) -> Vec<u8> {
         if self.is_inside {
-            let last_value = (self.last_value * 1_000_000.0) as u32;
+            vec![(self.last_value * 128.0) as u8, ((2.0 - self.last_value) * 128.0) as u8, 0]
 
-            // vec![0, 0, 0]
-            u32_to_vec(last_value)
-
+            //let last_value = (self.last_value * 1_000_000.0) as u32;
             // vec![0, (last_value % 255) as u8, (last_value % 255) as u8]
         } else {
             u32_to_vec(self.iterations)
