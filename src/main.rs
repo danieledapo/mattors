@@ -67,9 +67,9 @@ impl FractalPoint {
             let last_value = (self.last_value * 1_000_000.0) as u32;
 
             // vec![0, 0, 0]
-            // u32_to_vec(self.last_value * 1_000_000.0)
+            u32_to_vec(last_value)
 
-            vec![0, (last_value % 255) as u8, (last_value % 255) as u8]
+            // vec![0, (last_value % 255) as u8, (last_value % 255) as u8]
         } else {
             u32_to_vec(self.iterations)
         }
