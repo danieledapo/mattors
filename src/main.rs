@@ -10,7 +10,7 @@ use num::complex::Complex64;
 use rayon::prelude::*;
 
 
-const ITERATIONS: u32 = 100;
+const ITERATIONS: u32 = 128;
 const STEP: f64 = 0.002;
 const SCAL: u32 = 1;
 
@@ -64,7 +64,7 @@ impl FractalPoint {
 
     fn to_pixels(&self) -> Vec<u8> {
         if self.is_inside {
-            vec![(self.last_value * 128.0) as u8, ((2.0 - self.last_value) * 128.0) as u8, 0]
+            vec![0, (self.last_value * 128.0) as u8, ((2.0 - self.last_value) * 100.0) as u8]
 
             //let last_value = (self.last_value * 1_000_000.0) as u32;
             // vec![0, (last_value % 255) as u8, (last_value % 255) as u8]
