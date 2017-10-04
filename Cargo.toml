@@ -5,5 +5,5 @@ authors = ["daniele <d.dorazio96@gmail.com>"]
 
 [dependencies]
 num = "0.1"
-image = "0.15"
+image = "0.16"
 rayon = "0.8"
