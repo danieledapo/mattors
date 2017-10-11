@@ -5,13 +5,11 @@ extern crate matto;
 
 use std::fs::File;
 
-use image::GenericImage;
 use num::complex::Complex64;
 
 use matto::julia::{fractal_to_image, gen_fractal, Bound, FractalPoint};
 
 const STEP: f64 = 0.002;
-const SCAL: u32 = 1;
 
 
 fn main() {
@@ -51,7 +49,7 @@ fn main() {
         println!("Fractal: {}", i + 1);
 
         let img = fractal_to_image(&frac);
-        let img = img.resize(img.width() * SCAL, img.height() * SCAL, image::CatmullRom);
+        let img = img.resize_exact(1920, 1080, image::Lanczos3);
 
         let mut fout = &File::create(&format!("{}.png", i + 1)).unwrap();
         img.save(&mut fout, image::PNG).unwrap();

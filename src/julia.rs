@@ -111,7 +111,7 @@ pub fn fractal_to_image(frac: &[Vec<FractalPoint>]) -> image::DynamicImage {
         .collect();
 
     let imgbuf = image::ImageBuffer::from_raw(width as u32, height as u32, v).unwrap();
-    image::ImageRgb8(imgbuf).resize_exact(1920, 1080, image::Lanczos3)
+    image::ImageRgb8(imgbuf)
 }
 
 
