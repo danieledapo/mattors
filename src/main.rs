@@ -60,17 +60,42 @@ fn julia_fractals() {
 
 
 fn spawn_dragons() {
-    let manifest = [
-        (dragon::Move::Left, 1480, 730, &[255, 0, 0]),
-        (dragon::Move::Up, 500, 730, &[0, 0, 255]),
-    ];
+    println!("Dragons!");
 
-    for (i, row) in manifest.iter().enumerate() {
-        println!("Dragon: {}", i + 1);
+    let red = dragon::dragon(17, dragon::Move::Left);
+    let red_img = dragon::dragon_to_image(&red, 1920, 1080, 1480, 730, 2, &[255, 0, 0]);
 
-        let drag = dragon::dragon(17, row.0.clone());
-        let img = dragon::dragon_to_image(&drag, 1920, 1080, row.1, row.2, 2, row.3);
+    let blue = dragon::dragon(17, dragon::Move::Up);
+    let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 500, 730, 2, &[0, 0, 255]);
 
-        img.save(&format!("dragon-{}.png", i + 1)).unwrap();
+    let redblue_img = overlap_images(&red_img, &blue_img).unwrap();
+
+    red_img.save("red-dragon.png").unwrap();
+    blue_img.save("blue-dragon.png").unwrap();
+    redblue_img.save("redblue-dragon.png").unwrap();
+}
+
+fn overlap_images(lhs: &image::RgbImage, rhs: &image::RgbImage) -> Option<image::RgbImage> {
+    if lhs.width() != rhs.width() || lhs.height() != rhs.height() {
+        return None;
     }
+
+    let mut res = image::ImageBuffer::new(lhs.width(), rhs.height());
+
+    for x in 0..lhs.width() {
+        for y in 0..lhs.height() {
+            let lhs_pix = lhs.get_pixel(x, y).data;
+            let rhs_pix = rhs.get_pixel(x, y).data;
+
+            let new_pix = [
+                (lhs_pix[0] + rhs_pix[0]) / 2,
+                (lhs_pix[1] + rhs_pix[1]) / 2,
+                (lhs_pix[2] + rhs_pix[2]) / 2,
+            ];
+
+            res.put_pixel(x, y, image::Rgb(new_pix));
+        }
+    }
+
+    Some(res)
 }
