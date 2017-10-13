@@ -12,7 +12,7 @@ use matto::dragon;
 
 
 fn main() {
-    julia_fractals();
+    // julia_fractals();
     spawn_dragons();
 }
 
@@ -68,11 +68,17 @@ fn spawn_dragons() {
     let blue = dragon::dragon(17, dragon::Move::Up);
     let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 500, 730, 2, &[0, 0, 255]);
 
+    let green = dragon::dragon(17, dragon::Move::Right);
+    let green_img = dragon::dragon_to_image(&green, 1920, 1080, 500, 350, 2, &[0, 255, 0]);
+
     let redblue_img = overlap_images(&red_img, &blue_img).unwrap();
+    let rgb_img = overlap_images(&redblue_img, &green_img).unwrap();
 
     red_img.save("red-dragon.png").unwrap();
     blue_img.save("blue-dragon.png").unwrap();
+    green_img.save("green-dragon.png").unwrap();
     redblue_img.save("redblue-dragon.png").unwrap();
+    rgb_img.save("rgb-dragon.png").unwrap();
 }
 
 fn overlap_images(lhs: &image::RgbImage, rhs: &image::RgbImage) -> Option<image::RgbImage> {
