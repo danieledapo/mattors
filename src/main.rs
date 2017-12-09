@@ -23,17 +23,17 @@ fn julia_fractals() {
         (
             Bound::new(-3.0, -1.2),
             Bound::new(2.0, 1.2),
-            Some(Complex64::new(-0.4, 0.6)),
+            Some(Complex64::new(-0.4, 0.6))
         ),
         (
             Bound::new(-3.0, -1.2),
             Bound::new(2.0, 1.2),
-            Some(Complex64::new(-0.8, 0.156)),
+            Some(Complex64::new(-0.8, 0.156))
         ),
         (
             Bound::new(-1.2, -1.2),
             Bound::new(1.2, 1.0),
-            Some(Complex64::new(0.285, 0.01)),
+            Some(Complex64::new(0.285, 0.01))
         ),
     ];
 

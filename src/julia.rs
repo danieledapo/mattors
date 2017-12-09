@@ -104,9 +104,9 @@ pub fn fractal_to_image(frac: &[Vec<FractalPoint>]) -> image::DynamicImage {
     let v = (0..height)
         .into_par_iter()
         .flat_map(move |y| {
-            (0..width)
-                .into_par_iter()
-                .flat_map(move |x| frac[x][y].to_pixels())
+            (0..width).into_par_iter().flat_map(
+                move |x| frac[x][y].to_pixels(),
+            )
         })
         .collect();
 
