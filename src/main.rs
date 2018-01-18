@@ -1,17 +1,34 @@
+extern crate clap;
 extern crate image;
 extern crate matto;
 extern crate num;
 
 use std::fs::File;
 
+use clap::{App, Arg};
 use num::complex::Complex64;
 
 use matto::julia::{fractal_to_image, gen_fractal, Bound, FractalPoint};
 use matto::dragon;
 
 fn main() {
-    julia_fractals();
-    spawn_dragons();
+    let matches = App::new("matto")
+        .version("0.1")
+        .author("Daniele D'Orazio <d.dorazio96@gmail.com>")
+        .about("Visualize some math")
+        .arg(
+            Arg::with_name("fractal")
+                .short("f")
+                .takes_value(true)
+                .possible_values(&["dragons", "julia"]),
+        )
+        .get_matches();
+
+    match matches.value_of("fractal").unwrap_or("dragons") {
+        "dragons" => spawn_dragons(),
+        "julia" => julia_fractals(),
+        &_ => panic!("bug"),
+    }
 }
 
 fn julia_fractals() {

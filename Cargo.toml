@@ -4,5 +4,6 @@ version = "0.1.0"
 authors = ["daniele <d.dorazio96@gmail.com>"]
 
 [dependencies]
+clap = "2.29"
 image = "0.18"
 num = "0.1"
