@@ -1,6 +1,5 @@
 extern crate image;
 
-
 #[derive(Clone, Debug)]
 pub enum Move {
     Down,
@@ -40,7 +39,6 @@ pub fn dragon(n: usize, initial: Move) -> Dragon {
 
     Dragon(drag)
 }
-
 
 pub fn dragon_to_image(
     drag: &Dragon,

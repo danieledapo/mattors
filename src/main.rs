@@ -1,7 +1,6 @@
 extern crate image;
 extern crate matto;
 extern crate num;
-extern crate rayon;
 
 use std::fs::File;
 
@@ -10,12 +9,10 @@ use num::complex::Complex64;
 use matto::julia::{fractal_to_image, gen_fractal, Bound, FractalPoint};
 use matto::dragon;
 
-
 fn main() {
-    // julia_fractals();
+    julia_fractals();
     spawn_dragons();
 }
-
 
 fn julia_fractals() {
     let manifest = vec![
@@ -23,17 +20,17 @@ fn julia_fractals() {
         (
             Bound::new(-3.0, -1.2),
             Bound::new(2.0, 1.2),
-            Some(Complex64::new(-0.4, 0.6))
+            Some(Complex64::new(-0.4, 0.6)),
         ),
         (
             Bound::new(-3.0, -1.2),
             Bound::new(2.0, 1.2),
-            Some(Complex64::new(-0.8, 0.156))
+            Some(Complex64::new(-0.8, 0.156)),
         ),
         (
             Bound::new(-1.2, -1.2),
             Bound::new(1.2, 1.0),
-            Some(Complex64::new(0.285, 0.01))
+            Some(Complex64::new(0.285, 0.01)),
         ),
     ];
 
@@ -57,7 +54,6 @@ fn julia_fractals() {
         img.save(&mut fout, image::PNG).unwrap();
     }
 }
-
 
 fn spawn_dragons() {
     println!("Dragons!");

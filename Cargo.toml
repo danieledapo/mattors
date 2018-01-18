@@ -4,6 +4,5 @@ version = "0.1.0"
 authors = ["daniele <d.dorazio96@gmail.com>"]
 
 [dependencies]
-num = "0.1"
 image = "0.18"
-rayon = "0.9"
+num = "0.1"

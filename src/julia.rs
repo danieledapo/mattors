@@ -1,10 +1,7 @@
 extern crate image;
 extern crate num;
-extern crate rayon;
 
 use self::num::complex::Complex64;
-
-use self::rayon::prelude::*;
 
 const ITERATIONS: u32 = 128;
 
@@ -19,7 +16,6 @@ impl Bound {
         Bound { x: x, y: y }
     }
 }
-
 
 #[derive(Debug)]
 pub struct FractalPoint {
@@ -71,54 +67,42 @@ impl FractalPoint {
     }
 }
 
-
 pub fn gen_fractal<F>(start: &Bound, end: &Bound, step: f64, gen: F) -> Vec<Vec<FractalPoint>>
 where
-    F: Fn(Complex64) -> FractalPoint,
+    F: Sync + Send + Fn(Complex64) -> FractalPoint,
 {
-    let mut out = vec![];
-    let mut x = start.x;
+    let max_x = (end.x - start.x) / step;
+    let max_y = (end.y - start.y) / step;
 
-    while x < end.x {
-        let mut y = start.y;
-        let mut tmp = vec![];
+    (0..max_x as u32)
+        .map(|ix| {
+            (0..max_y as u32)
+                .map(|iy| {
+                    let x = start.x + f64::from(ix) * step;
+                    let y = start.y + f64::from(iy) * step;
 
-        while y < end.y {
-            tmp.push(gen(Complex64::new(x, y)));
-            y += step;
-        }
-
-        out.push(tmp);
-        x += step;
-    }
-
-    out
+                    gen(Complex64::new(x, y))
+                })
+                .collect()
+        })
+        .collect()
 }
-
 
 pub fn fractal_to_image(frac: &[Vec<FractalPoint>]) -> image::DynamicImage {
     let width = frac.len();
     let height = frac[0].len();
 
-    // *this is AWESOME*
     let v = (0..height)
-        .into_par_iter()
-        .flat_map(move |y| {
-            (0..width).into_par_iter().flat_map(
-                move |x| frac[x][y].to_pixels(),
-            )
-        })
+        .flat_map(move |y| (0..width).flat_map(move |x| frac[x][y].to_pixels()))
         .collect();
 
     let imgbuf = image::ImageBuffer::from_raw(width as u32, height as u32, v).unwrap();
     image::ImageRgb8(imgbuf)
 }
 
-
 fn u32_to_vec(n: u32) -> Vec<u8> {
     vec![(n >> 16) as u8, (n >> 8) as u8, n as u8]
 }
-
 
 #[cfg(test)]
 mod tests {
