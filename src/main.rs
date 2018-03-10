@@ -1,33 +1,39 @@
-extern crate clap;
+#[macro_use]
+extern crate structopt;
+
 extern crate image;
 extern crate matto;
 extern crate num;
 
-use std::fs::File;
+use structopt::StructOpt;
 
-use clap::{App, Arg};
 use num::complex::Complex64;
+
+use std::fs::File;
 
 use matto::julia::{fractal_to_image, gen_fractal, Bound, FractalPoint};
 use matto::dragon;
 
-fn main() {
-    let matches = App::new("matto")
-        .version("0.1")
-        .author("Daniele D'Orazio <d.dorazio96@gmail.com>")
-        .about("Visualize some math")
-        .arg(
-            Arg::with_name("fractal")
-                .short("f")
-                .takes_value(true)
-                .possible_values(&["dragons", "julia"]),
-        )
-        .get_matches();
+/// Have fun with some generative art
+#[derive(StructOpt, Debug)]
+#[structopt(name = "matto")]
+pub enum Command {
 
-    match matches.value_of("fractal").unwrap_or("dragons") {
-        "dragons" => spawn_dragons(),
-        "julia" => julia_fractals(),
-        &_ => panic!("bug"),
+    #[structopt(name = "dragons")]
+    /// Generate the dragon fractals
+    Dragons,
+
+    #[structopt(name = "julia")]
+    /// Generate some julia fractals. The Mandelbrot set is one of those.
+    Julia,
+}
+
+fn main() {
+    let command = Command::from_args();
+
+    match command {
+        Command::Dragons => spawn_dragons(),
+        Command::Julia => julia_fractals(),
     }
 }
 
