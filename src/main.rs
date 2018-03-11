@@ -105,11 +105,13 @@ fn main() {
             &Some(JuliaSet::Planets) => planets(&config),
             &Some(JuliaSet::DragonLikeSpiral) => planets(&config),
             &Some(JuliaSet::BlackHoles) => black_holes(&config),
-            &Some(JuliaSet::Custom{ref start, ref end, ref c}) => {
-                create_julia_set(&config, "custom", start, end, |f, it| {
-                    FractalPoint::julia(f, *c, it)
-                })
-            },
+            &Some(JuliaSet::Custom {
+                ref start,
+                ref end,
+                ref c,
+            }) => create_julia_set(&config, "custom", start, end, |f, it| {
+                FractalPoint::julia(f, *c, it)
+            }),
         },
     }
 }

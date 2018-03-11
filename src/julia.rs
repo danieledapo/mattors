@@ -23,7 +23,8 @@ impl FromStr for Point {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let points: Result<Vec<f64>, ParseFloatError> = s.trim().split(',').map(|p| p.parse()).collect();
+        let points: Result<Vec<f64>, ParseFloatError> =
+            s.trim().split(',').map(|p| p.parse()).collect();
 
         match points {
             Err(e) => Err("bad coord number format, ".to_string() + e.description()),
