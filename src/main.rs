@@ -13,7 +13,8 @@ use structopt::StructOpt;
 
 use num::complex::{Complex64, ParseComplexError};
 
-use matto::julia::{fractal_to_image, gen_fractal, FractalPoint, Point};
+use matto::Point;
+use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
 use matto::dragon;
 
 fn parse_complex(s: &str) -> Result<Complex64, ParseComplexError<ParseFloatError>> {
