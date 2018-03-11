@@ -2,4 +2,4 @@ target
 *.rs.bk
 
 *.png
-!redblue-dragon.png
+!images/*.png

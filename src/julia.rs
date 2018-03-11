@@ -1,19 +1,43 @@
 extern crate image;
 extern crate num;
 
+use std::error::Error;
+use std::str::FromStr;
+use std::num::ParseFloatError;
+
 use self::num::complex::Complex64;
 
-const ITERATIONS: u32 = 128;
-
 #[derive(Debug)]
-pub struct Bound {
-    x: f64,
-    y: f64,
+pub struct Point {
+    pub x: f64,
+    pub y: f64,
 }
 
-impl Bound {
-    pub fn new(x: f64, y: f64) -> Bound {
-        Bound { x: x, y: y }
+impl Point {
+    pub fn new(x: f64, y: f64) -> Point {
+        Point { x: x, y: y }
+    }
+}
+
+impl FromStr for Point {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let points: Result<Vec<f64>, ParseFloatError> = s.trim().split(',').map(|p| p.parse()).collect();
+
+        match points {
+            Err(e) => Err("bad coord number format, ".to_string() + e.description()),
+            Ok(points) => {
+                if points.len() != 2 {
+                    Err("wrong number of coords, please pass x and y coords as floats separated by ','".to_string())
+                } else {
+                    Ok(Self {
+                        x: points[0],
+                        y: points[1],
+                    })
+                }
+            }
+        }
     }
 }
 
@@ -25,15 +49,15 @@ pub struct FractalPoint {
 }
 
 impl FractalPoint {
-    pub fn mandelbrot(f: Complex64) -> FractalPoint {
-        FractalPoint::julia(f, f)
+    pub fn mandelbrot(f: Complex64, iterations: u32) -> FractalPoint {
+        FractalPoint::julia(f, f, iterations)
     }
 
-    pub fn julia(mut f: Complex64, c: Complex64) -> FractalPoint {
+    pub fn julia(mut f: Complex64, c: Complex64, iterations: u32) -> FractalPoint {
         let mut is_inside = true;
         let mut i = 0;
 
-        while i < ITERATIONS {
+        while i < iterations {
             f = f * f + c;
 
             if f.norm() > 2.0 {
@@ -67,21 +91,26 @@ impl FractalPoint {
     }
 }
 
-pub fn gen_fractal<F>(start: &Bound, end: &Bound, step: f64, gen: F) -> Vec<Vec<FractalPoint>>
+pub fn gen_fractal<F>(
+    start: &Point,
+    xcount: u32,
+    ycount: u32,
+    stepx: f64,
+    stepy: f64,
+    iterations: u32,
+    gen: F,
+) -> Vec<Vec<FractalPoint>>
 where
-    F: Sync + Send + Fn(Complex64) -> FractalPoint,
+    F: Sync + Send + Fn(Complex64, u32) -> FractalPoint,
 {
-    let max_x = (end.x - start.x) / step;
-    let max_y = (end.y - start.y) / step;
-
-    (0..max_x as u32)
+    (0..xcount)
         .map(|ix| {
-            (0..max_y as u32)
+            (0..ycount)
                 .map(|iy| {
-                    let x = start.x + f64::from(ix) * step;
-                    let y = start.y + f64::from(iy) * step;
+                    let x = start.x + f64::from(ix) * stepx;
+                    let y = start.y + f64::from(iy) * stepy;
 
-                    gen(Complex64::new(x, y))
+                    gen(Complex64::new(x, y), iterations)
                 })
                 .collect()
         })
@@ -106,18 +135,20 @@ fn u32_to_vec(n: u32) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn sanity() {
         assert_eq!(
-            FractalPoint::mandelbrot(Complex64::new(0.0, 0.0)).is_inside,
+            FractalPoint::mandelbrot(Complex64::new(0.0, 0.0), 128).is_inside,
             true
         );
         assert_eq!(
-            FractalPoint::mandelbrot(Complex64::new(-1.0, 0.0)).is_inside,
+            FractalPoint::mandelbrot(Complex64::new(-1.0, 0.0), 64).is_inside,
             true
         );
         assert_eq!(
-            FractalPoint::mandelbrot(Complex64::new(1.0, 0.0)).is_inside,
+            FractalPoint::mandelbrot(Complex64::new(1.0, 0.0), 12).is_inside,
             false
         );
     }
