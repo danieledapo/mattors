@@ -7,3 +7,6 @@ authors = ["daniele <d.dorazio96@gmail.com>"]
 image = "0.18"
 num = "0.1"
 structopt = "0.2"
+
+[dev-dependencies]
+maplit = "1.0"

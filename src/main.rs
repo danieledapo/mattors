@@ -7,15 +7,17 @@ extern crate num;
 
 use std::fs::File;
 use std::num::ParseFloatError;
+use std::path::PathBuf;
 use std::str::FromStr;
-
-use structopt::StructOpt;
 
 use num::complex::{Complex64, ParseComplexError};
 
-use matto::Point;
-use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
+use structopt::StructOpt;
+
 use matto::dragon;
+use matto::quantize;
+use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
+use matto::Point;
 
 fn parse_complex(s: &str) -> Result<Complex64, ParseComplexError<ParseFloatError>> {
     Complex64::from_str(s.trim())
@@ -26,12 +28,16 @@ fn parse_complex(s: &str) -> Result<Complex64, ParseComplexError<ParseFloatError
 #[structopt(name = "matto")]
 pub enum Command {
     #[structopt(name = "dragons")]
-    /// Generate the dragon fractals
+    /// Generate the dragon fractals.
     Dragons,
 
     #[structopt(name = "julia")]
     /// Generate some julia fractals. The Mandelbrot set is one of those.
     Julia(Julia),
+
+    #[structopt(name = "quantize")]
+    /// Quantize an image.
+    Quantize(Quantize),
 }
 
 #[derive(StructOpt, Debug)]
@@ -55,7 +61,6 @@ pub struct Julia {
     set_type: Option<JuliaSet>,
 }
 
-/// Have fun with some generative art
 #[derive(StructOpt, Debug)]
 pub enum JuliaSet {
     #[structopt(name = "all")]
@@ -90,6 +95,26 @@ pub enum JuliaSet {
     },
 }
 
+/// Reduce the number of colors an image uses. This process is called
+/// quantization. The algorithm implemented here is [Median
+/// Cut](https://en.wikipedia.org/wiki/Median_cut).
+#[derive(StructOpt, Debug)]
+pub struct Quantize {
+    #[structopt(short = "d", long = "divide-steps", default_value = "4")]
+    /// Number of dividing steps the Median Cut algorithm should take. The
+    /// number of output colors is 2 ^ divide_steps.
+    divide_steps: u32,
+
+    #[structopt(short = "o", long = "output", default_value = "./quantized.png",
+                parse(from_os_str))]
+    /// Where to write the quantized image.
+    output_path: PathBuf,
+
+    /// Image to quantize.
+    #[structopt(name = "FILE", parse(from_os_str))]
+    img_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -114,6 +139,23 @@ fn main() {
                 FractalPoint::julia(f, *c, it)
             }),
         },
+        Command::Quantize(ref config) => {
+            let img = image::open(&config.img_path).expect("cannot open source image file");
+            let rgb = img.as_rgb8()
+                .expect("cannot convert source image to rgb8 image");
+
+            let res = quantize::quantize(rgb.pixels().cloned(), config.divide_steps)
+                .expect("quantization error");
+
+            let mut quantized = rgb.clone();
+            for pixel in quantized.pixels_mut() {
+                *pixel = res.quantized_pixels[pixel];
+            }
+
+            quantized
+                .save(&config.output_path)
+                .expect("cannot save quantized file");
+        }
     }
 }
 
