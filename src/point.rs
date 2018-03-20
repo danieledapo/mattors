@@ -2,6 +2,7 @@ use std::error::Error;
 use std::str::FromStr;
 use std::num::ParseFloatError;
 
+/// Simple 2d Point struct
 #[derive(Debug)]
 pub struct Point {
     pub x: f64,
@@ -10,7 +11,7 @@ pub struct Point {
 
 impl Point {
     pub fn new(x: f64, y: f64) -> Point {
-        Point { x: x, y: y }
+        Point { x, y }
     }
 }
 

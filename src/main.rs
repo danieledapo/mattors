@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 #[macro_use]
 extern crate structopt;
 
@@ -92,6 +94,10 @@ pub enum JuliaSet {
         #[structopt(short = "c", parse(try_from_str = "parse_complex"))]
         /// The C constant in a Julia set.
         c: Complex64,
+
+        #[structopt(short = "n", long = "name", default_value = "custom")]
+        /// Name of the fractal.
+        name: String,
     },
 }
 
@@ -105,8 +111,7 @@ pub struct Quantize {
     /// number of output colors is 2 ^ divide_steps.
     divide_steps: u32,
 
-    #[structopt(short = "o", long = "output", default_value = "./quantized.png",
-                parse(from_os_str))]
+    #[structopt(short = "o", long = "output", default_value = "quantized.png", parse(from_os_str))]
     /// Where to write the quantized image.
     output_path: PathBuf,
 
@@ -120,42 +125,27 @@ fn main() {
 
     match command {
         Command::Dragons => spawn_dragons(),
-        Command::Julia(ref config) => match &config.set_type {
-            &None | &Some(JuliaSet::All) => {
-                mandelbrot(&config);
-                planets(&config);
-                dragon_like(&config);
-                black_holes(&config);
+        Command::Julia(ref config) => match config.set_type {
+            None | Some(JuliaSet::All) => {
+                mandelbrot(config);
+                planets(config);
+                dragon_like(config);
+                black_holes(config);
             }
-            &Some(JuliaSet::Mandelbrot) => mandelbrot(&config),
-            &Some(JuliaSet::Planets) => planets(&config),
-            &Some(JuliaSet::DragonLikeSpiral) => planets(&config),
-            &Some(JuliaSet::BlackHoles) => black_holes(&config),
-            &Some(JuliaSet::Custom {
+            Some(JuliaSet::Mandelbrot) => mandelbrot(config),
+            Some(JuliaSet::Planets) => planets(config),
+            Some(JuliaSet::DragonLikeSpiral) => dragon_like(config),
+            Some(JuliaSet::BlackHoles) => black_holes(config),
+            Some(JuliaSet::Custom {
                 ref start,
                 ref end,
                 ref c,
-            }) => create_julia_set(&config, "custom", start, end, |f, it| {
+                ref name,
+            }) => create_julia_set(config, name, start, end, |f, it| {
                 FractalPoint::julia(f, *c, it)
             }),
         },
-        Command::Quantize(ref config) => {
-            let img = image::open(&config.img_path).expect("cannot open source image file");
-            let rgb = img.as_rgb8()
-                .expect("cannot convert source image to rgb8 image");
-
-            let res = quantize::quantize(rgb.pixels().cloned(), config.divide_steps)
-                .expect("quantization error");
-
-            let mut quantized = rgb.clone();
-            for pixel in quantized.pixels_mut() {
-                *pixel = res.quantized_pixels[pixel];
-            }
-
-            quantized
-                .save(&config.output_path)
-                .expect("cannot save quantized file");
-        }
+        Command::Quantize(ref config) => quantize_image(config),
     }
 }
 
@@ -276,4 +266,22 @@ fn overlap_images(lhs: &image::RgbImage, rhs: &image::RgbImage) -> Option<image:
     }
 
     Some(res)
+}
+
+fn quantize_image(config: &Quantize) {
+    let img = image::open(&config.img_path).expect("cannot open source image file");
+    let rgb = img.as_rgb8()
+        .expect("cannot convert source image to rgb8 image");
+
+    let res =
+        quantize::quantize(rgb.pixels().cloned(), config.divide_steps).expect("quantization error");
+
+    let mut quantized = rgb.clone();
+    for pixel in quantized.pixels_mut() {
+        *pixel = res.quantized_pixels[pixel];
+    }
+
+    quantized
+        .save(&config.output_path)
+        .expect("cannot save quantized file");
 }

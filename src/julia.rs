@@ -5,6 +5,8 @@ use self::num::complex::Complex64;
 
 use point::Point;
 
+/// This struct is mainly used to pass some data used when converting to raw
+/// pixels.
 #[derive(Debug)]
 pub struct FractalPoint {
     is_inside: bool,
@@ -13,10 +15,14 @@ pub struct FractalPoint {
 }
 
 impl FractalPoint {
+    /// Calculate if the given `f`(that is point) is in the [Mandelbrot
+    /// Set](https://en.wikipedia.org/wiki/Mandelbrot_set).
     pub fn mandelbrot(f: Complex64, iterations: u32) -> FractalPoint {
         FractalPoint::julia(f, f, iterations)
     }
 
+    /// Calculate if the given `f`(that is point) with param `c` is in the
+    /// [Julia Set](https://en.wikipedia.org/wiki/Julia_set).
     pub fn julia(mut f: Complex64, c: Complex64, iterations: u32) -> FractalPoint {
         let mut is_inside = true;
         let mut i = 0;
@@ -35,7 +41,7 @@ impl FractalPoint {
         FractalPoint {
             last_value: f.norm(),
             iterations: i,
-            is_inside: is_inside,
+            is_inside,
         }
     }
 
@@ -55,6 +61,12 @@ impl FractalPoint {
     }
 }
 
+/// Generate a fractal starting from the given `point` and incrementing x by
+/// `xstep` and y by `ystep` for `xcount` and `ycount` respectively.
+/// `iterations` is the number of iterations `gen` functions should take before
+/// saying the point is outside the fractal. `gen` is the generator function
+/// that takes the current position as a complex number and that returns the
+/// `FractalPoint`.
 pub fn gen_fractal<F>(
     start: &Point,
     xcount: u32,
@@ -81,6 +93,7 @@ where
         .collect()
 }
 
+/// Create an image from the given fractal.
 pub fn fractal_to_image(frac: &[Vec<FractalPoint>]) -> image::DynamicImage {
     let width = frac.len();
     let height = frac[0].len();

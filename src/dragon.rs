@@ -1,5 +1,6 @@
 extern crate image;
 
+/// A move the Dragon Fractal can take
 #[derive(Clone, Debug)]
 pub enum Move {
     Down,
@@ -19,9 +20,12 @@ impl Move {
     }
 }
 
+/// A [Dragon Fractal](https://en.wikipedia.org/wiki/Dragon_curve).
 #[derive(Debug)]
 pub struct Dragon(Vec<Move>);
 
+/// Generate a [Dragon Fractal](https://en.wikipedia.org/wiki/Dragon_curve) from
+/// an `initial` move iterating `n` times.
 pub fn dragon(n: usize, initial: Move) -> Dragon {
     if n == 0 {
         return Dragon(vec![initial]);
@@ -40,6 +44,8 @@ pub fn dragon(n: usize, initial: Move) -> Dragon {
     Dragon(drag)
 }
 
+/// Generate a [Dragon Fractal](https://en.wikipedia.org/wiki/Dragon_curve) and
+/// dump it to an image with the given color.
 pub fn dragon_to_image(
     drag: &Dragon,
     width: u32,
@@ -49,6 +55,8 @@ pub fn dragon_to_image(
     line_len: u32,
     rgb_color: &[u8; 3],
 ) -> image::RgbImage {
+    // TODO: might be interesting to add [perlin
+    // noise](https://en.wikipedia.org/wiki/Perlin_noise)
     let mut img = image::ImageBuffer::new(width, height);
 
     // turn u32 to i64 because we can go < 0

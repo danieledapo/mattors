@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 #[cfg(test)]
 #[macro_use]
 extern crate maplit;
