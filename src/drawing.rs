@@ -49,10 +49,15 @@ where
     let mut d = 2 * dy - dx;
     let mut y = i64::from(start.y);
 
-    for x in (start.x)..(end.x + 1) {
-        if x < img.width() && y >= 0 && y < i64::from(img.height()) {
-            img.put_pixel(x, y as u32, *pix);
+    let start_x = start.x;
+    let end_x = img.width().min(end.x + 1); // +1 'cause it's exclusive
+
+    for x in start_x..end_x {
+        if y < 0 || y >= i64::from(img.height()) {
+            break;
         }
+
+        img.put_pixel(x, y as u32, *pix);
 
         if d > 0 {
             y += ystep;
@@ -77,8 +82,11 @@ where
     let mut d = 2 * dx - dy;
     let mut x = i64::from(start.x);
 
-    for y in (start.y)..(end.y + 1) {
-        if x >= 0 && x < i64::from(img.width()) && y < img.height() {
+    let start_y = start.y;
+    let end_y = img.height().min(end.y + 1); // +1 'cause it's exclusive
+
+    for y in start_y..end_y {
+        if x >= 0 && x < i64::from(img.width()) {
             img.put_pixel(x as u32, y, *pix);
         }
 
