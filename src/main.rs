@@ -16,10 +16,10 @@ use num::complex::{Complex64, ParseComplexError};
 
 use structopt::StructOpt;
 
-use matto::dragon;
-use matto::quantize;
-use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
 use matto::Point;
+use matto::dragon;
+use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
+use matto::quantize;
 
 fn parse_complex(s: &str) -> Result<Complex64, ParseComplexError<ParseFloatError>> {
     Complex64::from_str(s.trim())

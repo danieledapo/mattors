@@ -1,6 +1,6 @@
 use std::error::Error;
-use std::str::FromStr;
 use std::num::ParseFloatError;
+use std::str::FromStr;
 
 /// Simple 2d Point struct
 #[derive(Debug)]
