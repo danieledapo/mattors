@@ -1,5 +1,8 @@
 extern crate image;
 
+use drawing;
+use point::PointU32;
+
 /// A move the Dragon Fractal can take
 #[derive(Clone, Debug)]
 pub enum Move {
@@ -75,37 +78,30 @@ pub fn dragon_to_image(
     // TODO: might be interesting to add [perlin
     // noise](https://en.wikipedia.org/wiki/Perlin_noise)
     let mut img = image::ImageBuffer::new(width, height);
+    let pix = image::Rgb { data: *rgb_color };
 
-    // turn u32 to i64 because we can go < 0
-    let line_len = i64::from(line_len);
-    let mut x = i64::from(start_x);
-    let mut y = i64::from(start_y);
+    let mut x = start_x;
+    let mut y = start_y;
 
     for m in &drag.0 {
-        let (dx, dy) = {
+        let (nx, ny) = {
             match *m {
-                Move::Down => (0, 1),
-                Move::Left => (-1, 0),
-                Move::Right => (1, 0),
-                Move::Up => (0, -1),
+                Move::Down => (x, y.saturating_add(line_len)),
+                Move::Left => (x.saturating_sub(line_len), y),
+                Move::Right => (x.saturating_add(line_len), y),
+                Move::Up => (x, y.saturating_sub(line_len)),
             }
         };
 
-        for _ in 0..line_len {
-            x += dx;
-            y += dy;
+        drawing::line(
+            &mut img,
+            &PointU32 { x, y },
+            &PointU32 { x: nx, y: ny },
+            &pix,
+        );
 
-            if x < 0 || x >= (i64::from(width)) {
-                continue;
-            }
-
-            if y < 0 || y >= (i64::from(height)) {
-                continue;
-            }
-
-            let pix = image::Rgb(*rgb_color);
-            img.put_pixel(x as u32, y as u32, pix);
-        }
+        x = nx;
+        y = ny;
     }
 
     img
