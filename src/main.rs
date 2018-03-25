@@ -35,7 +35,10 @@ fn parse_complex(s: &str) -> Result<Complex64, ParseComplexError<ParseFloatError
 pub enum Command {
     #[structopt(name = "dragons")]
     /// Generate the dragon fractals.
-    Dragons,
+    Dragons {
+        #[structopt(short = "i", long = "iterations", default_value = "17")]
+        iterations: u32,
+    },
 
     #[structopt(name = "horns")]
     /// Generate the horns fractals which are invented by me(really?) which are
@@ -136,7 +139,7 @@ fn main() {
     let command = Command::from_args();
 
     match command {
-        Command::Dragons => spawn_dragons(),
+        Command::Dragons{iterations} => spawn_dragons(iterations),
         Command::Horns{iterations} => spawn_horns(iterations),
         Command::Julia(ref config) => match config.set_type {
             None | Some(JuliaSet::All) => {
@@ -234,16 +237,16 @@ where
     img.save(&mut fout, image::PNG).unwrap();
 }
 
-fn spawn_dragons() {
+fn spawn_dragons(iterations: u32) {
     println!("Dragons!");
 
-    let red = dragon::dragon(17, dragon::Move::Left);
+    let red = dragon::dragon(iterations, dragon::Move::Left);
     let red_img = dragon::dragon_to_image(&red, 1920, 1080, 1480, 730, 2, &[255, 0, 0]);
 
-    let blue = dragon::dragon(17, dragon::Move::Up);
+    let blue = dragon::dragon(iterations, dragon::Move::Up);
     let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 500, 730, 2, &[0, 0, 255]);
 
-    let green = dragon::dragon(17, dragon::Move::Right);
+    let green = dragon::dragon(iterations, dragon::Move::Right);
     let green_img = dragon::dragon_to_image(&green, 1920, 1080, 500, 350, 2, &[0, 255, 0]);
 
     let redblue_img = overlap_images(&red_img, &blue_img).unwrap();
@@ -286,9 +289,9 @@ fn overlap_images(lhs: &image::RgbImage, rhs: &image::RgbImage) -> Option<image:
             let rhs_pix = rhs.get_pixel(x, y).data;
 
             let new_pix = [
-                (lhs_pix[0] + rhs_pix[0]) / 2,
-                (lhs_pix[1] + rhs_pix[1]) / 2,
-                (lhs_pix[2] + rhs_pix[2]) / 2,
+                (lhs_pix[0].saturating_add(rhs_pix[0])) / 2,
+                (lhs_pix[1].saturating_add(rhs_pix[1])) / 2,
+                (lhs_pix[2].saturating_add(rhs_pix[2])) / 2,
             ];
 
             res.put_pixel(x, y, image::Rgb(new_pix));
