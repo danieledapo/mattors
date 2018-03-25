@@ -26,22 +26,20 @@ pub struct Dragon(Vec<Move>);
 
 /// Generate a [Dragon Fractal](https://en.wikipedia.org/wiki/Dragon_curve) from
 /// an `initial` move iterating `n` times.
-pub fn dragon(n: usize, initial: Move) -> Dragon {
-    if n == 0 {
-        return Dragon(vec![initial]);
+pub fn dragon(n: u32, initial: Move) -> Dragon {
+    let mut moves = Vec::with_capacity(2_usize.pow(n));
+    moves.push(initial);
+
+    for _ in 0..n {
+        let cur_len = moves.len();
+
+        for i in 0..cur_len {
+            let mv = moves[cur_len - i - 1].clockwise();
+            moves.push(mv);
+        }
     }
 
-    let little_dragon = dragon(n - 1, initial).0;
-    let rotated_dragon = little_dragon
-        .iter()
-        .by_ref()
-        .rev()
-        .map(|m| m.clockwise())
-        .collect::<Vec<_>>();
-
-    let drag = little_dragon.into_iter().chain(rotated_dragon).collect();
-
-    Dragon(drag)
+    Dragon(moves)
 }
 
 /// Generate a [Dragon Fractal](https://en.wikipedia.org/wiki/Dragon_curve) and
