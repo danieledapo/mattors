@@ -139,8 +139,8 @@ fn main() {
     let command = Command::from_args();
 
     match command {
-        Command::Dragons{iterations} => spawn_dragons(iterations),
-        Command::Horns{iterations} => spawn_horns(iterations),
+        Command::Dragons { iterations } => spawn_dragons(iterations),
+        Command::Horns { iterations } => spawn_horns(iterations),
         Command::Julia(ref config) => match config.set_type {
             None | Some(JuliaSet::All) => {
                 mandelbrot(config);
