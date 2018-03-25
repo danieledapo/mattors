@@ -21,6 +21,10 @@ use matto::dragon;
 use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
 use matto::quantize;
 
+const LIGHT_GREEN: [u8; 3] = [0x17, 0xB9, 0x78];
+const RED: [u8; 3] = [0xF6, 0x72, 0x80];
+const DARK_BLUE: [u8; 3] = [0x1D, 0x27, 0x86];
+
 fn parse_complex(s: &str) -> Result<Complex64, ParseComplexError<ParseFloatError>> {
     Complex64::from_str(s.trim())
 }
@@ -32,6 +36,14 @@ pub enum Command {
     #[structopt(name = "dragons")]
     /// Generate the dragon fractals.
     Dragons,
+
+    #[structopt(name = "horns")]
+    /// Generate the horns fractals which are invented by me(really?) which are
+    /// a slight modification of `Dragons`.
+    Horns {
+        #[structopt(short = "i", long = "iterations", default_value = "16")]
+        iterations: u32,
+    },
 
     #[structopt(name = "julia")]
     /// Generate some julia fractals. The Mandelbrot set is one of those.
@@ -125,6 +137,7 @@ fn main() {
 
     match command {
         Command::Dragons => spawn_dragons(),
+        Command::Horns{iterations} => spawn_horns(iterations),
         Command::Julia(ref config) => match config.set_type {
             None | Some(JuliaSet::All) => {
                 mandelbrot(config);
@@ -241,6 +254,23 @@ fn spawn_dragons() {
     green_img.save("green-dragon.png").unwrap();
     redblue_img.save("redblue-dragon.png").unwrap();
     rgb_img.save("rgb-dragon.png").unwrap();
+}
+
+fn spawn_horns(iterations: u32) {
+    println!("Horns!");
+
+    let red = dragon::horns(iterations, dragon::Move::Left);
+    let red_img = dragon::dragon_to_image(&red, 1920, 1080, 1480, 530, 2, &RED);
+
+    let blue = dragon::horns(iterations, dragon::Move::Up);
+    let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 550, 790, 2, &DARK_BLUE);
+
+    let green = dragon::horns(iterations, dragon::Move::Right);
+    let green_img = dragon::dragon_to_image(&green, 1920, 1080, 960, 550, 2, &LIGHT_GREEN);
+
+    red_img.save("red-horns.png").unwrap();
+    blue_img.save("blue-horns.png").unwrap();
+    green_img.save("green-horns.png").unwrap();
 }
 
 fn overlap_images(lhs: &image::RgbImage, rhs: &image::RgbImage) -> Option<image::RgbImage> {

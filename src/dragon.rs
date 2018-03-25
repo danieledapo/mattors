@@ -42,6 +42,25 @@ pub fn dragon(n: u32, initial: Move) -> Dragon {
     Dragon(moves)
 }
 
+/// Generate a Fractal(I think) based on the same process as the `dragon`. The
+/// difference is that the new move is calculated not from the last move, but
+/// the first one.
+pub fn horns(n: u32, initial: Move) -> Dragon {
+    let mut moves = Vec::with_capacity(2_usize.pow(n));
+    moves.push(initial);
+
+    for _ in 0..n {
+        let cur_len = moves.len();
+
+        for i in 0..cur_len {
+            let mv = moves[i].clockwise();
+            moves.push(mv);
+        }
+    }
+
+    Dragon(moves)
+}
+
 /// Generate a [Dragon Fractal](https://en.wikipedia.org/wiki/Dragon_curve) and
 /// dump it to an image with the given color.
 pub fn dragon_to_image(
