@@ -3,7 +3,7 @@ extern crate num;
 
 use self::num::complex::Complex64;
 
-use point::Point;
+use point::PointF64;
 
 /// This struct is mainly used to pass some data used when converting to raw
 /// pixels.
@@ -68,7 +68,7 @@ impl FractalPoint {
 /// that takes the current position as a complex number and that returns the
 /// `FractalPoint`.
 pub fn gen_fractal<F>(
-    start: &Point,
+    start: &PointF64,
     xcount: u32,
     ycount: u32,
     stepx: f64,

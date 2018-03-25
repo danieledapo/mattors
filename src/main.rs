@@ -16,9 +16,9 @@ use num::complex::{Complex64, ParseComplexError};
 
 use structopt::StructOpt;
 
-use matto::Point;
 use matto::dragon;
 use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
+use matto::point::PointF64;
 use matto::quantize;
 
 const LIGHT_GREEN: [u8; 3] = [0x17, 0xB9, 0x78];
@@ -100,11 +100,11 @@ pub enum JuliaSet {
     Custom {
         #[structopt(short = "s", long = "start")]
         /// Top left point where to start the generation.
-        start: Point,
+        start: PointF64,
 
         #[structopt(short = "e", long = "end")]
         // / Bottom right point where to end the generation.
-        end: Point,
+        end: PointF64,
 
         #[structopt(short = "c", parse(try_from_str = "parse_complex"))]
         /// The C constant in a Julia set.
@@ -169,8 +169,8 @@ fn mandelbrot(config: &Julia) {
     create_julia_set(
         config,
         "mandelbrot",
-        &Point::new(-3.0, -1.2),
-        &Point::new(1.0, 1.2),
+        &PointF64::new(-3.0, -1.2),
+        &PointF64::new(1.0, 1.2),
         FractalPoint::mandelbrot,
     );
 }
@@ -181,8 +181,8 @@ fn planets(config: &Julia) {
     create_julia_set(
         config,
         "planets",
-        &Point::new(-3.0, -1.2),
-        &Point::new(2.0, 1.2),
+        &PointF64::new(-3.0, -1.2),
+        &PointF64::new(2.0, 1.2),
         |f, it| FractalPoint::julia(f, c, it),
     );
 }
@@ -193,8 +193,8 @@ fn dragon_like(config: &Julia) {
     create_julia_set(
         config,
         "dragon_like",
-        &Point::new(-3.0, -1.2),
-        &Point::new(2.0, 1.2),
+        &PointF64::new(-3.0, -1.2),
+        &PointF64::new(2.0, 1.2),
         |f, it| FractalPoint::julia(f, c, it),
     );
 }
@@ -205,13 +205,13 @@ fn black_holes(config: &Julia) {
     create_julia_set(
         config,
         "black_holes",
-        &Point::new(-1.2, -1.2),
-        &Point::new(1.2, 1.0),
+        &PointF64::new(-1.2, -1.2),
+        &PointF64::new(1.2, 1.0),
         |f, it| FractalPoint::julia(f, c, it),
     );
 }
 
-fn create_julia_set<F>(config: &Julia, name: &str, start: &Point, end: &Point, gen: F)
+fn create_julia_set<F>(config: &Julia, name: &str, start: &PointF64, end: &PointF64, gen: F)
 where
     F: Sync + Send + Fn(Complex64, u32) -> FractalPoint,
 {
