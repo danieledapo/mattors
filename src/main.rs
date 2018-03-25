@@ -42,7 +42,7 @@ pub enum Command {
 
     #[structopt(name = "horns")]
     /// Generate the horns fractals which are invented by me(really?) which are
-    /// a slight modification of `Dragons`.
+    /// a slight modification of `Dragons`. It's also full of little smiles :).
     Horns {
         #[structopt(short = "i", long = "iterations", default_value = "16")]
         iterations: u32,
