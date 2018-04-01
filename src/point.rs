@@ -1,18 +1,27 @@
+//! Handy `Point` struct and utility functions.
+
 use std::clone::Clone;
 use std::error::Error;
 use std::str::FromStr;
 
+/// Point specialized for `f64`
 pub type PointF64 = Point<f64>;
+
+/// Point specialized for `u32`
 pub type PointU32 = Point<u32>;
 
 /// Simple 2d Point struct
 #[derive(Clone, Debug, PartialEq)]
 pub struct Point<T> {
+    /// x coordinate
     pub x: T,
+
+    /// y coordinate
     pub y: T,
 }
 
 impl<T> Point<T> {
+    /// create a new `Point` with the given `x` and `y` coordinates.
     pub fn new(x: T, y: T) -> Point<T> {
         Point { x, y }
     }

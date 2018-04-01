@@ -1,5 +1,6 @@
-// most of this stuff is already implemented in the imageprocs crate, but the
-// best way to learn is by reimplementing, so...
+//! Simple module to draw basic shapes on an image. Most of this stuff is
+//! already implemented in the imageprocs crate, but the best way to learn is by
+//! reimplementing, so...
 
 extern crate image;
 

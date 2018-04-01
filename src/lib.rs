@@ -1,4 +1,5 @@
-#![deny(warnings)]
+//! Simple module to create some generative art.
+#![deny(missing_docs, warnings)]
 
 #[cfg(test)]
 #[macro_use]

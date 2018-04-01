@@ -1,3 +1,7 @@
+//! Simple module to draw some [Julia
+//! Set](https://en.wikipedia.org/wiki/Julia_set). The most famous one is
+//! probably the [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set).
+
 extern crate image;
 extern crate num;
 

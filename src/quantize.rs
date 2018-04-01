@@ -1,3 +1,7 @@
+//! Simple module that provides [Image
+//! quantization](https://en.wikipedia.org/wiki/Quantization_(image_processing))
+//! by implemeting [Median Cut](https://en.wikipedia.org/wiki/Median_cut).
+
 extern crate image;
 extern crate num;
 

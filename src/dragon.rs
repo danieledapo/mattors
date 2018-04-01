@@ -1,3 +1,6 @@
+//! Simple module to draw some [Dragon
+//! Curves](https://en.wikipedia.org/wiki/Dragon_curve).
+
 extern crate image;
 
 use drawing;
@@ -6,13 +9,22 @@ use point::PointU32;
 /// A move the Dragon Fractal can take
 #[derive(Clone, Debug)]
 pub enum Move {
+    /// Go down
     Down,
+
+    /// Go left
     Left,
+
+    /// Go right
     Right,
+
+    /// Go up
     Up,
 }
 
 impl Move {
+    /// return the move that is obtained by rotating the current move in
+    /// clockwise order.
     pub fn clockwise(&self) -> Move {
         match *self {
             Move::Down => Move::Left,

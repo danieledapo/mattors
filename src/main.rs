@@ -1,4 +1,6 @@
-#![deny(warnings)]
+//! Create some generative art.
+
+#![deny(missing_docs, warnings)]
 
 #[macro_use]
 extern crate structopt;
@@ -33,85 +35,94 @@ fn parse_complex(s: &str) -> Result<Complex64, ParseComplexError<ParseFloatError
 #[derive(StructOpt, Debug)]
 #[structopt(name = "matto")]
 pub enum Command {
-    #[structopt(name = "dragons")]
     /// Generate the dragon fractals.
+    #[structopt(name = "dragons")]
     Dragons {
+        /// How many iterations the algorithm should perform before creating the image.
         #[structopt(short = "i", long = "iterations", default_value = "17")]
         iterations: u32,
     },
 
-    #[structopt(name = "horns")]
     /// Generate the horns fractals which are invented by me(really?) which are
     /// a slight modification of `Dragons`. It's also full of little smiles :).
+    #[structopt(name = "horns")]
     Horns {
+        /// How many iterations the algorithm should perform before creating the image.
         #[structopt(short = "i", long = "iterations", default_value = "16")]
         iterations: u32,
     },
 
-    #[structopt(name = "julia")]
     /// Generate some julia fractals. The Mandelbrot set is one of those.
+    #[structopt(name = "julia")]
     Julia(Julia),
 
-    #[structopt(name = "quantize")]
     /// Quantize an image.
+    #[structopt(name = "quantize")]
     Quantize(Quantize),
 }
 
+/// Julia Set settings.
 #[derive(StructOpt, Debug)]
 pub struct Julia {
-    #[structopt(short = "i", long = "iterations", default_value = "64")]
     /// Number of iterations to run the check for for every pixel. The
     /// higher the better, but lower numbers make cool fractals
     /// nonentheless.
+    #[structopt(short = "i", long = "iterations", default_value = "64")]
     iterations: u32,
 
-    #[structopt(short = "w", long = "width", default_value = "1920")]
     /// Width of the output image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
     width: u32,
 
-    #[structopt(short = "h", long = "height", default_value = "1080")]
     /// Height of the output image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
     height: u32,
 
-    #[structopt(subcommand)]
     /// Which Julia set to generate.
+    #[structopt(subcommand)]
     set_type: Option<JuliaSet>,
 }
 
+/// All the available Julia sets.
 #[derive(StructOpt, Debug)]
 pub enum JuliaSet {
+    /// Generate all the Julia fractals.
     #[structopt(name = "all")]
     All,
 
+    /// Generate the Mandelbrot set
     #[structopt(name = "mandelbrot")]
     Mandelbrot,
 
+    /// Generate a Planets like fractal.
     #[structopt(name = "planets")]
     Planets,
 
+    /// Generate a dragon like fractal.
     #[structopt(name = "dragon-like")]
     DragonLikeSpiral,
 
+    /// Generate a black holes like fractal.
     #[structopt(name = "black-holes")]
     BlackHoles,
 
-    #[structopt(name = "custom")]
     /// Generate custom fractal by specifying its parameters.
+    #[structopt(name = "custom")]
     Custom {
-        #[structopt(short = "s", long = "start")]
         /// Top left point where to start the generation.
+        #[structopt(short = "s", long = "start")]
         start: PointF64,
 
+        /// Bottom right point where to end the generation.
         #[structopt(short = "e", long = "end")]
-        // / Bottom right point where to end the generation.
         end: PointF64,
 
-        #[structopt(short = "c", parse(try_from_str = "parse_complex"))]
         /// The C constant in a Julia set.
+        #[structopt(short = "c", parse(try_from_str = "parse_complex"))]
         c: Complex64,
 
-        #[structopt(short = "n", long = "name", default_value = "custom")]
         /// Name of the fractal.
+        #[structopt(short = "n", long = "name", default_value = "custom")]
         name: String,
     },
 }
@@ -121,13 +132,13 @@ pub enum JuliaSet {
 /// Cut](https://en.wikipedia.org/wiki/Median_cut).
 #[derive(StructOpt, Debug)]
 pub struct Quantize {
-    #[structopt(short = "d", long = "divide-steps", default_value = "4")]
     /// Number of dividing steps the Median Cut algorithm should take. The
     /// number of output colors is 2 ^ divide_steps.
+    #[structopt(short = "d", long = "divide-steps", default_value = "4")]
     divide_steps: u32,
 
-    #[structopt(short = "o", long = "output", default_value = "quantized.png", parse(from_os_str))]
     /// Where to write the quantized image.
+    #[structopt(short = "o", long = "output", default_value = "quantized.png", parse(from_os_str))]
     output_path: PathBuf,
 
     /// Image to quantize.
