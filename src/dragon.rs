@@ -93,12 +93,7 @@ pub fn dragon_to_image(
             }
         };
 
-        drawing::line(
-            &mut img,
-            &PointU32 { x, y },
-            &PointU32 { x: nx, y: ny },
-            &pix,
-        );
+        drawing::line(&mut img, PointU32 { x, y }, PointU32 { x: nx, y: ny }, &pix);
 
         x = nx;
         y = ny;

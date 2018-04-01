@@ -6,7 +6,7 @@ pub type PointF64 = Point<f64>;
 pub type PointU32 = Point<u32>;
 
 /// Simple 2d Point struct
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Point<T> {
     pub x: T,
     pub y: T,
