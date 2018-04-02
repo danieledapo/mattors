@@ -145,6 +145,7 @@ pub struct Quantize {
     img_path: PathBuf,
 }
 
+
 fn main() {
     let command = Command::from_args();
 

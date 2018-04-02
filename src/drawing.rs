@@ -137,6 +137,80 @@ where
     }
 }
 
+/// Draw a triangle on the given image filled with the given pix.
+pub fn triangle<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
+where
+    I: image::GenericImage,
+{
+    let (tl, mid, br) = {
+        // ugly as hell, but easier than hand written comparisons...
+        let mut tmp = [p1, p2, p3];
+        tmp.sort_by_key(|p| (p.y, p.x));
+
+        (tmp[0], tmp[1], tmp[2])
+    };
+
+    let break_point = Point {
+        y: mid.y,
+        x: tl.x + (f64::from(mid.y - tl.y) / f64::from(br.y - tl.y) * f64::from(br.x - tl.x))
+            as u32,
+    };
+
+    triangle_impl(img, tl.clone(), mid.clone(), break_point.clone(), pix);
+    triangle_impl(img, br.clone(), break_point.clone(), mid.clone(), pix);
+}
+
+/// Draw a hollow triangle on the given image.
+pub fn hollow_triangle<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
+where
+    I: image::GenericImage,
+{
+    line(img, p1.clone(), p2.clone(), pix);
+    line(img, p1.clone(), p3.clone(), pix);
+    line(img, p2.clone(), p3.clone(), pix);
+}
+
+fn triangle_impl<I>(img: &mut I, p1: PointU32, p2: PointU32, p3: PointU32, pix: &I::Pixel)
+where
+    I: image::GenericImage,
+{
+    let mut p1p2 = BresenhamLineIter::new(p1.clone(), p2);
+    let mut p1p3 = BresenhamLineIter::new(p1.clone(), p3);
+
+    let mut last_start = p1.clone();
+    let mut last_end = p1.clone();
+
+    let mut exit = false;
+
+    while !exit {
+        line(img, last_start.clone(), last_end.clone(), pix);
+
+        loop {
+            match p1p2.next() {
+                Some(new_start) => {
+                    if new_start.y != last_start.y {
+                        last_start = new_start;
+                        break;
+                    }
+                }
+                None => {
+                    exit = true;
+                    break;
+                }
+            }
+        }
+
+        while let Some(new_end) = p1p3.next() {
+            if new_end.y != last_end.y {
+                last_end = new_end;
+                break;
+            }
+        }
+    }
+
+    line(img, last_start.clone(), last_end.clone(), pix);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
