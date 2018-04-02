@@ -1,5 +1,4 @@
 //! Create some generative art.
-
 #![deny(missing_docs, warnings)]
 
 #[macro_use]

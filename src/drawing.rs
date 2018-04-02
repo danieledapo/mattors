@@ -12,7 +12,9 @@ use point::{Point, PointU32};
 /// Iterator that returns all the points that compose the line from start to
 /// end. It uses the [Bresenham's line
 /// algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm) to
-/// interpolate the points in the line.
+/// interpolate the points in the line. Note that the points are returned in
+/// order that is if start is higher than end(i.e. start.y < end.y) then the
+/// points will be returned by starting from the top falling down.
 #[derive(Debug)]
 pub struct BresenhamLineIter {
     // this struct is designed to work for non steep lines. In case we actually
@@ -26,6 +28,8 @@ pub struct BresenhamLineIter {
     d: i64,
     dx: i64,
     dy: i64,
+    xstep: i64,
+    ystep: i64,
 }
 
 impl BresenhamLineIter {
@@ -35,7 +39,7 @@ impl BresenhamLineIter {
         let mut dx = (i64::from(end.x) - i64::from(start.x)).abs();
         let mut dy = (i64::from(end.y) - i64::from(start.y)).abs();
 
-        let mut is_steep = false;
+        let is_steep;
 
         // find out whether the line is steep that is that whether it grows faster
         // in y or in x and call the appropriate implementation. The algorithms are
@@ -43,19 +47,17 @@ impl BresenhamLineIter {
         // slowest coordinate is governed by whether the value is closer to the new
         // coord or not.
         if dx >= dy {
-            if start.x > end.x {
-                mem::swap(&mut start, &mut end);
-            }
+            is_steep = false;
         } else {
-            if start.y > end.y {
-                mem::swap(&mut start, &mut end);
-            }
-
             is_steep = true;
+
             mem::swap(&mut start.x, &mut start.y);
             mem::swap(&mut end.x, &mut end.y);
             mem::swap(&mut dx, &mut dy);
         }
+
+        let xstep = if start.x > end.x { -1 } else { 1 };
+        let ystep = if start.y > end.y { -1 } else { 1 };
 
         let start = Point {
             x: i64::from(start.x),
@@ -69,12 +71,16 @@ impl BresenhamLineIter {
             dx,
             dy,
             d: 2 * dy - dx,
+            ystep,
+            xstep,
         }
     }
 
     // calculate next non steep point in the line
     fn next_non_steep_point(&mut self) -> Option<PointU32> {
-        if self.start.x > i64::from(self.end.x) {
+        if (self.start.x > i64::from(self.end.x) && self.xstep > 0)
+            || (self.start.x < i64::from(self.end.x) && self.xstep < 0)
+        {
             return None;
         }
 
@@ -88,13 +94,13 @@ impl BresenhamLineIter {
         };
 
         if self.d > 0 {
-            self.start.y += 1;
+            self.start.y += self.ystep;
             self.d -= 2 * self.dx;
         }
 
         self.d += 2 * self.dy;
 
-        self.start.x += 1;
+        self.start.x += self.xstep;
 
         Some(old)
     }
@@ -135,15 +141,29 @@ where
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_bresenham_line() {
-        let origin = Point { x: 0, y: 0 };
+    fn _test_line_bresenham(start: PointU32, end: PointU32, exp_points: Vec<PointU32>) {
+        assert_eq!(
+            BresenhamLineIter::new(start.clone(), end.clone()).collect::<Vec<_>>(),
+            exp_points,
+            "line from start {:?} to end {:?}",
+            start,
+            end,
+        );
 
         assert_eq!(
-            BresenhamLineIter::new(origin.clone(), origin.clone()).collect::<Vec<_>>(),
-            vec![origin.clone()],
-            "line from origin to origin"
+            BresenhamLineIter::new(end.clone(), start.clone()).collect::<Vec<_>>(),
+            exp_points.iter().cloned().rev().collect::<Vec<_>>(),
+            "line from end {:?} to start {:?}",
+            end,
+            start,
         );
+    }
+
+    #[test]
+    fn test_bresenham_line_basic() {
+        let origin = Point { x: 0, y: 0 };
+
+        _test_line_bresenham(origin.clone(), origin.clone(), vec![origin.clone()]);
 
         let bis = Point { x: 3, y: 3 };
         let bis_exp_points = vec![
@@ -153,19 +173,7 @@ mod tests {
             bis.clone(),
         ];
 
-        assert_eq!(
-            BresenhamLineIter::new(origin.clone(), bis.clone()).collect::<Vec<_>>(),
-            bis_exp_points,
-            "line from origin to bisec {:?}",
-            bis
-        );
-
-        assert_eq!(
-            BresenhamLineIter::new(bis.clone(), origin.clone()).collect::<Vec<_>>(),
-            bis_exp_points,
-            "line from bisec {:?} to origin",
-            bis
-        );
+        _test_line_bresenham(origin.clone(), bis.clone(), bis_exp_points);
     }
 
     #[test]
@@ -179,19 +187,7 @@ mod tests {
             non_steep_pt.clone(),
         ];
 
-        assert_eq!(
-            BresenhamLineIter::new(origin.clone(), non_steep_pt.clone()).collect::<Vec<_>>(),
-            exp_points,
-            "line from origin to non steep {:?}",
-            non_steep_pt
-        );
-
-        assert_eq!(
-            BresenhamLineIter::new(non_steep_pt.clone(), origin.clone()).collect::<Vec<_>>(),
-            exp_points,
-            "line from non steep {:?} to origin",
-            non_steep_pt
-        );
+        _test_line_bresenham(origin.clone(), non_steep_pt.clone(), exp_points);
     }
 
     #[test]
@@ -205,18 +201,20 @@ mod tests {
             steep_pt.clone(),
         ];
 
-        assert_eq!(
-            BresenhamLineIter::new(origin.clone(), steep_pt.clone()).collect::<Vec<_>>(),
-            exp_points,
-            "line from origin to steep {:?}",
-            steep_pt
-        );
+        _test_line_bresenham(origin.clone(), steep_pt.clone(), exp_points);
+    }
 
-        assert_eq!(
-            BresenhamLineIter::new(steep_pt.clone(), origin.clone()).collect::<Vec<_>>(),
-            exp_points,
-            "line from steep {:?} to origin",
-            steep_pt
-        );
+    #[test]
+    fn test_bresenham_line_dec() {
+        let start = Point { x: 4, y: 0 };
+        let end = Point { x: 1, y: 3 };
+        let exp_points = vec![
+            start.clone(),
+            Point { x: 3, y: 1 },
+            Point { x: 2, y: 2 },
+            end.clone(),
+        ];
+
+        _test_line_bresenham(start.clone(), end.clone(), exp_points);
     }
 }
