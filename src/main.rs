@@ -21,6 +21,7 @@ use matto::dragon;
 use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
 use matto::point::PointF64;
 use matto::quantize;
+use matto::sierpinski;
 
 const LIGHT_GREEN: [u8; 3] = [0x17, 0xB9, 0x78];
 const RED: [u8; 3] = [0xF6, 0x72, 0x80];
@@ -58,6 +59,10 @@ pub enum Command {
     /// Quantize an image.
     #[structopt(name = "quantize")]
     Quantize(Quantize),
+
+    /// Generate some Sierpinski triangles.
+    #[structopt(name = "sierpinski")]
+    Sierpinski(Sierpinski),
 }
 
 /// Julia Set settings.
@@ -127,8 +132,7 @@ pub enum JuliaSet {
 }
 
 /// Reduce the number of colors an image uses. This process is called
-/// quantization. The algorithm implemented here is [Median
-/// Cut](https://en.wikipedia.org/wiki/Median_cut).
+/// quantization. The algorithm implemented here is Median Cut.
 #[derive(StructOpt, Debug)]
 pub struct Quantize {
     /// Number of dividing steps the Median Cut algorithm should take. The
@@ -145,6 +149,26 @@ pub struct Quantize {
     img_path: PathBuf,
 }
 
+/// Draw a Sierpinski Triangle.
+#[derive(StructOpt, Debug)]
+pub struct Sierpinski {
+    /// How many times to divide the triangle.
+    #[structopt(short = "d", long = "divide-steps", default_value = "6")]
+    divide_steps: u32,
+
+    /// Where to write the output image.
+    #[structopt(short = "o", long = "output", default_value = "sierpinski.png",
+                parse(from_os_str))]
+    output_path: PathBuf,
+
+    /// Width of the output image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
+    width: u32,
+
+    /// Height of the output image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
+    height: u32,
+}
 
 fn main() {
     let command = Command::from_args();
@@ -173,6 +197,7 @@ fn main() {
             }),
         },
         Command::Quantize(ref config) => quantize_image(config),
+        Command::Sierpinski(ref config) => spawn_sierpinski(config),
     }
 }
 
@@ -328,4 +353,13 @@ fn quantize_image(config: &Quantize) {
     quantized
         .save(&config.output_path)
         .expect("cannot save quantized file");
+}
+
+fn spawn_sierpinski(config: &Sierpinski) {
+    let mut img = image::RgbImage::new(config.width, config.height);
+
+    sierpinski::sierpinski(&mut img, config.divide_steps, &image::Rgb { data: RED });
+
+    img.save(&config.output_path)
+        .expect("cannot save sierpinski triangle");
 }
