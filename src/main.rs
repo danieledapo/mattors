@@ -154,7 +154,11 @@ pub struct Quantize {
 pub struct Sierpinski {
     /// How many times to divide the triangle.
     #[structopt(short = "d", long = "divide-steps", default_value = "6")]
-    divide_steps: u32,
+    divide_steps: usize,
+
+    /// Draw a fancy Sierpinski Triangle.
+    #[structopt(short = "f", long = "fancy")]
+    fancy: bool,
 
     /// Where to write the output image.
     #[structopt(short = "o", long = "output", default_value = "sierpinski.png",
@@ -162,11 +166,11 @@ pub struct Sierpinski {
     output_path: PathBuf,
 
     /// Width of the output image.
-    #[structopt(short = "w", long = "width", default_value = "1920")]
+    #[structopt(short = "w", long = "width", default_value = "1600")]
     width: u32,
 
     /// Height of the output image.
-    #[structopt(short = "h", long = "height", default_value = "1080")]
+    #[structopt(short = "h", long = "height", default_value = "1600")]
     height: u32,
 }
 
@@ -356,9 +360,46 @@ fn quantize_image(config: &Quantize) {
 }
 
 fn spawn_sierpinski(config: &Sierpinski) {
-    let mut img = image::RgbImage::new(config.width, config.height);
+    let mut img = image::RgbImage::from_pixel(
+        config.width,
+        config.height,
+        image::Rgb {
+            data: [0x40, 0xbe, 0xcd],
+        },
+    );
 
-    sierpinski::sierpinski(&mut img, config.divide_steps, &image::Rgb { data: RED });
+    if config.fancy {
+        sierpinski::fancy_sierpinski(
+            &mut img,
+            config.divide_steps,
+            false,
+            &[
+                image::Rgb {
+                    data: [0x02, 0x44, 0x0c],
+                },
+                image::Rgb {
+                    data: [0x78, 0x94, 0x00],
+                },
+                image::Rgb {
+                    data: [0xe4, 0xd5, 0x65],
+                },
+                image::Rgb {
+                    data: [0xf3, 0xf5, 0xe7],
+                },
+            ],
+        );
+    } else {
+        sierpinski::fancy_sierpinski(
+            &mut img,
+            config.divide_steps,
+            true,
+            &[
+                image::Rgb {
+                    data: [0xf3, 0xf5, 0xe7],
+                },
+            ],
+        );
+    }
 
     img.save(&config.output_path)
         .expect("cannot save sierpinski triangle");
