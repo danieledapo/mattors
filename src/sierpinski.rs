@@ -101,9 +101,9 @@ pub fn fancy_sierpinski<I>(
                         let pix = rng.choose(pixs).unwrap();
 
                         if hollow_triangles {
-                            drawing::hollow_triangle(img, &mid_left, &mid_right, &mid_bottom, pix);
+                            drawing::hollow_triangle(img, mid_left, mid_right, mid_bottom, pix);
                         } else {
-                            drawing::triangle(img, &mid_left, &mid_right, &mid_bottom, pix);
+                            drawing::triangle(img, mid_left, mid_right, mid_bottom, pix);
                         }
                     });
             });

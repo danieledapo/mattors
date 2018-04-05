@@ -137,6 +137,16 @@ where
     }
 }
 
+/// Draw a hollow triangle on the given image.
+pub fn hollow_triangle<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
+where
+    I: image::GenericImage,
+{
+    line(img, p1.clone(), p2.clone(), pix);
+    line(img, p1.clone(), p3.clone(), pix);
+    line(img, p2.clone(), p3.clone(), pix);
+}
+
 /// Draw a triangle on the given image filled with the given pix.
 pub fn triangle<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
 where
@@ -156,26 +166,16 @@ where
             as u32,
     };
 
-    triangle_impl(img, tl.clone(), mid.clone(), break_point.clone(), pix);
-    triangle_impl(img, br.clone(), break_point.clone(), mid.clone(), pix);
+    triangle_impl(img, tl, mid, &break_point, pix);
+    triangle_impl(img, br, &break_point, mid, pix);
 }
 
-/// Draw a hollow triangle on the given image.
-pub fn hollow_triangle<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
+fn triangle_impl<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
 where
     I: image::GenericImage,
 {
-    line(img, p1.clone(), p2.clone(), pix);
-    line(img, p1.clone(), p3.clone(), pix);
-    line(img, p2.clone(), p3.clone(), pix);
-}
-
-fn triangle_impl<I>(img: &mut I, p1: PointU32, p2: PointU32, p3: PointU32, pix: &I::Pixel)
-where
-    I: image::GenericImage,
-{
-    let mut p1p2 = BresenhamLineIter::new(p1.clone(), p2);
-    let mut p1p3 = BresenhamLineIter::new(p1.clone(), p3);
+    let mut p1p2 = BresenhamLineIter::new(p1.clone(), p2.clone());
+    let mut p1p3 = BresenhamLineIter::new(p1.clone(), p3.clone());
 
     let mut last_start = p1.clone();
     let mut last_end = p1.clone();
