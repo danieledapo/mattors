@@ -5,6 +5,8 @@
 extern crate image;
 extern crate num;
 
+use std::iter::Iterator;
+
 use self::num::complex::Complex64;
 
 use point::PointF64;
@@ -26,7 +28,9 @@ impl FractalPoint {
     }
 
     /// Calculate if the given `f`(that is point) with param `c` is in the
-    /// [Julia Set](https://en.wikipedia.org/wiki/Julia_set).
+    /// [Julia Set](https://en.wikipedia.org/wiki/Julia_set). `iterations` is
+    /// the maximum number of times this function can perform the check to see
+    /// whether a given point is inside the set or not.
     pub fn julia(mut f: Complex64, c: Complex64, iterations: u32) -> FractalPoint {
         let mut is_inside = true;
         let mut i = 0;
@@ -60,58 +64,90 @@ impl FractalPoint {
         //let last_value = (self.last_value * 1_000_000.0) as u32;
         // vec![0, (last_value % 255) as u8, (last_value % 255) as u8]
         } else {
-            u32_to_vec(self.iterations)
+            vec![
+                (self.iterations >> 16) as u8,
+                (self.iterations >> 8) as u8,
+                self.iterations as u8,
+            ]
         }
     }
 }
 
-/// Generate a fractal starting from the given `point` and incrementing x by
-/// `xstep` and y by `ystep` for `xcount` and `ycount` respectively.
-/// `iterations` is the number of iterations `gen` functions should take before
-/// saying the point is outside the fractal. `gen` is the generator function
-/// that takes the current position as a complex number and that returns the
-/// `FractalPoint`.
-pub fn gen_fractal<F>(
-    start: &PointF64,
+/// Iterator that returns all the `FractalPoint`
+pub struct JuliaGenIter<F: Fn(Complex64, u32) -> FractalPoint> {
+    // params
+    start: PointF64,
     xcount: u32,
     ycount: u32,
     stepx: f64,
     stepy: f64,
     iterations: u32,
-    gen: F,
-) -> Vec<Vec<FractalPoint>>
-where
-    F: Sync + Send + Fn(Complex64, u32) -> FractalPoint,
-{
-    (0..xcount)
-        .map(|ix| {
-            (0..ycount)
-                .map(|iy| {
-                    let x = start.x + f64::from(ix) * stepx;
-                    let y = start.y + f64::from(iy) * stepy;
+    gen_fn: F,
 
-                    gen(Complex64::new(x, y), iterations)
-                })
-                .collect()
-        })
-        .collect()
+    // state
+    x: u32,
+    y: u32,
 }
 
-/// Create an image from the given fractal.
-pub fn fractal_to_image(frac: &[Vec<FractalPoint>]) -> image::DynamicImage {
-    let width = frac.len();
-    let height = frac[0].len();
+impl<F: Fn(Complex64, u32) -> FractalPoint> JuliaGenIter<F> {
+    /// Create a new `JuliaGenIter` that returns all the `FractalPoint`s from
+    /// `start` moving x by `stepx` `xcount` times and y by `stepy` `ycount`
+    /// times. Both `ycount` and `xcount` are exclusive. `gen_fn` is the
+    /// generator function that takes the current position as a complex number
+    /// and that returns the `FractalPoint`.
+    pub fn new(
+        start: PointF64,
+        xcount: u32,
+        ycount: u32,
+        stepx: f64,
+        stepy: f64,
+        iterations: u32,
+        gen_fn: F,
+    ) -> JuliaGenIter<F> {
+        JuliaGenIter {
+            start,
+            xcount,
+            ycount,
+            stepx,
+            stepy,
+            iterations,
+            gen_fn,
+            x: 0,
+            y: 0,
+        }
+    }
 
-    let v = (0..height)
-        .flat_map(move |y| (0..width).flat_map(move |x| frac[x][y].to_pixels()))
-        .collect();
+    /// Consume the `JuliaGenIter` and return an image of the Julia set formed
+    /// by all the points this iterator yields.
+    pub fn into_image(self) -> Option<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>> {
+        let width = self.xcount;
+        let height = self.ycount;
 
-    let imgbuf = image::ImageBuffer::from_raw(width as u32, height as u32, v).unwrap();
-    image::ImageRgb8(imgbuf)
+        image::ImageBuffer::from_raw(width, height, self.flat_map(|pt| pt.to_pixels()).collect())
+    }
 }
 
-fn u32_to_vec(n: u32) -> Vec<u8> {
-    vec![(n >> 16) as u8, (n >> 8) as u8, n as u8]
+impl<F: Fn(Complex64, u32) -> FractalPoint> Iterator for JuliaGenIter<F> {
+    type Item = FractalPoint;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.y >= self.ycount {
+            return None;
+        }
+
+        let x = self.start.x + f64::from(self.x) * self.stepx;
+        let y = self.start.y + f64::from(self.y) * self.stepy;
+
+        let pt = (self.gen_fn)(Complex64::new(x, y), self.iterations);
+
+        self.x += 1;
+        if self.x >= self.xcount {
+            self.x = 0;
+            self.y += 1;
+        }
+
+        Some(pt)
+    }
 }
 
 #[cfg(test)]

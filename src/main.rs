@@ -18,7 +18,7 @@ use num::complex::{Complex64, ParseComplexError};
 use structopt::StructOpt;
 
 use matto::dragon;
-use matto::julia::{fractal_to_image, gen_fractal, FractalPoint};
+use matto::julia::{FractalPoint, JuliaGenIter};
 use matto::point::PointF64;
 use matto::quantize;
 use matto::sierpinski;
@@ -253,13 +253,13 @@ fn black_holes(config: &Julia) {
 
 fn create_julia_set<F>(config: &Julia, name: &str, start: &PointF64, end: &PointF64, gen: F)
 where
-    F: Sync + Send + Fn(Complex64, u32) -> FractalPoint,
+    F: Fn(Complex64, u32) -> FractalPoint,
 {
     let stepx = (end.x - start.x) / f64::from(config.width);
     let stepy = (end.y - start.y) / f64::from(config.height);
 
-    let frac = gen_fractal(
-        start,
+    let frac_it = JuliaGenIter::new(
+        start.clone(),
         config.width,
         config.height,
         stepx,
@@ -270,11 +270,16 @@ where
 
     println!("Fractal: {}", name);
 
-    let img = fractal_to_image(&frac);
+    let imgbuf = frac_it
+        .into_image()
+        .expect("error while generating fractal");
+    let img = image::ImageRgb8(imgbuf);
+
     // let img = img.resize_exact(width, height, image::Lanczos3);
 
-    let mut fout = &File::create(&format!("{}.png", name)).unwrap();
-    img.save(&mut fout, image::PNG).unwrap();
+    let mut fout = &File::create(&format!("{}.png", name)).expect("cannot create output file");
+    img.save(&mut fout, image::PNG)
+        .expect("cannot save output image");
 }
 
 fn spawn_dragons(iterations: u32) {
