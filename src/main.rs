@@ -18,8 +18,8 @@ use num::complex::{Complex64, ParseComplexError};
 use structopt::StructOpt;
 
 use matto::dragon;
+use matto::geo::PointF64;
 use matto::julia::{FractalPoint, JuliaGenIter};
-use matto::point::PointF64;
 use matto::quantize;
 use matto::sierpinski;
 

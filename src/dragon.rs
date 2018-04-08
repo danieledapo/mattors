@@ -4,7 +4,7 @@
 extern crate image;
 
 use drawing;
-use point::PointU32;
+use geo::PointU32;
 
 /// A move the Dragon Fractal can take
 #[derive(Clone, Debug)]

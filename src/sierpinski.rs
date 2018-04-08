@@ -8,7 +8,7 @@ use std::iter::Iterator;
 use self::rand::Rng;
 
 use drawing;
-use point::PointU32;
+use geo::PointU32;
 
 /// Handy alias for a [Sierpinski
 /// Triangle](https://en.wikipedia.org/wiki/Sierpinski_triangle). Order is top,

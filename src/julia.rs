@@ -9,7 +9,7 @@ use std::iter::Iterator;
 
 use self::num::complex::Complex64;
 
-use point::PointF64;
+use geo::PointF64;
 
 /// This struct is mainly used to pass some data used when converting to raw
 /// pixels.
