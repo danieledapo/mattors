@@ -160,11 +160,16 @@ where
         (tmp[0], tmp[1], tmp[2])
     };
 
-    let break_point = Point {
-        y: mid.y,
-        x: tl.x + (f64::from(mid.y - tl.y) / f64::from(br.y - tl.y) * f64::from(br.x - tl.x))
-            as u32,
-    };
+    let mid_y = f64::from(mid.y);
+    let tl_y = f64::from(tl.y);
+    let br_y = f64::from(br.y);
+    let br_x = f64::from(br.x);
+    let tl_x = f64::from(tl.x);
+
+    let break_point = Point::new(
+        (tl_x + (mid_y - tl_y) / (br_y - tl_y) * (br_x - tl_x)) as u32,
+        mid.y,
+    );
 
     triangle_impl(img, tl, mid, &break_point, pix);
     triangle_impl(img, br, &break_point, mid, pix);
