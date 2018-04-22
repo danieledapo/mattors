@@ -120,13 +120,11 @@ mod tests {
         assert_eq!(
             SierpinskiIter::new(101, 101).take(2).collect::<Vec<_>>(),
             vec![
-                vec![
-                    (
-                        PointU32::new(50, 0),
-                        PointU32::new(0, 100),
-                        PointU32::new(100, 100),
-                    ),
-                ],
+                vec![(
+                    PointU32::new(50, 0),
+                    PointU32::new(0, 100),
+                    PointU32::new(100, 100),
+                )],
                 vec![
                     (
                         PointU32::new(50, 0),

@@ -11,8 +11,8 @@ use std::hash::Hash;
 
 use self::image::Pixel;
 
-use self::num::ToPrimitive;
 use self::num::cast::NumCast;
+use self::num::ToPrimitive;
 
 use utils;
 

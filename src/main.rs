@@ -161,8 +161,7 @@ pub struct Sierpinski {
     fancy: bool,
 
     /// Where to write the output image.
-    #[structopt(short = "o", long = "output", default_value = "sierpinski.png",
-                parse(from_os_str))]
+    #[structopt(short = "o", long = "output", default_value = "sierpinski.png", parse(from_os_str))]
     output_path: PathBuf,
 
     /// Width of the output image.
@@ -398,11 +397,9 @@ fn spawn_sierpinski(config: &Sierpinski) {
             &mut img,
             config.divide_steps,
             true,
-            &[
-                image::Rgb {
-                    data: [0xf3, 0xf5, 0xe7],
-                },
-            ],
+            &[image::Rgb {
+                data: [0xf3, 0xf5, 0xe7],
+            }],
         );
     }
 
