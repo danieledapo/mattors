@@ -92,14 +92,14 @@ fn quantize_impl<P>(
             .map(|(i, _)| i)
     });
 
-    mbiggest_chan_range.map(|max_range_chan_idx| {
+    if let Some(max_range_chan_idx) = mbiggest_chan_range {
         pixels_freqs.sort_by_key(|p| p.0.channels()[max_range_chan_idx]);
 
         let (lpixels, rpixels) = pixels_freqs.split_at(pixels_freqs.len() / 2);
 
         quantize_impl(lpixels.to_vec(), divide_steps - 1, mresult);
         quantize_impl(rpixels.to_vec(), divide_steps - 1, mresult);
-    });
+    }
 }
 
 /// Calculate the pixel obtained as the average among all `pixels_freqs` also
