@@ -14,6 +14,13 @@ Have some fun visualizing math.
 ![desert-quantized](images/desert-quantized.jpeg)
 ![baboon-quantized](images/baboon-quantized.jpeg)
 
+## Primirs
+
+inspired by [primitive](https://github.com/fogleman/primitive).
+
+![rb-primitized](images/rb-primitized.png)
+![tiffanys-primitized](images/tiffanys-primitized.png)
+
 # Examples
 
 ```
@@ -28,4 +35,8 @@ cargo run -- sierpinski --fancy
 # quantize
 cargo run -- quantize images/desert.jpeg -o images/desert-quantized.jpeg
 cargo run -- quantize -d 1 images/baboon.jpeg -o images/baboon-quantized.jpeg
+
+# primirs
+cargo run --release -- primirs --shapes 200 --mutations 150 -o images/rb-primitized.png --dx 8 --dy 8 images/rb.png
+cargo run --release -- primirs --shapes 200 --mutations 100 --scale-down 2 --dx 16 --dy 16 -o primitized.png images/tiffanys.jpg
 ```
