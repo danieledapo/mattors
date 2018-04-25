@@ -4,8 +4,11 @@
 
 extern crate image;
 
+use std::fmt::Debug;
 use std::iter::Iterator;
 use std::mem;
+
+use self::image::Pixel;
 
 use geo::{Point, PointU32};
 
@@ -126,6 +129,7 @@ impl Iterator for BresenhamLineIter {
 pub fn line<I>(img: &mut I, start: PointU32, end: PointU32, pix: &I::Pixel)
 where
     I: image::GenericImage,
+    I::Pixel: Debug,
 {
     let it = BresenhamLineIter::new(start, end);
     for pt in it {
@@ -133,7 +137,11 @@ where
             break;
         }
 
-        img.put_pixel(pt.x, pt.y, *pix);
+        let mut new_pix = img.get_pixel_mut(pt.x, pt.y);
+        new_pix.blend(pix);
+
+        // TODO: make blending optional
+        // img.put_pixel(pt.x, pt.y, *pix);
     }
 }
 
@@ -210,6 +218,7 @@ impl Iterator for FlatTriangleIter {
 pub fn hollow_triangle<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
 where
     I: image::GenericImage,
+    I::Pixel: Debug,
 {
     line(img, p1.clone(), p2.clone(), pix);
     line(img, p1.clone(), p3.clone(), pix);
@@ -220,6 +229,7 @@ where
 pub fn triangle<I>(img: &mut I, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel)
 where
     I: image::GenericImage,
+    I::Pixel: Debug,
 {
     // the idea here is pretty simple: divide the triangle in an upper and
     // bottom flat triangles. At that point draw horizontal lines between the

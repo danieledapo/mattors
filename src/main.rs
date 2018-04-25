@@ -8,18 +8,22 @@ extern crate image;
 extern crate matto;
 extern crate num;
 
-use std::fs::File;
 use std::num::ParseFloatError;
 use std::path::PathBuf;
 use std::str::FromStr;
+
+use image::GenericImage;
 
 use num::complex::{Complex64, ParseComplexError};
 
 use structopt::StructOpt;
 
 use matto::dragon;
+use matto::geo;
 use matto::geo::PointF64;
 use matto::julia::{FractalPoint, JuliaGenIter};
+use matto::primi;
+use matto::primi::Shape;
 use matto::quantize;
 use matto::sierpinski;
 
@@ -63,6 +67,10 @@ pub enum Command {
     /// Generate some Sierpinski triangles.
     #[structopt(name = "sierpinski")]
     Sierpinski(Sierpinski),
+
+    /// Reconstruct an image from simple geometric shapes.
+    #[structopt(name = "primirs")]
+    Primirs(Primirs),
 }
 
 /// Julia Set settings.
@@ -173,6 +181,39 @@ pub struct Sierpinski {
     height: u32,
 }
 
+/// Port of primitive/primipy. Approximate an image by using simple geometric
+/// shapes.
+#[derive(StructOpt, Debug)]
+pub struct Primirs {
+    /// Number of shapes to generate into the image.
+    #[structopt(short = "s", long = "shapes", default_value = "100")]
+    nshapes: usize,
+
+    /// Number of mutations to perform for a single shape before changing shape.
+    #[structopt(short = "m", long = "mutations", default_value = "100")]
+    nmutations: u32,
+
+    /// delta in x that determines how big the shapes will be.
+    #[structopt(long = "dx", default_value = "16")]
+    dx: u32,
+
+    /// delta in x that determines how big the shapes will be.
+    #[structopt(long = "dy", default_value = "16")]
+    dy: u32,
+
+    /// Scale the original image down by this percentage so that's faster.
+    #[structopt(long = "scale-down", default_value = "1")]
+    scale_down: u32,
+
+    /// Where to write the "primitized" image.
+    #[structopt(short = "o", long = "output", default_value = "primitized.png", parse(from_os_str))]
+    output_path: PathBuf,
+
+    /// Image to "primitize".
+    #[structopt(name = "FILE", parse(from_os_str))]
+    img_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -201,6 +242,7 @@ fn main() {
         },
         Command::Quantize(ref config) => quantize_image(config),
         Command::Sierpinski(ref config) => spawn_sierpinski(config),
+        Command::Primirs(ref config) => primirs(config),
     }
 }
 
@@ -276,8 +318,7 @@ where
 
     // let img = img.resize_exact(width, height, image::Lanczos3);
 
-    let mut fout = &File::create(&format!("{}.png", name)).expect("cannot create output file");
-    img.save(&mut fout, image::PNG)
+    img.save(&format!("{}.png", name))
         .expect("cannot save output image");
 }
 
@@ -405,4 +446,53 @@ fn spawn_sierpinski(config: &Sierpinski) {
 
     img.save(&config.output_path)
         .expect("cannot save sierpinski triangle");
+}
+
+fn primirs(config: &Primirs) {
+    let img = image::open(&config.img_path).expect("cannot open source image file");
+    let rgba = img.to_rgba();
+
+    let primitized = if config.scale_down > 1 {
+        let resized = image::imageops::resize(
+            &rgba,
+            img.width() / config.scale_down,
+            img.height() / config.scale_down,
+            image::Triangle,
+        );
+
+        primi::primify::<_, geo::Triangle<u32>>(
+            &resized,
+            config.nshapes,
+            config.nmutations,
+            config.dx,
+            config.dy,
+        ).map(|prim| {
+            let mut upscaled_img =
+                image::RgbaImage::from_pixel(rgba.width(), rgba.height(), prim.dominant_color);
+
+            for shape in prim.shapes {
+                let upscaled_shape = shape.upscale(config.scale_down);
+
+                upscaled_shape.draw(&rgba, &mut upscaled_img);
+            }
+
+            (upscaled_img, prim.best_error)
+        })
+    } else {
+        primi::primify::<_, geo::Triangle<u32>>(
+            &rgba,
+            config.nshapes,
+            config.nmutations,
+            config.dx,
+            config.dy,
+        ).map(|prim| (prim.best_image, prim.best_error))
+    };
+
+    let (best_image, best_error) = primitized.expect("primirs error");
+
+    println!("best error {:?}", best_error);
+
+    best_image
+        .save(&config.output_path)
+        .expect("cannot save primitized file");
 }

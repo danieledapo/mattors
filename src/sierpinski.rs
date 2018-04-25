@@ -3,6 +3,7 @@
 extern crate image;
 extern crate rand;
 
+use std::fmt::Debug;
 use std::iter::Iterator;
 
 use self::rand::Rng;
@@ -73,6 +74,7 @@ pub fn fancy_sierpinski<I>(
     pixs: &[I::Pixel],
 ) where
     I: image::GenericImage,
+    I::Pixel: Debug,
 {
     if pixs.is_empty() {
         return;

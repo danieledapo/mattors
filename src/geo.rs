@@ -1,6 +1,10 @@
 //! Handy `Point` struct and utility functions.
 
+extern crate num;
+extern crate rand;
+
 use std::clone::Clone;
+use std::convert::From;
 use std::error::Error;
 use std::str::FromStr;
 
@@ -50,5 +54,42 @@ where
                 }
             }
         }
+    }
+}
+
+/// Simple Triangle shape.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Triangle<P>
+where
+    P: num::Num + From<u8> + Clone,
+{
+    /// The points of the triangle
+    pub points: [Point<P>; 3],
+}
+
+impl<P> Triangle<P>
+where
+    P: num::Num + From<u8> + Clone,
+{
+    /// Create a new `Triangle` from the given points.
+    pub fn new(p1: Point<P>, p2: Point<P>, p3: Point<P>) -> Triangle<P> {
+        Triangle {
+            points: [p1, p2, p3],
+        }
+    }
+
+    /// Return the [centroid](https://en.wikipedia.org/wiki/Centroid) of the
+    /// triangle.
+    pub fn centroid(&self) -> Point<P> {
+        let (sum_x, sum_y) = self.points
+            .iter()
+            .fold((P::zero(), P::zero()), |(accx, accy), pt| {
+                (accx + pt.x.clone(), accy + pt.y.clone())
+            });
+
+        let avg_x = sum_x / From::from(3);
+        let avg_y = sum_y / From::from(3);
+
+        Point::new(avg_x, avg_y)
     }
 }
