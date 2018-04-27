@@ -226,7 +226,8 @@ impl Shape for geo::Triangle<u32> {
             .get_pixel(triangle_center.x, triangle_center.y)
             .map_with_alpha(|c| c, |_| From::from(0x7F));
 
-        drawing::triangle(dst, &self.points[0], &self.points[1], &self.points[2], &pix);
+        let mut drawer = drawing::Drawer::new_with_default_blending(dst);
+        drawer.triangle(&self.points[0], &self.points[1], &self.points[2], &pix);
     }
 
     fn upscale(&self, factor: u32) -> Self {

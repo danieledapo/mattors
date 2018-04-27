@@ -90,25 +90,30 @@ pub fn dragon_to_image(
     // TODO: might be interesting to add [perlin
     // noise](https://en.wikipedia.org/wiki/Perlin_noise)
     let mut img = image::ImageBuffer::new(width, height);
-    let pix = image::Rgb { data: *rgb_color };
 
-    let mut x = start_x;
-    let mut y = start_y;
+    {
+        let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
 
-    for m in &drag.0 {
-        let (nx, ny) = {
-            match *m {
-                Move::Down => (x, y.saturating_add(line_len)),
-                Move::Left => (x.saturating_sub(line_len), y),
-                Move::Right => (x.saturating_add(line_len), y),
-                Move::Up => (x, y.saturating_sub(line_len)),
-            }
-        };
+        let pix = image::Rgb { data: *rgb_color };
 
-        drawing::line(&mut img, PointU32 { x, y }, PointU32 { x: nx, y: ny }, &pix);
+        let mut x = start_x;
+        let mut y = start_y;
 
-        x = nx;
-        y = ny;
+        for m in &drag.0 {
+            let (nx, ny) = {
+                match *m {
+                    Move::Down => (x, y.saturating_add(line_len)),
+                    Move::Left => (x.saturating_sub(line_len), y),
+                    Move::Right => (x.saturating_add(line_len), y),
+                    Move::Up => (x, y.saturating_sub(line_len)),
+                }
+            };
+
+            drawer.line(PointU32::new(x, y), PointU32::new(nx, ny), &pix);
+
+            x = nx;
+            y = ny;
+        }
     }
 
     img

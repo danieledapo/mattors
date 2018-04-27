@@ -85,11 +85,12 @@ pub fn fancy_sierpinski<I>(
     let (width, height) = img.dimensions();
     let mut siter = SierpinskiIter::new(width, height);
 
+    let mut drawer = drawing::Drawer::new_with_no_blending(img);
+
     siter
         .next()
         .map(|triangles| {
-            drawing::hollow_triangle(
-                img,
+            drawer.hollow_triangle(
                 &triangles[0].0,
                 &triangles[0].1,
                 &triangles[0].2,
@@ -103,9 +104,9 @@ pub fn fancy_sierpinski<I>(
                         let pix = rng.choose(pixs).unwrap();
 
                         if hollow_triangles {
-                            drawing::hollow_triangle(img, mid_left, mid_right, mid_bottom, pix);
+                            drawer.hollow_triangle(mid_left, mid_right, mid_bottom, pix);
                         } else {
-                            drawing::triangle(img, mid_left, mid_right, mid_bottom, pix);
+                            drawer.triangle(mid_left, mid_right, mid_bottom, pix);
                         }
                     });
             });
