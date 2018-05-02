@@ -13,7 +13,7 @@ use std::num::ParseFloatError;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use image::GenericImageView;
+use image::{GenericImage, GenericImageView};
 
 use num::complex::{Complex64, ParseComplexError};
 
@@ -27,6 +27,7 @@ use matto::julia::{FractalPoint, JuliaGenIter};
 use matto::primi;
 use matto::primi::Shape;
 use matto::quantize;
+use matto::runes;
 use matto::sierpinski;
 
 const LIGHT_GREEN: [u8; 3] = [0x17, 0xB9, 0x78];
@@ -77,6 +78,10 @@ pub enum Command {
     /// Generate a Fractal Tree.
     #[structopt(name = "fractal-tree")]
     FractalTree(FractalTree),
+
+    /// Generate an alphabet of random rune like characters.
+    #[structopt(name = "runes")]
+    Runes(Runes),
 }
 
 /// Julia Set settings.
@@ -84,7 +89,7 @@ pub enum Command {
 pub struct Julia {
     /// Number of iterations to run the check for for every pixel. The
     /// higher the better, but lower numbers make cool fractals
-    /// nonentheless.
+    /// nonetheless.
     #[structopt(short = "i", long = "iterations", default_value = "64")]
     iterations: u32,
 
@@ -252,6 +257,31 @@ pub struct FractalTree {
     output_path: PathBuf,
 }
 
+/// Generate an alphabet of random rune like characters.
+#[derive(StructOpt, Debug)]
+pub struct Runes {
+    /// Number of characters in the alphabet.
+    #[structopt(short = "c", long = "characters", default_value = "20")]
+    ntiles: u32,
+
+    /// Number of points the rune should have. The higher the more complex the
+    /// rune will be.
+    #[structopt(short = "p", long = "points", default_value = "3")]
+    npoints: u32,
+
+    /// Height of each rune.
+    #[structopt(short = "w", long = "width", default_value = "128")]
+    width: u32,
+
+    /// Height of each rune.
+    #[structopt(short = "h", long = "height", default_value = "128")]
+    height: u32,
+
+    /// Where to write the fractal image.
+    #[structopt(short = "o", long = "output", default_value = "runes.png", parse(from_os_str))]
+    output_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -282,6 +312,7 @@ fn main() {
         Command::Sierpinski(ref config) => spawn_sierpinski(config),
         Command::Primirs(ref config) => primirs(config),
         Command::FractalTree(ref config) => fractal_tree(config),
+        Command::Runes(ref config) => runes(config),
     }
 }
 
@@ -553,5 +584,22 @@ fn fractal_tree(config: &FractalTree) {
     );
 
     img.save(&config.output_path)
+        .expect("cannot save primitized file");
+}
+
+fn runes(config: &Runes) {
+    let white_pix = image::Luma { data: [0xFF] };
+    let black_pix = image::Luma { data: [0] };
+
+    let mut imgbuf =
+        image::GrayImage::from_pixel(config.ntiles * config.width, config.height, white_pix);
+
+    for i in 0..config.ntiles {
+        let mut rune = imgbuf.sub_image(i * config.width, 0, config.width, config.height);
+        runes::draw_random_rune(&mut rune, config.npoints, &black_pix);
+    }
+
+    imgbuf
+        .save(&config.output_path)
         .expect("cannot save primitized file");
 }

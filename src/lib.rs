@@ -12,5 +12,6 @@ pub mod geo;
 pub mod julia;
 pub mod primi;
 pub mod quantize;
+pub mod runes;
 pub mod sierpinski;
 pub mod utils;

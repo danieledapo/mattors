@@ -64,6 +64,11 @@ where
         Drawer::new(img, blend)
     }
 
+    /// Returns the inner image dimensions as (width, height).
+    pub fn dimensions(&self) -> (u32, u32) {
+        self.img.dimensions()
+    }
+
     /// Draw the given `pix`el at `x` and `y`. It does nothing if the
     /// coordinates are out of bounds.
     pub fn draw_pixel(&mut self, x: u32, y: u32, pix: &I::Pixel) {
