@@ -12,7 +12,7 @@ use std::num::ParseFloatError;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use image::GenericImage;
+use image::GenericImageView;
 
 use num::complex::{Complex64, ParseComplexError};
 

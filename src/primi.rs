@@ -140,9 +140,9 @@ where
 
 fn get_dominant_color<I>(img: &I) -> Option<I::Pixel>
 where
-    I: image::GenericImage,
+    I: image::GenericImageView,
     I::Pixel: Eq + Hash,
-    <<I as image::GenericImage>::Pixel as image::Pixel>::Subpixel: Ord,
+    <<I as image::GenericImageView>::Pixel as image::Pixel>::Subpixel: Ord,
 {
     let pixels_it = img.pixels().map(|(_, _, p)| p);
 
