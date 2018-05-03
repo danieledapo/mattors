@@ -215,6 +215,16 @@ pub struct Primirs {
 }
 
 fn main() {
+    let mut img = image::RgbImage::from_pixel(600, 600, image::Rgb { data: [0, 0, 0] });
+    fractal_tree(
+        &mut img,
+        5,
+        &image::Rgb {
+            data: [0xFF, 0xFF, 0xFF],
+        },
+    );
+    img.save("fuffa.jpeg").unwrap();
+
     let command = Command::from_args();
 
     match command {
@@ -495,4 +505,47 @@ fn primirs(config: &Primirs) {
     best_image
         .save(&config.output_path)
         .expect("cannot save primitized file");
+}
+
+use matto::drawing;
+use matto::geo::PointU32;
+use std::f64;
+use std::fmt::Debug;
+
+fn fractal_tree<I>(img: &mut I, ntimes: u32, pix: &I::Pixel)
+where
+    I: image::GenericImage,
+    I::Pixel: Debug,
+{
+    if ntimes == 0 {
+        return;
+    }
+
+    let (width, height) = img.dimensions();
+    let bottom = PointU32::new(width / 2, height - 1);
+    let break_point = PointU32::new(bottom.x, height / 4 * 3);
+
+    let dx = bottom.x / 2;
+    let left = PointU32::new(bottom.x - dx, height / 2);
+    let right = PointU32::new(bottom.x + dx, left.y);
+
+    {
+        let mut drawer = drawing::Drawer::new_with_no_blending(img);
+
+        drawer.line(bottom, break_point.clone(), pix);
+        drawer.line(break_point.clone(), left, pix);
+        drawer.line(break_point, right, pix);
+    }
+
+    fractal_tree(
+        &mut img.sub_image(0, 0, width / 2, height / 2),
+        ntimes - 1,
+        pix,
+    );
+
+    fractal_tree(
+        &mut img.sub_image(width / 2, 0, width / 2, height / 2),
+        ntimes - 1,
+        pix,
+    );
 }
