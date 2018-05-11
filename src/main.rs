@@ -169,7 +169,9 @@ pub struct Sierpinski {
     fancy: bool,
 
     /// Where to write the output image.
-    #[structopt(short = "o", long = "output", default_value = "sierpinski.png", parse(from_os_str))]
+    #[structopt(
+        short = "o", long = "output", default_value = "sierpinski.png", parse(from_os_str)
+    )]
     output_path: PathBuf,
 
     /// Width of the output image.
@@ -206,7 +208,9 @@ pub struct Primirs {
     scale_down: u32,
 
     /// Where to write the "primitized" image.
-    #[structopt(short = "o", long = "output", default_value = "primitized.png", parse(from_os_str))]
+    #[structopt(
+        short = "o", long = "output", default_value = "primitized.png", parse(from_os_str)
+    )]
     output_path: PathBuf,
 
     /// Image to "primitize".
