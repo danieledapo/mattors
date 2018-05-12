@@ -7,6 +7,7 @@ extern crate maplit;
 
 pub mod dragon;
 pub mod drawing;
+pub mod fractree;
 pub mod geo;
 pub mod julia;
 pub mod primi;

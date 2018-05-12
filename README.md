@@ -7,6 +7,7 @@ Have some fun visualizing math.
 ![redblue dragon](images/redblue-dragon.png)
 ![mandelbrot](images/mandelbrot.png)
 ![horns](images/red-horns.png)
+![fractal tree](images/fractree.png)
 ![sierpinski](images/sierpinski.png)
 
 ## Quantization

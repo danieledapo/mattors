@@ -8,6 +8,7 @@ extern crate image;
 extern crate matto;
 extern crate num;
 
+use std::f64;
 use std::num::ParseFloatError;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -19,8 +20,9 @@ use num::complex::{Complex64, ParseComplexError};
 use structopt::StructOpt;
 
 use matto::dragon;
+use matto::fractree;
 use matto::geo;
-use matto::geo::PointF64;
+use matto::geo::{PointF64, PointU32};
 use matto::julia::{FractalPoint, JuliaGenIter};
 use matto::primi;
 use matto::primi::Shape;
@@ -71,6 +73,10 @@ pub enum Command {
     /// Reconstruct an image from simple geometric shapes.
     #[structopt(name = "primirs")]
     Primirs(Primirs),
+
+    /// Generate a Fractal Tree.
+    #[structopt(name = "fractal-tree")]
+    FractalTree(FractalTree),
 }
 
 /// Julia Set settings.
@@ -218,17 +224,35 @@ pub struct Primirs {
     img_path: PathBuf,
 }
 
-fn main() {
-    let mut img = image::RgbImage::from_pixel(600, 600, image::Rgb { data: [0, 0, 0] });
-    fractal_tree(
-        &mut img,
-        5,
-        &image::Rgb {
-            data: [0xFF, 0xFF, 0xFF],
-        },
-    );
-    img.save("fuffa.jpeg").unwrap();
+/// Generate some awesome Fractal Trees.
+#[derive(StructOpt, Debug)]
+pub struct FractalTree {
+    /// Number of branch points in the fractal tree.
+    #[structopt(short = "b", long = "branches", default_value = "10")]
+    nbranches: u32,
 
+    /// Angle to use to rotate branches in radians.
+    #[structopt(short = "a", long = "a", default_value = "0.523599")]
+    branching_angle_step: f64,
+
+    /// Factor to be multiplied to the branch len to change the latter.
+    #[structopt(short = "l", long = "branch-factor", default_value = "0.6")]
+    branch_len_factor: f64,
+
+    /// Width of the output image.
+    #[structopt(short = "w", long = "width", default_value = "1600")]
+    width: u32,
+
+    /// Height of the output image.
+    #[structopt(short = "h", long = "height", default_value = "1600")]
+    height: u32,
+
+    /// Where to write the fractal image.
+    #[structopt(short = "o", long = "output", default_value = "fractree.png", parse(from_os_str))]
+    output_path: PathBuf,
+}
+
+fn main() {
     let command = Command::from_args();
 
     match command {
@@ -257,6 +281,7 @@ fn main() {
         Command::Quantize(ref config) => quantize_image(config),
         Command::Sierpinski(ref config) => spawn_sierpinski(config),
         Command::Primirs(ref config) => primirs(config),
+        Command::FractalTree(ref config) => fractal_tree(config),
     }
 }
 
@@ -511,45 +536,21 @@ fn primirs(config: &Primirs) {
         .expect("cannot save primitized file");
 }
 
-use matto::drawing;
-use matto::geo::PointU32;
-use std::f64;
-use std::fmt::Debug;
+fn fractal_tree(config: &FractalTree) {
+    let mut img =
+        image::GrayImage::from_pixel(config.width, config.height, image::Luma { data: [0] });
 
-fn fractal_tree<I>(img: &mut I, ntimes: u32, pix: &I::Pixel)
-where
-    I: image::GenericImage,
-    I::Pixel: Debug,
-{
-    if ntimes == 0 {
-        return;
-    }
-
-    let (width, height) = img.dimensions();
-    let bottom = PointU32::new(width / 2, height - 1);
-    let break_point = PointU32::new(bottom.x, height / 4 * 3);
-
-    let dx = bottom.x / 2;
-    let left = PointU32::new(bottom.x - dx, height / 2);
-    let right = PointU32::new(bottom.x + dx, left.y);
-
-    {
-        let mut drawer = drawing::Drawer::new_with_no_blending(img);
-
-        drawer.line(bottom, break_point.clone(), pix);
-        drawer.line(break_point.clone(), left, pix);
-        drawer.line(break_point, right, pix);
-    }
-
-    fractal_tree(
-        &mut img.sub_image(0, 0, width / 2, height / 2),
-        ntimes - 1,
-        pix,
+    fractree::fractal_tree(
+        &mut img,
+        config.nbranches,
+        PointU32::new(config.width / 2, config.height - 1),
+        -f64::consts::PI / 2.0,
+        config.branching_angle_step,
+        f64::from(config.height) / 3.0,
+        config.branch_len_factor,
+        &image::Luma { data: [0xFF] },
     );
 
-    fractal_tree(
-        &mut img.sub_image(width / 2, 0, width / 2, height / 2),
-        ntimes - 1,
-        pix,
-    );
+    img.save(&config.output_path)
+        .expect("cannot save primitized file");
 }
