@@ -427,7 +427,8 @@ fn overlap_images(lhs: &image::RgbImage, rhs: &image::RgbImage) -> Option<image:
 
 fn quantize_image(config: &Quantize) {
     let img = image::open(&config.img_path).expect("cannot open source image file");
-    let rgb = img.as_rgb8()
+    let rgb = img
+        .as_rgb8()
         .expect("cannot convert source image to rgb8 image");
 
     let res =

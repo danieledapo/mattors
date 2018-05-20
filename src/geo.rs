@@ -81,7 +81,8 @@ where
     /// Return the [centroid](https://en.wikipedia.org/wiki/Centroid) of the
     /// triangle.
     pub fn centroid(&self) -> Point<P> {
-        let (sum_x, sum_y) = self.points
+        let (sum_x, sum_y) = self
+            .points
             .iter()
             .fold((P::zero(), P::zero()), |(accx, accy), pt| {
                 (accx + pt.x.clone(), accy + pt.y.clone())

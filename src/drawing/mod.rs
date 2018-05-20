@@ -78,8 +78,8 @@ where
         let it = BresenhamLineIter::new(start, end);
         for pt in it {
             self.draw_pixel(pt.x, pt.y, pix);
-            }
         }
+    }
 
     /// Draw a hollow triangle on the given image.
     pub fn hollow_triangle(&mut self, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel) {

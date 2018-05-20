@@ -44,7 +44,8 @@ impl Iterator for SierpinskiIter {
     fn next(&mut self) -> Option<Self::Item> {
         let old_triangles = self.triangles.clone();
 
-        self.triangles = self.triangles
+        self.triangles = self
+            .triangles
             .iter()
             .flat_map(|&(ref top, ref left, ref right)| {
                 let mid_left =
