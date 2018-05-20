@@ -32,6 +32,7 @@ cargo run -- julia
 cargo run -- julia --iterations 16 mandelbrot
 cargo run -- julia --iterations 128 custom -c ' -0.4+0.6i' --start " -3.0,-1.2" --end "2.0,1.2"
 cargo run -- sierpinski --fancy
+cargo run -- fractal-tree
 
 # quantize
 cargo run -- quantize images/desert.jpeg -o images/desert-quantized.jpeg

@@ -25,22 +25,22 @@ pub fn fractal_tree<I>(
 ) where
     I: image::GenericImage,
     I::Pixel: Debug,
+    f64: From<<I::Pixel as image::Pixel>::Subpixel>,
 {
     if nbranches == 0 {
         return;
     }
 
     let breakpoint = {
-        let branch_len = f64::from(branch_len);
-        let x = (f64::from(pt.x) + branching_angle.cos() * branch_len).max(0.0) as u32;
-        let y = (f64::from(pt.y) + branching_angle.sin() * branch_len).max(0.0) as u32;
+        let x = (<f64 as From<u32>>::from(pt.x) + branching_angle.cos() * branch_len).max(0.0) as u32;
+        let y = (<f64 as From<u32>>::from(pt.y) + branching_angle.sin() * branch_len).max(0.0) as u32;
 
         PointU32::new(x, y)
     };
 
     {
         let mut drawer = drawing::Drawer::new_with_no_blending(img);
-        drawer.line(pt, breakpoint.clone(), pix);
+        drawer.antialiased_line(pt, breakpoint.clone(), pix);
     }
 
     fractal_tree(

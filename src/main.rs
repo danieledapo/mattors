@@ -538,8 +538,11 @@ fn primirs(config: &Primirs) {
 }
 
 fn fractal_tree(config: &FractalTree) {
-    let mut img =
-        image::GrayImage::from_pixel(config.width, config.height, image::Luma { data: [0] });
+    let mut img = image::GrayImage::from_pixel(
+        config.width,
+        config.height,
+        image::Luma { data: [0] },
+    );
 
     fractree::fractal_tree(
         &mut img,
