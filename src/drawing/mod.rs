@@ -61,18 +61,25 @@ where
         Drawer::new(img, blend)
     }
 
+    /// Draw the given `pix`el at `x` and `y`. It does nothing if the
+    /// coordinates are out of bounds.
+    pub fn draw_pixel(&mut self, x: u32, y: u32, pix: &I::Pixel) {
+        if x >= self.img.width() || y >= self.img.height() {
+            return;
+        }
+
+        let old_pix = self.img.get_pixel_mut(x, y);
+        (self.blender)(old_pix, pix);
+    }
+
     /// Draw a line on the given image using [Bresenham's line
     /// algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm).
     pub fn line(&mut self, start: PointU32, end: PointU32, pix: &I::Pixel) {
         let it = BresenhamLineIter::new(start, end);
         for pt in it {
-            if pt.x >= self.img.width() || pt.y >= self.img.height() {
-                break;
+            self.draw_pixel(pt.x, pt.y, pix);
             }
-
-            (self.blender)(self.img.get_pixel_mut(pt.x, pt.y), pix);
         }
-    }
 
     /// Draw a hollow triangle on the given image.
     pub fn hollow_triangle(&mut self, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel) {
