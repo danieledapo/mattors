@@ -6,11 +6,14 @@ pub mod line;
 pub mod triangle;
 
 extern crate image;
+extern crate num;
 
 use std::fmt::Debug;
 
+use self::image::Pixel;
 use self::line::BresenhamLineIter;
 use self::triangle::FlatTriangleIter;
+
 use geo::{Point, PointU32};
 
 /// The `Blender` is the function that decides how to merge two pixels together.
@@ -143,6 +146,102 @@ where
                 }
                 _ => break,
             }
+        }
+    }
+}
+
+impl<'a, I> Drawer<'a, I>
+where
+    I: image::GenericImage,
+    I::Pixel: Debug,
+    f64: From<<I::Pixel as image::Pixel>::Subpixel>,
+{
+    /// Draw an antialiased line using a variation of [`Xiaolin Wu's line
+    /// algorithm`](https://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm).
+    pub fn antialiased_line(&mut self, mut start: PointU32, mut end: PointU32, pix: &I::Pixel) {
+        use std::mem;
+
+        let mut dx = (<i64 as From<u32>>::from(end.x) - <i64 as From<u32>>::from(start.x)).abs();
+        let mut dy = (<i64 as From<u32>>::from(end.y) - <i64 as From<u32>>::from(start.y)).abs();
+
+        let is_steep = dy > dx;
+
+        // the `antialised_line_impl` assumes non steep lines, therefore we swap
+        // x and y to preserve this invariant. We'll use the `coord_selector`
+        // parameter to swap the coordinates again just before writing onto the
+        // image.
+        if is_steep {
+            mem::swap(&mut start.x, &mut start.y);
+            mem::swap(&mut end.x, &mut end.y);
+            mem::swap(&mut dx, &mut dy);
+        }
+
+        if start.x > end.x {
+            mem::swap(&mut start, &mut end);
+        }
+
+        if is_steep {
+            self.antialised_line_impl(&start, &end, pix, dx, dy, |x, y| (y, x));
+        } else {
+            self.antialised_line_impl(&start, &end, pix, dx, dy, |x, y| (x, y));
+        }
+    }
+
+    /// heavily based on
+    /// https://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm#Algorithm.
+    /// Assumes the line is _not_ steep and `start.x <= end.x`, if unsure call `antialised_line`.
+    /// `coord_selector` is used in order to restore the proper x and y
+    /// coordinates before drawing onto the image because in the case of a steep
+    /// line x and y were swapped.
+    fn antialised_line_impl(
+        &mut self,
+        start: &PointU32,
+        end: &PointU32,
+        pix: &I::Pixel,
+        dx: i64,
+        dy: i64,
+        coord_selector: impl Fn(u32, u32) -> (u32, u32),
+    ) {
+        // local import because otherwise using convert::From in other parts
+        // will be a pain
+        use self::num::traits::cast::NumCast;
+
+        debug_assert!(dx >= dy);
+        debug_assert!(start.x <= end.x);
+
+        // since the points are u32 there is no fractional part and so we don't
+        // need to draw the second point for each of the endpoints like in the
+        // wikipedia pseudocode.
+        for pt in [start, end].into_iter() {
+            let (x, y) = coord_selector(pt.x, pt.y);
+            self.draw_pixel(x, y, pix);
+        }
+
+        let gradient = if dx == 0 { 1.0 } else { dy as f64 / dx as f64 };
+        let gradient = if start.y > end.y { -gradient } else { gradient };
+        let mut intery = start.y as f64 + gradient;
+
+        for x in (start.x + 1)..end.x {
+            let pts = [
+                (intery.floor(), 1.0 - intery.fract()),
+                (intery.floor() + 1.0, intery.fract()),
+            ];
+
+            for (y, weight) in pts.into_iter() {
+                // linear interpolation of the channels, might want to fancier
+                // in the future and/or allow custom interpolation functions,
+                // but kiss for now.
+                let pix = pix.map(|c| {
+                    <<I::Pixel as image::Pixel>::Subpixel as NumCast>::from(
+                        <f64 as From<_>>::from(c) * weight,
+                    ).unwrap()
+                });
+
+                let (x, y) = coord_selector(x, *y as u32);
+                self.draw_pixel(x, y, &pix);
+            }
+
+            intery += gradient;
         }
     }
 }
