@@ -32,8 +32,10 @@ pub fn fractal_tree<I>(
     }
 
     let breakpoint = {
-        let x = (<f64 as From<u32>>::from(pt.x) + branching_angle.cos() * branch_len).max(0.0) as u32;
-        let y = (<f64 as From<u32>>::from(pt.y) + branching_angle.sin() * branch_len).max(0.0) as u32;
+        let x =
+            (<f64 as From<u32>>::from(pt.x) + branching_angle.cos() * branch_len).max(0.0) as u32;
+        let y =
+            (<f64 as From<u32>>::from(pt.y) + branching_angle.sin() * branch_len).max(0.0) as u32;
 
         PointU32::new(x, y)
     };
