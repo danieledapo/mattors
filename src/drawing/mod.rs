@@ -9,6 +9,7 @@ extern crate image;
 extern crate num;
 
 use std::fmt::Debug;
+use std::marker::PhantomData;
 
 use self::image::Pixel;
 use self::line::BresenhamLineIter;
@@ -17,51 +18,62 @@ use self::triangle::FlatTriangleIter;
 use geo::{Point, PointU32};
 
 /// The `Blender` is the function that decides how to merge two pixels together.
-/// The first param is the old value of the pixel and it's meant to be modified
-/// with the blended value. The second parameter is the new pixel.
-pub type Blender<P> = fn(&mut P, &P);
+pub trait Blender<P: image::Pixel> {
+    /// The first param is the old value of the pixel and it's meant to be modified
+    /// with the blended value. The second parameter is the new pixel.
+    fn blend(dst: &mut P, src: &P);
+}
 
 /// Simple struct to easily write common geometric primitives onto a given image
 /// using the given `Blender`.
-pub struct Drawer<'a, I: 'a>
+pub struct Drawer<'a, I: 'a, B>
+where
+    I: image::GenericImage,
+    I::Pixel: Debug,
+    B: Blender<I::Pixel>,
+{
+    img: &'a mut I,
+    _blender: PhantomData<B>,
+}
+
+impl<'a, I> Drawer<'a, I, NoopBlender>
 where
     I: image::GenericImage,
     I::Pixel: Debug,
 {
-    img: &'a mut I,
-    blender: Blender<I::Pixel>,
+    /// Create a new `Drawer` that does not perform any blending, but just
+    /// copies the new pixel.
+    pub fn new_with_no_blending(img: &'a mut I) -> Self {
+        Drawer::new(img)
+    }
 }
 
-impl<'a, I> Drawer<'a, I>
+impl<'a, I> Drawer<'a, I, DefaultBlender>
 where
     I: image::GenericImage,
     I::Pixel: Debug,
+{
+    /// Create a new `Drawer` that performs pixel blending.
+    pub fn new_with_default_blending(img: &'a mut I) -> Self {
+        Drawer::new(img)
+    }
+}
+
+impl<'a, I, B> Drawer<'a, I, B>
+where
+    I: image::GenericImage,
+    I::Pixel: Debug,
+    B: Blender<I::Pixel>,
 {
     /// Create a new `Drawer` on the given `img` with the given `blender`. The
     /// `blender` is a function that takes the current pixel on the image and
     /// the new one and can change the current pixel. It is meant for pixel
     /// blending.
-    pub fn new(img: &'a mut I, blender: Blender<I::Pixel>) -> Drawer<'a, I> {
-        Drawer { img, blender }
-    }
-
-    /// Create a new `Drawer` that does not perform any blending, but just
-    /// copies the new pixel.
-    pub fn new_with_no_blending(img: &'a mut I) -> Drawer<'a, I> {
-        fn no_blend<P: image::Pixel>(old: &mut P, new: &P) {
-            *old = *new;
+    pub fn new(img: &'a mut I) -> Self {
+        Drawer {
+            img,
+            _blender: PhantomData,
         }
-
-        Drawer::new(img, no_blend)
-    }
-
-    /// Create a new `Drawer` that perform pixel blending.
-    pub fn new_with_default_blending(img: &'a mut I) -> Drawer<'a, I> {
-        fn blend<P: image::Pixel>(old: &mut P, new: &P) {
-            old.blend(new);
-        }
-
-        Drawer::new(img, blend)
     }
 
     /// Returns the inner image dimensions as (width, height).
@@ -77,7 +89,7 @@ where
         }
 
         let old_pix = self.img.get_pixel_mut(x, y);
-        (self.blender)(old_pix, pix);
+        B::blend(old_pix, pix);
     }
 
     /// Draw a line on the given image using [Bresenham's line
@@ -155,10 +167,11 @@ where
     }
 }
 
-impl<'a, I> Drawer<'a, I>
+impl<'a, I, B> Drawer<'a, I, B>
 where
     I: image::GenericImage,
     I::Pixel: Debug,
+    B: Blender<I::Pixel>,
     f64: From<<I::Pixel as image::Pixel>::Subpixel>,
 {
     /// Draw an antialiased line using a variation of [`Xiaolin Wu's line
@@ -248,5 +261,23 @@ where
 
             intery += gradient;
         }
+    }
+}
+
+/// Noop Blender
+pub struct NoopBlender;
+
+impl<P: image::Pixel> Blender<P> for NoopBlender {
+    fn blend(dst: &mut P, src: &P) {
+        *dst = *src;
+    }
+}
+
+/// Default Blender
+pub struct DefaultBlender;
+
+impl<P: image::Pixel> Blender<P> for DefaultBlender {
+    fn blend(dst: &mut P, src: &P) {
+        dst.blend(src);
     }
 }
