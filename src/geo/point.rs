@@ -16,10 +16,7 @@ pub type PointU32 = Point<u32>;
 
 /// Simple 2d Point struct
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Point<T>
-where
-    T: num::Num + From<u8> + Copy,
-{
+pub struct Point<T> {
     /// x coordinate
     pub x: T,
 

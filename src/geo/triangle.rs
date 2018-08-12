@@ -6,10 +6,7 @@ use geo::{LineEquation, Point};
 
 /// Simple Triangle shape.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Triangle<P>
-where
-    P: num::Num + From<u8> + Copy,
-{
+pub struct Triangle<P> {
     /// The points of the triangle
     pub points: [Point<P>; 3],
 }

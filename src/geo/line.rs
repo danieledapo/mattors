@@ -6,10 +6,7 @@ use geo::Point;
 
 /// Abstract representation of a line equation.
 #[derive(Clone, Debug, PartialEq)]
-pub enum LineEquation<T>
-where
-    T: num::Num + From<u8> + Copy,
-{
+pub enum LineEquation<T> {
     /// An equation for a `VerticalLine` in the given x coordinate.
     VerticalLine(T),
 
