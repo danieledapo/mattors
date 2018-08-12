@@ -74,7 +74,10 @@ where
     }
 
     /// Return the circumcenter of the circle that encloses this triangle.
-    pub fn circumcenter(&self) -> Option<Point<P>> {
+    pub fn circumcenter(&self) -> Option<Point<P>>
+    where
+        P: ::std::fmt::Debug,
+    {
         let p0p1 = LineEquation::between(&self.points[0], &self.points[1]);
         let p0p2 = LineEquation::between(&self.points[0], &self.points[2]);
 
@@ -84,7 +87,30 @@ where
         let bisec_p0p1 = p0p1.perpendicular(&mid_p0p1);
         let bisec_p0p2 = p0p2.perpendicular(&mid_p0p2);
 
-        bisec_p0p1.intersection(&bisec_p0p2)
+        let res = bisec_p0p1.intersection(&bisec_p0p2);
+
+        if res.is_none() {
+            println!(
+                "p0p1 {:?} p0p2 {:?} bisec_p0p1 {:?} bisec_p0p2 {:?}",
+                p0p1, p0p2, bisec_p0p1, bisec_p0p2
+            );
+        }
+
+        res
+    }
+
+    /// Return the circumcicle that encloses this triangle as a pair of
+    /// circumcenter and radius _squared_.
+    pub fn squared_circumcircle<O>(&self) -> Option<(Point<P>, O)>
+    where
+        O: num::Num + From<P> + Copy,
+        P: ::std::fmt::Debug,
+    {
+        self.circumcenter().map(|circumcenter| {
+            let squared_radius = circumcenter.squared_dist(&self.points[0]);
+
+            (circumcenter, squared_radius)
+        })
     }
 }
 
@@ -95,7 +121,10 @@ where
 {
     /// Return the circumcicle that encloses this triangle as a pair of
     /// circumcenter and radius.
-    pub fn circumcircle(&self) -> Option<(Point<P>, f64)> {
+    pub fn circumcircle(&self) -> Option<(Point<P>, f64)>
+    where
+        P: ::std::fmt::Debug,
+    {
         self.circumcenter().map(|circumcenter| {
             let radius = circumcenter.dist(&self.points[0]);
 

@@ -8,6 +8,7 @@ extern crate image;
 extern crate matto;
 extern crate num;
 
+use std::collections::HashSet;
 use std::f64;
 use std::num::ParseFloatError;
 use std::path::PathBuf;
@@ -19,7 +20,9 @@ use num::complex::{Complex64, ParseComplexError};
 
 use structopt::StructOpt;
 
+use matto::delaunay;
 use matto::dragon;
+use matto::drawing;
 use matto::fractree;
 use matto::geo;
 use matto::geo::{PointF64, PointU32};
@@ -283,6 +286,44 @@ pub struct Runes {
 }
 
 fn main() {
+    let mut img = image::RgbImage::new(400, 400);
+
+    let points = {
+        let mut out = HashSet::new();
+        out.insert(PointU32::new(42, 42));
+        out.insert(PointU32::new(100, 73));
+        out.insert(PointU32::new(300, 300));
+        out
+    };
+
+    let triangles = delaunay::triangulate(&geo::Rect::new(PointU32::new(0, 0), 400, 400), points);
+
+    let colors = [
+        image::Rgb {
+            data: [0x9a, 0xb7, 0x40],
+        },
+        image::Rgb {
+            data: [0x54, 0x6c, 0x2a],
+        },
+        image::Rgb {
+            data: [0x72, 0x90, 0x37],
+        },
+        image::Rgb {
+            data: [0xc8, 0xd8, 0x6d],
+        },
+    ];
+
+    {
+        let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
+
+        for (triangle, pix) in triangles.iter().zip(colors.iter().cycle()) {
+            let [ref p1, ref p2, ref p3] = triangle.points;
+            drawer.triangle(p1, p2, p3, pix);
+        }
+    }
+
+    img.save("delaunay.png").unwrap();
+
     let command = Command::from_args();
 
     match command {
