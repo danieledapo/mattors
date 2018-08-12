@@ -17,7 +17,7 @@ pub type PointI32 = Point<i32>;
 pub type PointU32 = Point<u32>;
 
 /// Simple 2d Point struct
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Point<T>
 where
     T: num::Num + From<u8> + Copy,
@@ -65,15 +65,48 @@ where
         self.y - slope * self.x
     }
 
-    /// Calculate the distance between this point and another.
+    /// Calculate the squared distance between this point and another.
     pub fn dist<O>(&self, p: &Self) -> O
     where
         O: num::Float + From<T>,
     {
+        self.squared_dist::<O>(p).sqrt()
+    }
+
+    /// Calculate the distance between this point and another.
+    pub fn squared_dist<O>(&self, p: &Self) -> O
+    where
+        O: num::Num + From<T> + Copy,
+    {
         let dx = <O as From<T>>::from(self.x) - <O as From<T>>::from(p.x);
         let dy = <O as From<T>>::from(self.y) - <O as From<T>>::from(p.y);
 
-        (dx.powi(2) + dy.powi(2)).sqrt()
+        dx * dx + dy * dy
+    }
+
+    /// Return a copy of this point with different types.
+    pub fn cast<O>(&self) -> Point<O>
+    where
+        O: num::Num + From<T> + From<u8> + Copy,
+    {
+        Point::new(O::from(self.x), O::from(self.y))
+    }
+}
+
+impl<T> Point<T>
+where
+    T: num::Num + From<u8> + Copy + Ord,
+{
+    /// Handy method that returns a point that's composed by the highest x and y
+    /// values among the two points.
+    pub fn top_right(&self, other: &Self) -> Self {
+        Point::new(self.x.max(other.x), self.y.max(other.y))
+    }
+
+    /// Handy method that returns a point that's composed by the lowest x and y
+    /// values among the two points.
+    pub fn bottom_left(&self, other: &Self) -> Self {
+        Point::new(self.x.min(other.x), self.y.min(other.y))
     }
 }
 
@@ -134,8 +167,8 @@ where
                 (accx + pt.x, accy + pt.y)
             });
 
-        let avg_x = sum_x / From::from(3);
-        let avg_y = sum_y / From::from(3);
+        let avg_x = sum_x / P::from(3);
+        let avg_y = sum_y / P::from(3);
 
         Point::new(avg_x, avg_y)
     }
@@ -143,12 +176,40 @@ where
 
 impl<P> Triangle<P>
 where
-    P: num::Num + num::Signed + From<u8> + Copy,
-    f64: From<P>,
+    P: num::Num + num::Signed + From<u8> + Copy + PartialOrd,
 {
-    /// Return the circumcicle that encloses this triangle as a pair of
-    /// circumcenter and radius.
-    pub fn circumcircle(&self) -> Option<(Point<P>, f64)> {
+    /// Return the area for this triangle.
+    pub fn area(&self) -> P {
+        self.signed_area().abs()
+    }
+
+    /// Return the signed area for this triangle. The sign indicates the
+    /// orientation of the points. If it's negative then the vertices are in
+    /// clockwise order, counter clockwise otherwise.
+    pub fn signed_area(&self) -> P {
+        let parallelogram_area = (self.points[1].x - self.points[0].x)
+            * (self.points[2].y - self.points[0].y)
+            - (self.points[2].x - self.points[0].x) * (self.points[1].y - self.points[0].y);
+
+        parallelogram_area / P::from(2)
+    }
+
+    /// Transform this triangle so that the vertices are always in counter
+    /// clockwise order.
+    pub fn counter_clockwise(self) -> Self {
+        if self.area() < P::from(0) {
+            self
+        } else {
+            Triangle::new(
+                self.points[1].clone(),
+                self.points[0].clone(),
+                self.points[2].clone(),
+            )
+        }
+    }
+
+    /// Return the circumcenter of the circle that encloses this triangle.
+    pub fn circumcenter(&self) -> Option<Point<P>> {
         let p0p1 = LineEquation::between(&self.points[0], &self.points[1]);
         let p0p2 = LineEquation::between(&self.points[0], &self.points[2]);
 
@@ -158,7 +219,19 @@ where
         let bisec_p0p1 = p0p1.perpendicular(&mid_p0p1);
         let bisec_p0p2 = p0p2.perpendicular(&mid_p0p2);
 
-        bisec_p0p1.intersection(&bisec_p0p2).map(|circumcenter| {
+        bisec_p0p1.intersection(&bisec_p0p2)
+    }
+}
+
+impl<P> Triangle<P>
+where
+    P: num::Num + num::Signed + From<u8> + Copy + PartialOrd,
+    f64: From<P>,
+{
+    /// Return the circumcicle that encloses this triangle as a pair of
+    /// circumcenter and radius.
+    pub fn circumcircle(&self) -> Option<(Point<P>, f64)> {
+        self.circumcenter().map(|circumcenter| {
             let radius = circumcenter.dist(&self.points[0]);
 
             (circumcenter, radius)
@@ -171,7 +244,6 @@ where
 pub enum LineEquation<T>
 where
     T: num::Num + From<u8> + Copy,
-    f64: From<T>,
 {
     /// An equation for a `VerticalLine` in the given x coordinate.
     VerticalLine(T),
@@ -189,7 +261,6 @@ where
 impl<T> LineEquation<T>
 where
     T: num::Signed + From<u8> + Copy,
-    f64: From<T>,
 {
     /// Build a new `LineEquation` that represents a line intersecting both of
     /// the given points.
@@ -211,7 +282,7 @@ where
     /// Build a `LineEquation` for an horizontal line.
     pub fn horizonal(y: T) -> Self {
         LineEquation::Line {
-            slope: From::from(0),
+            slope: T::from(0),
             yintercept: y,
         }
     }
@@ -276,7 +347,7 @@ where
         match self {
             &VerticalLine(_) => Self::horizonal(p.y),
             &Line { slope, .. } => {
-                if slope == From::from(0) {
+                if slope == T::from(0) {
                     Self::vertical(p.x)
                 } else {
                     let perp_slope = -T::from(1) / slope;
@@ -373,6 +444,46 @@ mod test {
     }
 
     #[test]
+    fn test_top_right() {
+        assert_eq!(
+            PointU32::new(0, 0).top_right(&PointU32::new(4, 10)),
+            PointU32::new(4, 10)
+        );
+        assert_eq!(
+            PointU32::new(10, 0).top_right(&PointU32::new(4, 10)),
+            PointU32::new(10, 10)
+        );
+        assert_eq!(
+            PointU32::new(0, 12).top_right(&PointU32::new(4, 10)),
+            PointU32::new(4, 12)
+        );
+        assert_eq!(
+            PointU32::new(10, 12).top_right(&PointU32::new(4, 10)),
+            PointU32::new(10, 12)
+        );
+    }
+
+    #[test]
+    fn test_bottom_left() {
+        assert_eq!(
+            PointU32::new(0, 0).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(0, 0)
+        );
+        assert_eq!(
+            PointU32::new(10, 0).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(4, 0)
+        );
+        assert_eq!(
+            PointU32::new(0, 12).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(0, 10)
+        );
+        assert_eq!(
+            PointU32::new(10, 12).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(4, 10)
+        );
+    }
+
+    #[test]
     fn test_dist() {
         let origin = PointI32::new(0, 0);
 
@@ -395,7 +506,7 @@ mod test {
     }
 
     #[test]
-    fn test_triangle_circumcicle() {
+    fn test_triangle_circumcircle() {
         let triangle = Triangle::new(
             PointI32::new(3, 2),
             PointI32::new(1, 4),
@@ -417,6 +528,21 @@ mod test {
             PointI32::new(4, 2),
         );
         assert_eq!(triangle.circumcircle(), None);
+    }
+
+    #[test]
+    fn test_triangle_area() {
+        let triangle = Triangle::new(
+            PointI32::new(6, 0),
+            PointI32::new(0, 0),
+            PointI32::new(3, 3),
+        );
+        assert_eq!(triangle.area(), 9);
+        assert_eq!(triangle.signed_area(), -9);
+
+        let triangle = triangle.counter_clockwise();
+        assert_eq!(triangle.area(), 9);
+        assert_eq!(triangle.signed_area(), 9);
     }
 
     #[test]
