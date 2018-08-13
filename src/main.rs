@@ -632,11 +632,15 @@ fn runes(config: &Runes) {
 }
 
 fn delaunay(config: &Delaunay) {
+    let mut color_config = matto::color::RandomColorConfig::new()
+        .hue(matto::color::KnownHue::Blue)
+        .luminosity(matto::color::Luminosity::Light);
+
     let mut img = image::RgbImage::from_pixel(
         config.width,
         config.height,
         image::Rgb {
-            data: [0x9a, 0xb7, 0x40],
+            data: matto::color::random_color(&mut color_config).to_rgb(),
         },
     );
 
@@ -659,30 +663,19 @@ fn delaunay(config: &Delaunay) {
         points,
     );
 
-    let colors = [
-        image::Rgb {
-            data: [0x9a, 0xb7, 0x40],
-        },
-        image::Rgb {
-            data: [0x54, 0x6c, 0x2a],
-        },
-        image::Rgb {
-            data: [0x72, 0x90, 0x37],
-        },
-        image::Rgb {
-            data: [0xc8, 0xd8, 0x6d],
-        },
-    ];
-
     {
         let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
 
-        for (triangle, pix) in triangles.into_iter().zip(colors.iter().cycle()) {
+        for triangle in triangles {
             let [ref p1, ref p2, ref p3] = triangle.points;
 
             let p1 = PointU32::new(p1.x as u32, p1.y as u32);
             let p2 = PointU32::new(p2.x as u32, p2.y as u32);
             let p3 = PointU32::new(p3.x as u32, p3.y as u32);
+
+            let pix = image::Rgb {
+                data: matto::color::random_color(&mut color_config).to_rgb(),
+            };
 
             drawer.triangle(&p1, &p2, &p3, &pix);
         }
