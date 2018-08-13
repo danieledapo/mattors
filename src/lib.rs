@@ -5,6 +5,7 @@
 #[macro_use]
 extern crate maplit;
 
+pub mod color;
 pub mod delaunay;
 pub mod dragon;
 pub mod drawing;
