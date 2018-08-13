@@ -116,8 +116,11 @@ fn pick_brightness(hue: u16, saturation: u8) -> u8 {
         let (sat2, bri2) = win[1];
 
         if saturation >= sat1 && saturation <= sat2 {
-            return linear_interpolate(&Point::new(sat2, bri1), &Point::new(sat1, bri2), saturation)
-                .unwrap();
+            return linear_interpolate(
+                &Point::new(sat2 as i16, bri1 as i16),
+                &Point::new(sat1 as i16, bri2 as i16),
+                saturation as i16,
+            ).unwrap() as u8;
         }
     }
 
