@@ -1,38 +1,26 @@
 //! Simple module that implements [Delaunay
 //! triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation)
 
-use std::collections::hash_map::Entry;
-use std::collections::{HashMap, HashSet};
+use geo::{Point, PointF64, Rect, Triangle};
 
-use geo::{Point, PointU32, Rect, Triangle};
-
-/// Triangulate the given set of points.
-pub fn triangulate(bounding_box: &Rect<u32>, points: HashSet<PointU32>) -> Vec<Triangle<u32>> {
+/// Triangulate the given set of points. This blows up if degenerate triangles
+/// are formed(e.g. completely flat triangles).
+pub fn triangulate(bounding_box: &Rect<f64>, points: Vec<PointF64>) -> Vec<Triangle<f64>> {
     if points.len() < 3 {
         return vec![];
     }
 
-    let triangles = points
-        .into_iter()
-        .fold(super_triangles(bounding_box), |triangles, point| {
-            add_point(triangles, point.cast())
-        });
+    let mut points = points.into_iter();
+    let super_triangles = super_triangles(bounding_box, points.next().unwrap());
+
+    let triangles = points.fold(super_triangles, |triangles, point| {
+        add_point(triangles, point)
+    });
 
     // theoretically we should remove the triangles that share vertices with the
     // initial point, but this thing is not for real use.
 
-    // it's safe to cast everything back to u32 since the points started as u32
-    // and were not modified
     triangles
-        .into_iter()
-        .map(|tri| {
-            Triangle::new(
-                PointU32::new(tri.points[0].x as u32, tri.points[0].y as u32),
-                PointU32::new(tri.points[1].x as u32, tri.points[1].y as u32),
-                PointU32::new(tri.points[2].x as u32, tri.points[2].y as u32),
-            )
-        })
-        .collect()
 }
 
 // the original algorithm works by finding a super triangle that encloses
@@ -40,32 +28,28 @@ pub fn triangulate(bounding_box: &Rect<u32>, points: HashSet<PointU32>) -> Vec<T
 // point and divide the bounding box in 4 triangles that always cover the
 // entire space. It's not acceptable for real triangulation but we're having
 // fun here :).
-fn super_triangles(bounding_box: &Rect<u32>) -> Vec<Triangle<i64>> {
+fn super_triangles(bounding_box: &Rect<f64>, first_point: PointF64) -> Vec<Triangle<f64>> {
     let bounds = bounding_box.points();
-    let center = bounding_box.center().cast::<i64>();
 
     (0..bounds.len())
         .map(|i| {
             Triangle::new(
-                bounds[i].cast().clone(),
-                bounds[(i + 1) % bounds.len()].cast().clone(),
-                center.clone(),
+                bounds[i].clone(),
+                bounds[(i + 1) % bounds.len()].clone(),
+                first_point.clone(),
             )
         })
         .collect()
 }
 
-fn add_point(triangles: Vec<Triangle<i64>>, point: Point<i64>) -> Vec<Triangle<i64>> {
+fn add_point(triangles: Vec<Triangle<f64>>, point: Point<f64>) -> Vec<Triangle<f64>> {
     let mut edges = vec![];
     let mut new_triangles = Vec::with_capacity(triangles.len());
 
     for triangle in triangles {
-        println!("adding point {:?} to triangle {:?}", point, triangle);
         let (circumcenter, radius) = triangle.squared_circumcircle().unwrap();
 
-        if circumcenter.squared_dist::<i64>(&point) <= radius {
-            println!("inside triangle's circumcircle");
-
+        if circumcenter.squared_dist::<f64>(&point) <= radius {
             edges.push((triangle.points[0].clone(), triangle.points[1].clone()));
             edges.push((triangle.points[1].clone(), triangle.points[2].clone()));
             edges.push((triangle.points[2].clone(), triangle.points[0].clone()));
@@ -85,34 +69,28 @@ fn add_point(triangles: Vec<Triangle<i64>>, point: Point<i64>) -> Vec<Triangle<i
     new_triangles
 }
 
-fn dedup_edges(edges: Vec<(Point<i64>, Point<i64>)>) -> Vec<(Point<i64>, Point<i64>)> {
-    let mut counts = HashMap::with_capacity(edges.len());
+fn dedup_edges(edges: Vec<(Point<f64>, Point<f64>)>) -> Vec<(Point<f64>, Point<f64>)> {
+    // super ugly and super inefficient, but we cannot use hashmaps with f64...
 
-    for (start, end) in edges {
-        let mut occupied = false;
+    let mut out = vec![];
 
-        let edges = vec![(start.clone(), end.clone()), (end.clone(), start.clone())];
+    for i in 0..edges.len() {
+        let mut count = 0;
 
-        for edge in edges {
-            if let Entry::Occupied(mut o) = counts.entry(edge) {
-                // avoid overflow by not incrementing, but by simply putting a
-                // value != 1
-                *o.get_mut() = 42;
-                occupied = true;
-                break;
+        for j in 0..edges.len() {
+            let (start, end) = &edges[j];
+            if edges[i] == (start.clone(), end.clone()) || edges[i] == (end.clone(), start.clone())
+            {
+                count += 1;
             }
         }
 
-        if !occupied {
-            counts.insert((start, end), 1);
+        if count == 1 {
+            out.push(edges[i].clone());
         }
     }
 
-    counts
-        .into_iter()
-        .filter(|(_, count)| *count == 1)
-        .map(|(edge, _count)| edge)
-        .collect()
+    out
 }
 
 #[cfg(test)]
@@ -123,13 +101,13 @@ mod test {
 
     #[test]
     fn test_dedup_edges() {
-        let edge1 = (Point::new(42, 12), Point::new(7, 12));
+        let edge1 = (Point::new(42.0, 12.0), Point::new(7.0, 12.0));
         let redge1 = (edge1.1.clone(), edge1.0.clone());
 
-        let edge2 = (Point::new(42, 73), Point::new(84, 146));
+        let edge2 = (Point::new(42.0, 73.0), Point::new(84.0, 146.0));
         let redge2 = (edge2.1.clone(), edge2.0.clone());
 
-        let edge3 = (Point::new(23, 32), Point::new(32, 23));
+        let edge3 = (Point::new(23.0, 32.0), Point::new(32.0, 23.0));
 
         let edges = vec![
             edge1.clone(),
