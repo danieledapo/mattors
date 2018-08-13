@@ -633,14 +633,16 @@ fn runes(config: &Runes) {
 
 fn delaunay(config: &Delaunay) {
     let mut color_config = matto::color::RandomColorConfig::new()
-        .hue(matto::color::KnownHue::Blue)
-        .luminosity(matto::color::Luminosity::Light);
+        .hue(matto::color::KnownHue::Green)
+        .luminosity(matto::color::Luminosity::Bright);
 
-    let mut img = image::RgbImage::from_pixel(
+    let alpha = 0xd6;
+
+    let mut img = image::RgbaImage::from_pixel(
         config.width,
         config.height,
-        image::Rgb {
-            data: matto::color::random_color(&mut color_config).to_rgb(),
+        image::Rgba {
+            data: matto::color::random_color(&mut color_config).to_rgba(alpha),
         },
     );
 
@@ -673,8 +675,8 @@ fn delaunay(config: &Delaunay) {
             let p2 = PointU32::new(p2.x as u32, p2.y as u32);
             let p3 = PointU32::new(p3.x as u32, p3.y as u32);
 
-            let pix = image::Rgb {
-                data: matto::color::random_color(&mut color_config).to_rgb(),
+            let pix = image::Rgba {
+                data: matto::color::random_color(&mut color_config).to_rgba(alpha),
             };
 
             drawer.triangle(&p1, &p2, &p3, &pix);

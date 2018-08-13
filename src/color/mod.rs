@@ -128,6 +128,12 @@ fn pick_brightness(hue: u16, saturation: u8) -> u8 {
 }
 
 impl Hsv {
+    /// Convert a color from Hsv color space to Rgba with the given alpha.
+    pub fn to_rgba(&self, alpha: u8) -> [u8; 4] {
+        let [r, g, b] = self.to_rgb();
+        [r, g, b, alpha]
+    }
+
     /// Convert a color from Hsv color space to Rgb.
     pub fn to_rgb(&self) -> [u8; 3] {
         // HACK: this algorithm doesn't work for h == 0 or h == 1
