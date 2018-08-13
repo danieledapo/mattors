@@ -4,6 +4,17 @@ extern crate num;
 
 use geo::Point;
 
+/// Linearly interpolate the point at the given x using the line that goes
+/// between the two points.
+pub fn linear_interpolate<T>(p1: &Point<T>, p2: &Point<T>, x: T) -> Option<T>
+where
+    T: num::Num + From<u8> + Copy,
+{
+    let line = LineEquation::between(p1, p2);
+
+    line.y_at(x)
+}
+
 /// Abstract representation of a line equation.
 #[derive(Clone, Debug, PartialEq)]
 pub enum LineEquation<T> {
@@ -22,7 +33,7 @@ pub enum LineEquation<T> {
 
 impl<T> LineEquation<T>
 where
-    T: num::Signed + From<u8> + Copy,
+    T: num::Num + From<u8> + Copy,
 {
     /// Build a new `LineEquation` that represents a line intersecting both of
     /// the given points.
@@ -100,7 +111,12 @@ where
             }
         }
     }
+}
 
+impl<T> LineEquation<T>
+where
+    T: num::Signed + From<u8> + Copy,
+{
     /// Return the perpendicular line to this line that intersects the given
     /// point.
     pub fn perpendicular(&self, p: &Point<T>) -> Self {

@@ -42,7 +42,7 @@ where
     /// the slope is undefined that is when `self` and `p` form a vertical line.
     pub fn slope<O>(&self, p: &Self) -> Option<O>
     where
-        O: num::Signed + From<T>,
+        O: num::Num + From<T>,
     {
         if self.x == p.x {
             None
