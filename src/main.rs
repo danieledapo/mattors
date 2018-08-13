@@ -7,8 +7,8 @@ extern crate structopt;
 extern crate image;
 extern crate matto;
 extern crate num;
+extern crate rand;
 
-use std::collections::HashSet;
 use std::f64;
 use std::num::ParseFloatError;
 use std::path::PathBuf;
@@ -17,6 +17,8 @@ use std::str::FromStr;
 use image::{GenericImage, GenericImageView};
 
 use num::complex::{Complex64, ParseComplexError};
+
+use rand::Rng;
 
 use structopt::StructOpt;
 
@@ -85,6 +87,10 @@ pub enum Command {
     /// Generate an alphabet of random rune like characters.
     #[structopt(name = "runes")]
     Runes(Runes),
+
+    /// Generate something similar to a proper delaunay triangulation.
+    #[structopt(name = "delaunay")]
+    Delaunay(Delaunay),
 }
 
 /// Julia Set settings.
@@ -272,7 +278,7 @@ pub struct Runes {
     #[structopt(short = "p", long = "points", default_value = "3")]
     npoints: u32,
 
-    /// Height of each rune.
+    /// Width of each rune.
     #[structopt(short = "w", long = "width", default_value = "128")]
     width: u32,
 
@@ -280,50 +286,32 @@ pub struct Runes {
     #[structopt(short = "h", long = "height", default_value = "128")]
     height: u32,
 
-    /// Where to write the fractal image.
+    /// Where to write the final image.
     #[structopt(short = "o", long = "output", default_value = "runes.png", parse(from_os_str))]
     output_path: PathBuf,
 }
 
+/// Generate something similar to a proper delaunay triangulation.
+#[derive(StructOpt, Debug)]
+pub struct Delaunay {
+    /// Number of points to triangulate.
+    #[structopt(short = "p", long = "points", default_value = "50")]
+    npoints: u32,
+
+    /// Width of the image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
+    width: u32,
+
+    /// Height of the image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
+    height: u32,
+
+    /// Where to write the final image.
+    #[structopt(short = "o", long = "output", default_value = "delaunay.png", parse(from_os_str))]
+    output_path: PathBuf,
+}
+
 fn main() {
-    let mut img = image::RgbImage::new(400, 400);
-
-    let points = {
-        let mut out = HashSet::new();
-        out.insert(PointU32::new(42, 42));
-        out.insert(PointU32::new(100, 73));
-        out.insert(PointU32::new(300, 300));
-        out
-    };
-
-    let triangles = delaunay::triangulate(&geo::Rect::new(PointU32::new(0, 0), 400, 400), points);
-
-    let colors = [
-        image::Rgb {
-            data: [0x9a, 0xb7, 0x40],
-        },
-        image::Rgb {
-            data: [0x54, 0x6c, 0x2a],
-        },
-        image::Rgb {
-            data: [0x72, 0x90, 0x37],
-        },
-        image::Rgb {
-            data: [0xc8, 0xd8, 0x6d],
-        },
-    ];
-
-    {
-        let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
-
-        for (triangle, pix) in triangles.iter().zip(colors.iter().cycle()) {
-            let [ref p1, ref p2, ref p3] = triangle.points;
-            drawer.triangle(p1, p2, p3, pix);
-        }
-    }
-
-    img.save("delaunay.png").unwrap();
-
     let command = Command::from_args();
 
     match command {
@@ -354,6 +342,7 @@ fn main() {
         Command::Primirs(ref config) => primirs(config),
         Command::FractalTree(ref config) => fractal_tree(config),
         Command::Runes(ref config) => runes(config),
+        Command::Delaunay(ref config) => delaunay(config),
     }
 }
 
@@ -624,8 +613,7 @@ fn fractal_tree(config: &FractalTree) {
         &image::Luma { data: [0xFF] },
     );
 
-    img.save(&config.output_path)
-        .expect("cannot save primitized file");
+    img.save(&config.output_path).expect("cannot save image");
 }
 
 fn runes(config: &Runes) {
@@ -640,7 +628,65 @@ fn runes(config: &Runes) {
         runes::draw_random_rune(&mut rune, config.npoints, &black_pix);
     }
 
-    imgbuf
-        .save(&config.output_path)
-        .expect("cannot save primitized file");
+    imgbuf.save(&config.output_path).expect("cannot save image");
+}
+
+fn delaunay(config: &Delaunay) {
+    let mut img = image::RgbImage::from_pixel(
+        config.width,
+        config.height,
+        image::Rgb {
+            data: [0x9a, 0xb7, 0x40],
+        },
+    );
+
+    let mut rng = rand::thread_rng();
+    let points = (0..config.npoints)
+        .map(|_| {
+            let x = rng.gen_range(0.0, config.width as f64);
+            let y = rng.gen_range(0.0, config.height as f64);
+
+            PointF64::new(x, y)
+        })
+        .collect();
+
+    let triangles = delaunay::triangulate(
+        &geo::Rect::new(
+            PointF64::new(0.0, 0.0),
+            f64::from(config.width),
+            f64::from(config.height),
+        ),
+        points,
+    );
+
+    let colors = [
+        image::Rgb {
+            data: [0x9a, 0xb7, 0x40],
+        },
+        image::Rgb {
+            data: [0x54, 0x6c, 0x2a],
+        },
+        image::Rgb {
+            data: [0x72, 0x90, 0x37],
+        },
+        image::Rgb {
+            data: [0xc8, 0xd8, 0x6d],
+        },
+    ];
+
+    {
+        let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
+
+        for (triangle, pix) in triangles.into_iter().zip(colors.iter().cycle()) {
+            let [ref p1, ref p2, ref p3] = triangle.points;
+
+            let p1 = PointU32::new(p1.x as u32, p1.y as u32);
+            let p2 = PointU32::new(p2.x as u32, p2.y as u32);
+            let p3 = PointU32::new(p3.x as u32, p3.y as u32);
+
+            drawer.triangle(&p1, &p2, &p3, &pix);
+        }
+    }
+
+    img.save(&config.output_path).expect("cannot save image");
 }
