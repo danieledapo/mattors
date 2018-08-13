@@ -1,5 +1,6 @@
 //! Geometric functions.
 
+pub mod delaunay;
 pub mod line;
 pub mod point;
 pub mod rect;

@@ -18,13 +18,10 @@ use image::{GenericImage, GenericImageView};
 
 use num::complex::{Complex64, ParseComplexError};
 
-use rand::Rng;
-
 use structopt::StructOpt;
 
 use matto::delaunay;
 use matto::dragon;
-use matto::drawing;
 use matto::fractree;
 use matto::geo;
 use matto::geo::{PointF64, PointU32};
@@ -294,9 +291,9 @@ pub struct Runes {
 /// Generate something similar to a proper delaunay triangulation.
 #[derive(StructOpt, Debug)]
 pub struct Delaunay {
-    /// Number of points to triangulate.
-    #[structopt(short = "p", long = "points", default_value = "50")]
-    npoints: u32,
+    /// Size of the grid where to put points.
+    #[structopt(short = "g", long = "grid-size", default_value = "25")]
+    grid_size: u32,
 
     /// Width of the image.
     #[structopt(short = "w", long = "width", default_value = "1920")]
@@ -633,8 +630,8 @@ fn runes(config: &Runes) {
 
 fn delaunay(config: &Delaunay) {
     let mut color_config = matto::color::RandomColorConfig::new()
-        .hue(matto::color::KnownHue::Green)
-        .luminosity(matto::color::Luminosity::Bright);
+        .hue(matto::color::KnownHue::Blue)
+        .luminosity(matto::color::Luminosity::Light);
 
     let alpha = 0xd6;
 
@@ -646,42 +643,7 @@ fn delaunay(config: &Delaunay) {
         },
     );
 
-    let mut rng = rand::thread_rng();
-    let points = (0..config.npoints)
-        .map(|_| {
-            let x = rng.gen_range(0.0, config.width as f64);
-            let y = rng.gen_range(0.0, config.height as f64);
-
-            PointF64::new(x, y)
-        })
-        .collect();
-
-    let triangles = delaunay::triangulate(
-        &geo::Rect::new(
-            PointF64::new(0.0, 0.0),
-            f64::from(config.width),
-            f64::from(config.height),
-        ),
-        points,
-    );
-
-    {
-        let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
-
-        for triangle in triangles {
-            let [ref p1, ref p2, ref p3] = triangle.points;
-
-            let p1 = PointU32::new(p1.x as u32, p1.y as u32);
-            let p2 = PointU32::new(p2.x as u32, p2.y as u32);
-            let p3 = PointU32::new(p3.x as u32, p3.y as u32);
-
-            let pix = image::Rgba {
-                data: matto::color::random_color(&mut color_config).to_rgba(alpha),
-            };
-
-            drawer.triangle(&p1, &p2, &p3, &pix);
-        }
-    }
+    delaunay::random_triangulation(&mut img, &mut color_config, config.grid_size, alpha);
 
     img.save(&config.output_path).expect("cannot save image");
 }

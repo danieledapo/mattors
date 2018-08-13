@@ -1,125 +1,78 @@
-//! Simple module that implements [Delaunay
-//! triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation)
+//! Generate some triangly art using Delaunay triangulation.
 
-use geo::{Point, PointF64, Rect, Triangle};
+extern crate image;
+extern crate rand;
 
-/// Triangulate the given set of points. This blows up if degenerate triangles
-/// are formed(e.g. completely flat triangles).
-pub fn triangulate(bounding_box: &Rect<f64>, points: Vec<PointF64>) -> Vec<Triangle<f64>> {
-    if points.len() < 3 {
-        return vec![];
-    }
+use self::rand::Rng;
 
-    let mut points = points.into_iter();
-    let super_triangles = super_triangles(bounding_box, points.next().unwrap());
+use color::{random_color, RandomColorConfig};
+use drawing;
+use geo::{delaunay, PointF64, PointU32, Rect};
 
-    let triangles = points.fold(super_triangles, |triangles, point| {
-        add_point(triangles, point)
-    });
+/// Generate a random triangulation and draws it onto the given image. The
+/// points are generated randomly but the image is divided into a grid and each
+/// point is contained in a cell.
+pub fn random_triangulation<R: Rng>(
+    img: &mut image::RgbaImage,
+    color_config: &mut RandomColorConfig<R>,
+    grid_size: u32,
+    alpha: u8,
+) {
+    let points = random_points_in_grid(img.width(), img.height(), grid_size);
 
-    // theoretically we should remove the triangles that share vertices with the
-    // initial point, but this thing is not for real use.
-
-    triangles
-}
-
-// the original algorithm works by finding a super triangle that encloses
-// all the points, but since we live in a finite space just pickup a random
-// point and divide the bounding box in 4 triangles that always cover the
-// entire space. It's not acceptable for real triangulation but we're having
-// fun here :).
-fn super_triangles(bounding_box: &Rect<f64>, first_point: PointF64) -> Vec<Triangle<f64>> {
-    let bounds = bounding_box.points();
-
-    (0..bounds.len())
-        .map(|i| {
-            Triangle::new(
-                bounds[i].clone(),
-                bounds[(i + 1) % bounds.len()].clone(),
-                first_point.clone(),
-            )
-        })
-        .collect()
-}
-
-fn add_point(triangles: Vec<Triangle<f64>>, point: Point<f64>) -> Vec<Triangle<f64>> {
-    let mut edges = vec![];
-    let mut new_triangles = Vec::with_capacity(triangles.len());
-
-    for triangle in triangles {
-        let (circumcenter, radius) = triangle.squared_circumcircle().unwrap();
-
-        if circumcenter.squared_dist::<f64>(&point) <= radius {
-            edges.push((triangle.points[0].clone(), triangle.points[1].clone()));
-            edges.push((triangle.points[1].clone(), triangle.points[2].clone()));
-            edges.push((triangle.points[2].clone(), triangle.points[0].clone()));
-        } else {
-            new_triangles.push(triangle);
-        }
-    }
-
-    edges = dedup_edges(edges);
-
-    new_triangles.extend(
-        edges
-            .into_iter()
-            .map(|(pt0, pt1)| Triangle::new(pt0, pt1, point.clone())),
+    let triangles = delaunay::triangulate(
+        &Rect::new(
+            PointF64::new(0.0, 0.0),
+            f64::from(img.width()),
+            f64::from(img.height()),
+        ),
+        points,
     );
 
-    new_triangles
+    {
+        let mut drawer = drawing::Drawer::new_with_no_blending(img);
+
+        for triangle in triangles {
+            let [ref p1, ref p2, ref p3] = triangle.points;
+
+            let p1 = PointU32::new(p1.x.ceil() as u32, p1.y.ceil() as u32);
+            let p2 = PointU32::new(p2.x.ceil() as u32, p2.y.ceil() as u32);
+            let p3 = PointU32::new(p3.x.ceil() as u32, p3.y.ceil() as u32);
+
+            let pix = image::Rgba {
+                data: random_color(color_config).to_rgba(alpha),
+            };
+
+            drawer.triangle(&p1, &p2, &p3, &pix);
+        }
+    }
 }
 
-fn dedup_edges(edges: Vec<(Point<f64>, Point<f64>)>) -> Vec<(Point<f64>, Point<f64>)> {
-    // super ugly and super inefficient, but we cannot use hashmaps with f64...
+fn random_points_in_grid(width: u32, height: u32, grid_size: u32) -> Vec<PointF64> {
+    let mut rng = rand::thread_rng();
 
-    let mut out = vec![];
+    let square_width = width / grid_size;
+    let square_height = height / grid_size;
 
-    for i in 0..edges.len() {
-        let mut count = 0;
+    let mut out = Vec::with_capacity(grid_size as usize * grid_size as usize);
 
-        for j in 0..edges.len() {
-            let (start, end) = &edges[j];
-            if edges[i] == (start.clone(), end.clone()) || edges[i] == (end.clone(), start.clone())
-            {
-                count += 1;
-            }
-        }
+    for xi in 0..grid_size {
+        for yi in 0..grid_size {
+            let cur_square_x = f64::from(xi * square_width);
+            let cur_square_y = f64::from(yi * square_height);
 
-        if count == 1 {
-            out.push(edges[i].clone());
+            let x = rng.gen_range(
+                cur_square_x,
+                (cur_square_x + f64::from(square_width)).min(f64::from(width)),
+            );
+            let y = rng.gen_range(
+                cur_square_y,
+                (cur_square_y + f64::from(square_height)).min(f64::from(height)),
+            );
+
+            out.push(PointF64::new(x, y));
         }
     }
 
     out
-}
-
-#[cfg(test)]
-mod test {
-    use super::dedup_edges;
-
-    use geo::Point;
-
-    #[test]
-    fn test_dedup_edges() {
-        let edge1 = (Point::new(42.0, 12.0), Point::new(7.0, 12.0));
-        let redge1 = (edge1.1.clone(), edge1.0.clone());
-
-        let edge2 = (Point::new(42.0, 73.0), Point::new(84.0, 146.0));
-        let redge2 = (edge2.1.clone(), edge2.0.clone());
-
-        let edge3 = (Point::new(23.0, 32.0), Point::new(32.0, 23.0));
-
-        let edges = vec![
-            edge1.clone(),
-            edge2.clone(),
-            edge1.clone(),
-            redge2.clone(),
-            edge3.clone(),
-            redge1.clone(),
-            edge1.clone(),
-            redge1.clone(),
-        ];
-
-        assert_eq!(dedup_edges(edges), vec![edge3]);
-    }
 }
