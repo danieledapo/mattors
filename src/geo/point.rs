@@ -15,7 +15,7 @@ pub type PointI32 = Point<i32>;
 pub type PointU32 = Point<u32>;
 
 /// Simple 2d Point struct
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Point<T> {
     /// x coordinate
     pub x: T,

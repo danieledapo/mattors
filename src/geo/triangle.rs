@@ -65,11 +65,7 @@ where
         if self.area() < P::from(0) {
             self
         } else {
-            Triangle::new(
-                self.points[1].clone(),
-                self.points[0].clone(),
-                self.points[2].clone(),
-            )
+            Triangle::new(self.points[1], self.points[0], self.points[2])
         }
     }
 

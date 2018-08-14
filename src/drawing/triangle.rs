@@ -16,12 +16,12 @@ pub struct FlatTriangleIter {
 impl FlatTriangleIter {
     /// Create a new `FlatTriangleIter`.
     /// invariant: `p2` and `p3` are the points on the flat line.
-    pub fn new(p1: &PointU32, p2: &PointU32, p3: &PointU32) -> FlatTriangleIter {
+    pub fn new(p1: PointU32, p2: PointU32, p3: PointU32) -> FlatTriangleIter {
         FlatTriangleIter {
-            last_start: p1.clone(),
-            last_end: p1.clone(),
-            p1p2_iter: BresenhamLineIter::new(p1.clone(), p2.clone()),
-            p1p3_iter: BresenhamLineIter::new(p1.clone(), p3.clone()),
+            last_start: p1,
+            last_end: p1,
+            p1p2_iter: BresenhamLineIter::new(p1, p2),
+            p1p3_iter: BresenhamLineIter::new(p1, p3),
             over: false,
         }
     }
@@ -35,7 +35,7 @@ impl Iterator for FlatTriangleIter {
             return None;
         }
 
-        let res = (self.last_start.clone(), self.last_end.clone());
+        let res = (self.last_start, self.last_end);
 
         // advance the current points, but make sure the y coord actually
         // changes because otherwise we could potentially draw a line on the
@@ -86,13 +86,13 @@ mod tests {
         let p3 = Point::new(8, 2);
 
         let exp_points = vec![
-            (p1.clone(), p1.clone()),
+            (p1, p1),
             (PointU32::new(3, 1), PointU32::new(6, 1)),
-            (p2.clone(), p3.clone()),
+            (p2, p3),
         ];
 
         assert_eq!(
-            FlatTriangleIter::new(&p1, &p2, &p3).collect::<Vec<_>>(),
+            FlatTriangleIter::new(p1, p2, p3).collect::<Vec<_>>(),
             exp_points
         );
     }
@@ -104,13 +104,13 @@ mod tests {
         let p3 = Point::new(4, 2);
 
         let exp_points = vec![
-            (p3.clone(), p3.clone()),
+            (p3, p3),
             (PointU32::new(3, 1), PointU32::new(5, 1)),
-            (p1.clone(), p2.clone()),
+            (p1, p2),
         ];
 
         assert_eq!(
-            FlatTriangleIter::new(&p3, &p1, &p2).collect::<Vec<_>>(),
+            FlatTriangleIter::new(p3, p1, p2).collect::<Vec<_>>(),
             exp_points
         );
     }

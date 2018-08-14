@@ -53,9 +53,9 @@ impl Iterator for SierpinskiIter {
                 let mid_right = PointU32::new(top.x + (top.x - left.x) / 2, mid_left.y);
                 let mid_bottom = PointU32::new(top.x, left.y);
 
-                let new_top = (top.clone(), mid_left.clone(), mid_right.clone());
-                let new_left = (mid_left.clone(), left.clone(), mid_bottom.clone());
-                let new_right = (mid_right.clone(), mid_bottom.clone(), right.clone());
+                let new_top = (*top, mid_left, mid_right);
+                let new_left = (mid_left, *left, mid_bottom);
+                let new_right = (mid_right, mid_bottom, *right);
 
                 vec![new_top, new_left, new_right].into_iter()
             })
@@ -92,9 +92,9 @@ pub fn fancy_sierpinski<I>(
         .next()
         .map(|triangles| {
             drawer.hollow_triangle(
-                &triangles[0].0,
-                &triangles[0].1,
-                &triangles[0].2,
+                triangles[0].0,
+                triangles[0].1,
+                triangles[0].2,
                 rng.choose(pixs).unwrap(),
             );
 
@@ -105,9 +105,9 @@ pub fn fancy_sierpinski<I>(
                         let pix = rng.choose(pixs).unwrap();
 
                         if hollow_triangles {
-                            drawer.hollow_triangle(mid_left, mid_right, mid_bottom, pix);
+                            drawer.hollow_triangle(*mid_left, *mid_right, *mid_bottom, pix);
                         } else {
-                            drawer.triangle(mid_left, mid_right, mid_bottom, pix);
+                            drawer.triangle(*mid_left, *mid_right, *mid_bottom, pix);
                         }
                     });
             });

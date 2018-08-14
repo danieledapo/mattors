@@ -134,7 +134,7 @@ where
             let y = rng.gen_range(0, quad_height);
 
             let p = PointU32::new(x, y);
-            drawer.antialiased_line(last_point, p.clone(), fg_color);
+            drawer.antialiased_line(last_point, p, fg_color);
 
             p
         },

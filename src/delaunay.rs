@@ -43,7 +43,7 @@ pub fn random_triangulation<R: Rng>(
                 data: random_color(color_config).to_rgba(alpha),
             };
 
-            drawer.triangle(&p1, &p2, &p3, &pix);
+            drawer.triangle(p1, p2, p3, &pix);
         }
     }
 }

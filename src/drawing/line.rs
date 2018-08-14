@@ -122,7 +122,7 @@ mod tests {
 
     fn _test_line_bresenham(start: PointU32, end: PointU32, exp_points: Vec<PointU32>) {
         assert_eq!(
-            BresenhamLineIter::new(start.clone(), end.clone()).collect::<Vec<_>>(),
+            BresenhamLineIter::new(start, end).collect::<Vec<_>>(),
             exp_points,
             "line from start {:?} to end {:?}",
             start,
@@ -130,7 +130,7 @@ mod tests {
         );
 
         assert_eq!(
-            BresenhamLineIter::new(end.clone(), start.clone()).collect::<Vec<_>>(),
+            BresenhamLineIter::new(end, start).collect::<Vec<_>>(),
             exp_points.iter().cloned().rev().collect::<Vec<_>>(),
             "line from end {:?} to start {:?}",
             end,
@@ -142,17 +142,12 @@ mod tests {
     fn test_bresenham_line_basic() {
         let origin = Point { x: 0, y: 0 };
 
-        _test_line_bresenham(origin.clone(), origin.clone(), vec![origin.clone()]);
+        _test_line_bresenham(origin, origin, vec![origin]);
 
         let bis = Point { x: 3, y: 3 };
-        let bis_exp_points = vec![
-            origin.clone(),
-            Point { x: 1, y: 1 },
-            Point { x: 2, y: 2 },
-            bis.clone(),
-        ];
+        let bis_exp_points = vec![origin, Point { x: 1, y: 1 }, Point { x: 2, y: 2 }, bis];
 
-        _test_line_bresenham(origin.clone(), bis.clone(), bis_exp_points);
+        _test_line_bresenham(origin, bis, bis_exp_points);
     }
 
     #[test]
@@ -160,40 +155,30 @@ mod tests {
         let origin = Point { x: 0, y: 0 };
         let non_steep_pt = Point { x: 3, y: 1 };
         let exp_points = vec![
-            origin.clone(),
+            origin,
             Point { x: 1, y: 0 },
             Point { x: 2, y: 1 },
-            non_steep_pt.clone(),
+            non_steep_pt,
         ];
 
-        _test_line_bresenham(origin.clone(), non_steep_pt.clone(), exp_points);
+        _test_line_bresenham(origin, non_steep_pt, exp_points);
     }
 
     #[test]
     fn test_bresenham_line_steep() {
         let origin = Point { x: 0, y: 0 };
         let steep_pt = Point { x: 1, y: 3 };
-        let exp_points = vec![
-            origin.clone(),
-            Point { x: 0, y: 1 },
-            Point { x: 1, y: 2 },
-            steep_pt.clone(),
-        ];
+        let exp_points = vec![origin, Point { x: 0, y: 1 }, Point { x: 1, y: 2 }, steep_pt];
 
-        _test_line_bresenham(origin.clone(), steep_pt.clone(), exp_points);
+        _test_line_bresenham(origin, steep_pt, exp_points);
     }
 
     #[test]
     fn test_bresenham_line_dec() {
         let start = Point { x: 4, y: 0 };
         let end = Point { x: 1, y: 3 };
-        let exp_points = vec![
-            start.clone(),
-            Point { x: 3, y: 1 },
-            Point { x: 2, y: 2 },
-            end.clone(),
-        ];
+        let exp_points = vec![start, Point { x: 3, y: 1 }, Point { x: 2, y: 2 }, end];
 
-        _test_line_bresenham(start.clone(), end.clone(), exp_points);
+        _test_line_bresenham(start, end, exp_points);
     }
 }

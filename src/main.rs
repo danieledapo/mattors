@@ -397,7 +397,7 @@ where
     let stepy = (end.y - start.y) / f64::from(config.height);
 
     let frac_it = JuliaGenIter::new(
-        start.clone(),
+        *start,
         config.width,
         config.height,
         stepx,

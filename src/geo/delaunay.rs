@@ -30,13 +30,7 @@ fn super_triangles(bounding_box: &Rect<f64>, first_point: &PointF64) -> Vec<Tria
     let bounds = bounding_box.points();
 
     (0..bounds.len())
-        .map(|i| {
-            Triangle::new(
-                bounds[i].clone(),
-                bounds[(i + 1) % bounds.len()].clone(),
-                first_point.clone(),
-            )
-        })
+        .map(|i| Triangle::new(bounds[i], bounds[(i + 1) % bounds.len()], *first_point))
         .collect()
 }
 
@@ -48,9 +42,9 @@ fn add_point(triangles: Vec<Triangle<f64>>, point: &Point<f64>) -> Vec<Triangle<
         let (circumcenter, radius) = triangle.squared_circumcircle().unwrap();
 
         if circumcenter.squared_dist::<f64>(point) <= radius {
-            edges.push((triangle.points[0].clone(), triangle.points[1].clone()));
-            edges.push((triangle.points[1].clone(), triangle.points[2].clone()));
-            edges.push((triangle.points[2].clone(), triangle.points[0].clone()));
+            edges.push((triangle.points[0], triangle.points[1]));
+            edges.push((triangle.points[1], triangle.points[2]));
+            edges.push((triangle.points[2], triangle.points[0]));
         } else {
             new_triangles.push(triangle);
         }
@@ -61,7 +55,7 @@ fn add_point(triangles: Vec<Triangle<f64>>, point: &Point<f64>) -> Vec<Triangle<
     new_triangles.extend(
         edges
             .into_iter()
-            .map(|(pt0, pt1)| Triangle::new(pt0, pt1, point.clone())),
+            .map(|(pt0, pt1)| Triangle::new(pt0, pt1, *point)),
     );
 
     new_triangles
@@ -77,14 +71,13 @@ fn dedup_edges(edges: &[(Point<f64>, Point<f64>)]) -> Vec<(Point<f64>, Point<f64
 
         for j in 0..edges.len() {
             let (start, end) = &edges[j];
-            if edges[i] == (start.clone(), end.clone()) || edges[i] == (end.clone(), start.clone())
-            {
+            if edges[i] == (*start, *end) || edges[i] == (*end, *start) {
                 count += 1;
             }
         }
 
         if count == 1 {
-            out.push(edges[i].clone());
+            out.push(edges[i]);
         }
     }
 
@@ -100,23 +93,14 @@ mod test {
     #[test]
     fn test_dedup_edges() {
         let edge1 = (Point::new(42.0, 12.0), Point::new(7.0, 12.0));
-        let redge1 = (edge1.1.clone(), edge1.0.clone());
+        let redge1 = (edge1.1, edge1.0);
 
         let edge2 = (Point::new(42.0, 73.0), Point::new(84.0, 146.0));
-        let redge2 = (edge2.1.clone(), edge2.0.clone());
+        let redge2 = (edge2.1, edge2.0);
 
         let edge3 = (Point::new(23.0, 32.0), Point::new(32.0, 23.0));
 
-        let edges = vec![
-            edge1.clone(),
-            edge2.clone(),
-            edge1.clone(),
-            redge2.clone(),
-            edge3.clone(),
-            redge1.clone(),
-            edge1.clone(),
-            redge1.clone(),
-        ];
+        let edges = vec![edge1, edge2, edge1, redge2, edge3, redge1, edge1, redge1];
 
         assert_eq!(dedup_edges(&edges), vec![edge3]);
     }

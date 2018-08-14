@@ -44,7 +44,7 @@ where
     /// Return the points of this rectangle in clockwise order.
     pub fn points(&self) -> [Point<T>; 4] {
         [
-            self.origin.clone(),
+            self.origin,
             Point::new(self.origin.x + self.width, self.origin.y),
             Point::new(self.origin.x + self.width, self.origin.y + self.height),
             Point::new(self.origin.x, self.origin.y + self.height),

@@ -43,13 +43,13 @@ pub fn fractal_tree<I>(
 
     {
         let mut drawer = drawing::Drawer::new_with_no_blending(img);
-        drawer.antialiased_line(pt, breakpoint.clone(), pix);
+        drawer.antialiased_line(pt, breakpoint, pix);
     }
 
     fractal_tree(
         img,
         nbranches - 1,
-        breakpoint.clone(),
+        breakpoint,
         branching_angle + branching_angle_step,
         branching_angle_step,
         branch_len * branch_len_factor,
@@ -60,7 +60,7 @@ pub fn fractal_tree<I>(
     fractal_tree(
         img,
         nbranches - 1,
-        breakpoint.clone(),
+        breakpoint,
         branching_angle - branching_angle_step,
         branching_angle_step,
         branch_len * branch_len_factor,

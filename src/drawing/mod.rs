@@ -102,14 +102,14 @@ where
     }
 
     /// Draw a hollow triangle on the given image.
-    pub fn hollow_triangle(&mut self, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel) {
-        self.line(p1.clone(), p2.clone(), pix);
-        self.line(p1.clone(), p3.clone(), pix);
-        self.line(p2.clone(), p3.clone(), pix);
+    pub fn hollow_triangle(&mut self, p1: PointU32, p2: PointU32, p3: PointU32, pix: &I::Pixel) {
+        self.line(p1, p2, pix);
+        self.line(p1, p3, pix);
+        self.line(p2, p3, pix);
     }
 
     /// Draw a triangle on the given image filled with the given `pix`.
-    pub fn triangle(&mut self, p1: &PointU32, p2: &PointU32, p3: &PointU32, pix: &I::Pixel) {
+    pub fn triangle(&mut self, p1: PointU32, p2: PointU32, p3: PointU32, pix: &I::Pixel) {
         // the idea here is pretty simple: divide the triangle in an upper and
         // bottom flat triangles. At that point draw horizontal lines between the
         // edge points of the triangle.
@@ -140,12 +140,12 @@ where
             mid.y,
         );
 
-        let upper_triangle = FlatTriangleIter::new(tl, mid, &break_point);
+        let upper_triangle = FlatTriangleIter::new(tl, mid, break_point);
         for (start, end) in upper_triangle {
             self.line(start, end, pix);
         }
 
-        let mut bottom_triangle = FlatTriangleIter::new(br, &break_point, mid).peekable();
+        let mut bottom_triangle = FlatTriangleIter::new(br, break_point, mid).peekable();
         loop {
             let mpoints = bottom_triangle.next();
 
@@ -199,9 +199,9 @@ where
         }
 
         if is_steep {
-            self.antialised_line_impl(&start, &end, pix, dx, dy, |x, y| (y, x));
+            self.antialised_line_impl(start, end, pix, dx, dy, |x, y| (y, x));
         } else {
-            self.antialised_line_impl(&start, &end, pix, dx, dy, |x, y| (x, y));
+            self.antialised_line_impl(start, end, pix, dx, dy, |x, y| (x, y));
         }
     }
 
@@ -213,8 +213,8 @@ where
     /// line x and y were swapped.
     fn antialised_line_impl(
         &mut self,
-        start: &PointU32,
-        end: &PointU32,
+        start: PointU32,
+        end: PointU32,
         pix: &I::Pixel,
         dx: i64,
         dy: i64,
