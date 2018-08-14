@@ -13,7 +13,7 @@ pub struct Hsv((u16, u8, u8));
 
 /// A handy enum that allows customization of random_color by passing a specific
 /// hue.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum KnownHue {
     /// Monochrome color
     Monochrome,
@@ -227,7 +227,7 @@ impl KnownHue {
             let (min_sat, max_sat) = known_hue.hue_range().unwrap();
 
             if min_sat <= hue && max_sat >= hue {
-                return known_hue.clone();
+                return *known_hue;
             }
         }
 
@@ -236,8 +236,8 @@ impl KnownHue {
 
     /// Return the hue range of this KnownHue. Note that Red starts from
     /// negative so that it's easier to work with.
-    pub fn hue_range(&self) -> Option<(i32, i32)> {
-        match *self {
+    pub fn hue_range(self) -> Option<(i32, i32)> {
+        match self {
             KnownHue::Monochrome => None,
             KnownHue::Red => Some((-26, 18)),
             KnownHue::Orange => Some((19, 46)),
@@ -250,14 +250,14 @@ impl KnownHue {
     }
 
     /// Return the saturation range this color can have.
-    pub fn saturation_range(&self) -> (u8, u8) {
+    pub fn saturation_range(self) -> (u8, u8) {
         let bounds = self.lower_bounds();
 
         (bounds[0].0, bounds[bounds.len() - 1].0)
     }
 
     /// Return the brightness range this color can have.
-    pub fn brightness_range(&self) -> (u8, u8) {
+    pub fn brightness_range(self) -> (u8, u8) {
         let bounds = self.lower_bounds();
 
         (bounds[0].1, bounds[bounds.len() - 1].1)
