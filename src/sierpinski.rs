@@ -42,24 +42,26 @@ impl Iterator for SierpinskiIter {
     type Item = Vec<SierpinskiTriangle>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let old_triangles = self.triangles.clone();
+        use std::mem::replace;
 
-        self.triangles = self
-            .triangles
-            .iter()
-            .flat_map(|&(ref top, ref left, ref right)| {
-                let mid_left =
-                    PointU32::new(top.x - (top.x - left.x) / 2, top.y + (left.y - top.y) / 2);
-                let mid_right = PointU32::new(top.x + (top.x - left.x) / 2, mid_left.y);
-                let mid_bottom = PointU32::new(top.x, left.y);
+        let old_triangles = replace(&mut self.triangles, vec![]);
 
-                let new_top = (*top, mid_left, mid_right);
-                let new_left = (mid_left, *left, mid_bottom);
-                let new_right = (mid_right, mid_bottom, *right);
+        self.triangles.extend(
+            old_triangles
+                .iter()
+                .flat_map(|&(ref top, ref left, ref right)| {
+                    let mid_left =
+                        PointU32::new(top.x - (top.x - left.x) / 2, top.y + (left.y - top.y) / 2);
+                    let mid_right = PointU32::new(top.x + (top.x - left.x) / 2, mid_left.y);
+                    let mid_bottom = PointU32::new(top.x, left.y);
 
-                vec![new_top, new_left, new_right].into_iter()
-            })
-            .collect();
+                    let new_top = (*top, mid_left, mid_right);
+                    let new_left = (mid_left, *left, mid_bottom);
+                    let new_right = (mid_right, mid_bottom, *right);
+
+                    vec![new_top, new_left, new_right].into_iter()
+                }),
+        );
 
         Some(old_triangles)
     }
