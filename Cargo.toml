@@ -5,7 +5,7 @@ authors = ["daniele <d.dorazio96@gmail.com>"]
 
 [dependencies]
 image = { git = "https://github.com/PistonDevelopers/image", branch = "master" }
-num = "0.1"
+num = "0.2"
 rand = "0.5"
 structopt = "0.2"
 
