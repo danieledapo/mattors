@@ -85,7 +85,7 @@ pub fn dragon_to_image(
     start_x: u32,
     start_y: u32,
     line_len: u32,
-    rgb_color: &[u8; 3],
+    rgb_color: [u8; 3],
 ) -> image::RgbImage {
     // TODO: might be interesting to add [perlin
     // noise](https://en.wikipedia.org/wiki/Perlin_noise)
@@ -94,7 +94,7 @@ pub fn dragon_to_image(
     {
         let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
 
-        let pix = image::Rgb { data: *rgb_color };
+        let pix = image::Rgb { data: rgb_color };
 
         let mut x = start_x;
         let mut y = start_y;

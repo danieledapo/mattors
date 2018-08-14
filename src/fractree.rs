@@ -13,6 +13,7 @@ use geo::PointU32;
 /// `branch_len` is the branch length. `branch_angle_step` is an angle that is
 /// added and subtracted from `angle` to move branches. `branch_len_factor` is
 /// multiplied with `branch_len` to change the `branch_len`.
+#[cfg_attr(feature = "cargo-clippy", allow(too_many_arguments))]
 pub fn fractal_tree<I>(
     img: &mut I,
     nbranches: u32,

@@ -117,9 +117,9 @@ fn pick_brightness(hue: u16, saturation: u8) -> u8 {
 
         if saturation >= sat1 && saturation <= sat2 {
             return linear_interpolate(
-                &Point::new(sat2 as i16, bri1 as i16),
-                &Point::new(sat1 as i16, bri2 as i16),
-                saturation as i16,
+                &Point::new(i16::from(sat2), i16::from(bri1)),
+                &Point::new(i16::from(sat1), i16::from(bri2)),
+                i16::from(saturation),
             ).unwrap() as u8;
         }
     }
@@ -135,6 +135,7 @@ impl Hsv {
     }
 
     /// Convert a color from Hsv color space to Rgb.
+    #[cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
     pub fn to_rgb(&self) -> [u8; 3] {
         // HACK: this algorithm doesn't work for h == 0 or h == 1
         let hue = match (self.0).0 {
@@ -172,8 +173,14 @@ impl Hsv {
 }
 
 impl RandomColorConfig<rand::ThreadRng> {
-    /// Create a new RandomColorConfig
+    /// Create a new RandomColorConfig.
     pub fn new() -> Self {
+        Default::default()
+    }
+}
+
+impl Default for RandomColorConfig<rand::ThreadRng> {
+    fn default() -> Self {
         RandomColorConfig {
             hue: None,
             luminosity: None,
@@ -216,7 +223,7 @@ impl KnownHue {
             KnownHue::Pink,
         ];
 
-        for known_hue in knowns.into_iter() {
+        for known_hue in &knowns {
             let (min_sat, max_sat) = known_hue.hue_range().unwrap();
 
             if min_sat <= hue && max_sat >= hue {

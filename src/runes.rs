@@ -50,7 +50,7 @@ impl Simmetry {
             Simmetry::Horizontal => {
                 for y in 0..simmetry_height {
                     for x in 0..simmetry_width {
-                        let p = img.get_pixel(x, y).clone();
+                        let p = img.get_pixel(x, y);
                         img.put_pixel(x, height - y - 1, p);
                     }
                 }
@@ -58,7 +58,7 @@ impl Simmetry {
             Simmetry::Vertical => {
                 for y in 0..simmetry_height {
                     for x in 0..simmetry_width {
-                        let p = img.get_pixel(x, y).clone();
+                        let p = img.get_pixel(x, y);
                         img.put_pixel(width - x - 1, y, p);
                     }
                 }
@@ -66,7 +66,7 @@ impl Simmetry {
             Simmetry::VerticalAndHorizontal => {
                 for y in 0..simmetry_height {
                     for x in 0..simmetry_width {
-                        let p = img.get_pixel(x, y).clone();
+                        let p = img.get_pixel(x, y);
 
                         img.put_pixel(width - x - 1, y, p);
                         img.put_pixel(x, height - y - 1, p);

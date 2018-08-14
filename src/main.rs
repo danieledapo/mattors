@@ -423,13 +423,13 @@ fn spawn_dragons(iterations: u32) {
     println!("Dragons!");
 
     let red = dragon::dragon(iterations, dragon::Move::Left);
-    let red_img = dragon::dragon_to_image(&red, 1920, 1080, 1480, 730, 2, &[255, 0, 0]);
+    let red_img = dragon::dragon_to_image(&red, 1920, 1080, 1480, 730, 2, [255, 0, 0]);
 
     let blue = dragon::dragon(iterations, dragon::Move::Up);
-    let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 500, 730, 2, &[0, 0, 255]);
+    let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 500, 730, 2, [0, 0, 255]);
 
     let green = dragon::dragon(iterations, dragon::Move::Right);
-    let green_img = dragon::dragon_to_image(&green, 1920, 1080, 500, 350, 2, &[0, 255, 0]);
+    let green_img = dragon::dragon_to_image(&green, 1920, 1080, 500, 350, 2, [0, 255, 0]);
 
     let redblue_img = overlap_images(&red_img, &blue_img).unwrap();
     let rgb_img = overlap_images(&redblue_img, &green_img).unwrap();
@@ -445,13 +445,13 @@ fn spawn_horns(iterations: u32) {
     println!("Horns!");
 
     let red = dragon::horns(iterations, dragon::Move::Left);
-    let red_img = dragon::dragon_to_image(&red, 1920, 1080, 1480, 530, 2, &RED);
+    let red_img = dragon::dragon_to_image(&red, 1920, 1080, 1480, 530, 2, RED);
 
     let blue = dragon::horns(iterations, dragon::Move::Up);
-    let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 550, 790, 2, &DARK_BLUE);
+    let blue_img = dragon::dragon_to_image(&blue, 1920, 1080, 550, 790, 2, DARK_BLUE);
 
     let green = dragon::horns(iterations, dragon::Move::Right);
-    let green_img = dragon::dragon_to_image(&green, 1920, 1080, 960, 550, 2, &LIGHT_GREEN);
+    let green_img = dragon::dragon_to_image(&green, 1920, 1080, 960, 550, 2, LIGHT_GREEN);
 
     red_img.save("red-horns.png").unwrap();
     blue_img.save("blue-horns.png").unwrap();

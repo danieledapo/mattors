@@ -122,9 +122,9 @@ where
     pub fn perpendicular(&self, p: &Point<T>) -> Self {
         use self::LineEquation::{Line, VerticalLine};
 
-        match self {
-            &VerticalLine(_) => Self::horizonal(p.y),
-            &Line { slope, .. } => {
+        match *self {
+            VerticalLine(_) => Self::horizonal(p.y),
+            Line { slope, .. } => {
                 if slope == T::from(0) {
                     Self::vertical(p.x)
                 } else {

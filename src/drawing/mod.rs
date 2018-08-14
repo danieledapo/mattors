@@ -230,14 +230,14 @@ where
         // since the points are u32 there is no fractional part and so we don't
         // need to draw the second point for each of the endpoints like in the
         // wikipedia pseudocode.
-        for pt in [start, end].into_iter() {
+        for pt in &[start, end] {
             let (x, y) = coord_selector(pt.x, pt.y);
             self.draw_pixel(x, y, pix);
         }
 
         let gradient = if dx == 0 { 1.0 } else { dy as f64 / dx as f64 };
         let gradient = if start.y > end.y { -gradient } else { gradient };
-        let mut intery = start.y as f64 + gradient;
+        let mut intery = <f64 as From<u32>>::from(start.y) + gradient;
 
         for x in (start.x + 1)..end.x {
             let pts = [
@@ -245,7 +245,7 @@ where
                 (intery.floor() + 1.0, intery.fract()),
             ];
 
-            for (y, weight) in pts.into_iter() {
+            for (y, weight) in &pts {
                 // linear interpolation of the channels, might want to fancier
                 // in the future and/or allow custom interpolation functions,
                 // but kiss for now.

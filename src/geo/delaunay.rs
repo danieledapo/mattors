@@ -11,16 +11,14 @@ pub fn triangulate(bounding_box: &Rect<f64>, points: Vec<PointF64>) -> Vec<Trian
     }
 
     let mut points = points.into_iter();
-    let super_triangles = super_triangles(bounding_box, points.next().unwrap());
-
-    let triangles = points.fold(super_triangles, |triangles, point| {
-        add_point(triangles, point)
-    });
+    let super_triangles = super_triangles(bounding_box, &points.next().unwrap());
 
     // theoretically we should remove the triangles that share vertices with the
     // initial point, but this thing is not for real use.
 
-    triangles
+    points.fold(super_triangles, |triangles, point| {
+        add_point(triangles, &point)
+    })
 }
 
 // the original algorithm works by finding a super triangle that encloses
@@ -28,7 +26,7 @@ pub fn triangulate(bounding_box: &Rect<f64>, points: Vec<PointF64>) -> Vec<Trian
 // point and divide the bounding box in 4 triangles that always cover the
 // entire space. It's not acceptable for real triangulation but we're having
 // fun here :).
-fn super_triangles(bounding_box: &Rect<f64>, first_point: PointF64) -> Vec<Triangle<f64>> {
+fn super_triangles(bounding_box: &Rect<f64>, first_point: &PointF64) -> Vec<Triangle<f64>> {
     let bounds = bounding_box.points();
 
     (0..bounds.len())
@@ -42,14 +40,14 @@ fn super_triangles(bounding_box: &Rect<f64>, first_point: PointF64) -> Vec<Trian
         .collect()
 }
 
-fn add_point(triangles: Vec<Triangle<f64>>, point: Point<f64>) -> Vec<Triangle<f64>> {
+fn add_point(triangles: Vec<Triangle<f64>>, point: &Point<f64>) -> Vec<Triangle<f64>> {
     let mut edges = vec![];
     let mut new_triangles = Vec::with_capacity(triangles.len());
 
     for triangle in triangles {
         let (circumcenter, radius) = triangle.squared_circumcircle().unwrap();
 
-        if circumcenter.squared_dist::<f64>(&point) <= radius {
+        if circumcenter.squared_dist::<f64>(point) <= radius {
             edges.push((triangle.points[0].clone(), triangle.points[1].clone()));
             edges.push((triangle.points[1].clone(), triangle.points[2].clone()));
             edges.push((triangle.points[2].clone(), triangle.points[0].clone()));
@@ -58,7 +56,7 @@ fn add_point(triangles: Vec<Triangle<f64>>, point: Point<f64>) -> Vec<Triangle<f
         }
     }
 
-    edges = dedup_edges(edges);
+    edges = dedup_edges(&edges);
 
     new_triangles.extend(
         edges
@@ -69,7 +67,7 @@ fn add_point(triangles: Vec<Triangle<f64>>, point: Point<f64>) -> Vec<Triangle<f
     new_triangles
 }
 
-fn dedup_edges(edges: Vec<(Point<f64>, Point<f64>)>) -> Vec<(Point<f64>, Point<f64>)> {
+fn dedup_edges(edges: &[(Point<f64>, Point<f64>)]) -> Vec<(Point<f64>, Point<f64>)> {
     // super ugly and super inefficient, but we cannot use hashmaps with f64...
 
     let mut out = vec![];
@@ -120,6 +118,6 @@ mod test {
             redge1.clone(),
         ];
 
-        assert_eq!(dedup_edges(edges), vec![edge3]);
+        assert_eq!(dedup_edges(&edges), vec![edge3]);
     }
 }
