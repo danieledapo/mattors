@@ -5,15 +5,8 @@
 #[macro_use]
 extern crate maplit;
 
+pub mod art;
 pub mod color;
-pub mod delaunay;
-pub mod dragon;
 pub mod drawing;
-pub mod fractree;
 pub mod geo;
-pub mod julia;
-pub mod primi;
-pub mod quantize;
-pub mod runes;
-pub mod sierpinski;
 pub mod utils;

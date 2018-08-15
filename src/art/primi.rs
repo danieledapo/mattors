@@ -13,9 +13,9 @@ use std::iter::Iterator;
 
 use self::rand::Rng;
 
+use art::quantize;
 use drawing;
 use geo;
-use quantize;
 use std;
 
 /// A shape that can be used in the `primitify` function.

@@ -20,17 +20,18 @@ use num::complex::{Complex64, ParseComplexError};
 
 use structopt::StructOpt;
 
-use matto::delaunay;
-use matto::dragon;
-use matto::fractree;
 use matto::geo;
 use matto::geo::{PointF64, PointU32};
-use matto::julia::{FractalPoint, JuliaGenIter};
-use matto::primi;
-use matto::primi::Shape;
-use matto::quantize;
-use matto::runes;
-use matto::sierpinski;
+
+use matto::art::delaunay;
+use matto::art::dragon;
+use matto::art::fractree;
+use matto::art::julia::{FractalPoint, JuliaGenIter};
+use matto::art::primi;
+use matto::art::primi::Shape;
+use matto::art::quantize;
+use matto::art::runes;
+use matto::art::sierpinski;
 
 const LIGHT_GREEN: [u8; 3] = [0x17, 0xB9, 0x78];
 const RED: [u8; 3] = [0xF6, 0x72, 0x80];
