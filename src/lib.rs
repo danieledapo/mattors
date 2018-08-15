@@ -5,6 +5,10 @@
 #[macro_use]
 extern crate maplit;
 
+#[cfg(test)]
+#[macro_use]
+extern crate proptest;
+
 pub mod art;
 pub mod color;
 pub mod drawing;

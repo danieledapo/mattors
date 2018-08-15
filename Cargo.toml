@@ -11,3 +11,4 @@ structopt = "0.2"
 
 [dev-dependencies]
 maplit = "1.0"
+proptest = "0.8.4"

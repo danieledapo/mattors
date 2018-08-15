@@ -19,3 +19,7 @@ where
 
     map
 }
+
+pub mod ksmallest;
+
+pub use self::ksmallest::{ksmallest, ksmallest_by, ksmallest_by_key};
