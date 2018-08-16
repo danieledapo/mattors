@@ -157,11 +157,11 @@ where
             };
 
             if let Some(candidate_node) = candidate {
-                let candidate_dist = candidate_node.median.squared_dist::<i64>(&point);
+                let split_plane = i64::from(axis_value(node.median, node.axis));
+                let plane_dist = i64::from(axis_value(point, node.axis)) - split_plane;
+                let plane_dist2 = plane_dist * plane_dist;
 
-                // FIXME: this check is broken, it doesn't allow nodes that
-                // should. See test_nearest_neighbor_comes_after_candidate.
-                if candidate_dist <= min_dist {
+                if plane_dist2 <= min_dist {
                     nodes.push(candidate_node);
                 }
             }
@@ -339,15 +339,6 @@ mod test {
         kdtree.add(PointU32::new(0, 0), ());
         kdtree.add(PointU32::new(0, 2), ());
 
-        // this test doesn't pass because
-        // 1) the min_dist is initially set to dist((0, 1), (1, 2)) == 2.
-        // 2) we then check if the left candidate(since (1, 2).x > (0, 1).x) has
-        //    a distance < min_dist. In this case it doesn't because dist((0,
-        //    0), (1, 2)) = 5. Everything stops at this point.
-        //
-        // note that (0, 2) wasn't visited even though it has a dist < min_dist
-        // because its parent didn't have a dist < min_dist.
-
         assert_eq!(
             kdtree.nearest_neighbor(PointU32::new(1, 2)),
             Some((&PointU32::new(0, 2), &()))
@@ -355,7 +346,7 @@ mod test {
     }
 
     proptest! {
-        #![proptest_config(proptest::test_runner::Config::with_cases(300))]
+        #![proptest_config(proptest::test_runner::Config::with_cases(500))]
         #[test]
         fn prop_kdtree_nearest_neight_same_as_loop(
             points in proptest::collection::hash_set((0_u32..10, 0_u32..10), 1..5),
