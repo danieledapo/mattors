@@ -35,8 +35,11 @@ pub fn split_element_at<T>(mut v: Vec<T>, at: usize) -> (Vec<T>, Option<T>, Vec<
 }
 
 pub mod ksmallest;
+pub mod ordwrapper;
 
 pub use self::ksmallest::{ksmallest, ksmallest_by, ksmallest_by_key};
+pub use self::ordwrapper::OrdWrapper;
+
 #[cfg(test)]
 mod test {
     use super::split_element_at;
