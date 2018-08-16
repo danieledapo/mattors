@@ -52,7 +52,7 @@ pub fn random_voronoi<R: Rng>(
             .min_by_key(|pt| pt.squared_dist::<i64>(&dst))
             .unwrap();
 
-        if closest_point != foo {
+        if closest_point.squared_dist::<i64>(&dst) != foo.squared_dist(&dst) {
             *pix = image::Rgb { data: [0xFF, 0, 0] };
         } else {
             *pix = *closest_point_color;

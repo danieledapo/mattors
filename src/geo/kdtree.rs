@@ -72,7 +72,9 @@ where
             let mid = points.len() / 2;
 
             // this is actually partitioning data at the median
-            ksmallest_by_key(&mut points, mid, |(pt, _val)| axis_value(*pt, axis)).unwrap();
+            ksmallest_by_key(&mut points, mid, |(pt, _val)| {
+                (axis_value(*pt, axis), axis_value(*pt, next_axis(axis)))
+            }).unwrap();
 
             let (left, elem, right) = split_element_at(points, mid);
 
@@ -111,7 +113,8 @@ where
     /// Return the nearest neighbor to the given point.
     pub fn nearest_neighbor(&self, point: Point<T>) -> Option<(&Point<T>, &V)>
     where
-        T: num::Num + From<u8>,
+        T: num::Num + From<u8> + ::std::fmt::Debug,
+        V: ::std::fmt::Debug,
         i64: From<T>,
     {
         self.nearest_neighbors(point, 1).into_iter().next()
@@ -120,7 +123,8 @@ where
     /// Return, at most, the k nearest neighbors to the given point.
     pub fn nearest_neighbors(&self, point: Point<T>, k: usize) -> Vec<(&Point<T>, &V)>
     where
-        T: num::Num + From<u8>,
+        T: num::Num + From<u8> + ::std::fmt::Debug,
+        V: ::std::fmt::Debug,
         i64: From<T>,
     {
         if self.root.is_none() || k == 0 {
@@ -147,33 +151,29 @@ where
             // last. In this case we want to perform the wrong path after we
             // checked the good one.
 
-            let candidate = match node.cmp_to_point_value(point) {
-                Ordering::Less | Ordering::Equal => &node.right,
-                Ordering::Greater => &node.left,
+            let (next, candidate) = match node.cmp_to_point_value(point) {
+                Ordering::Less | Ordering::Equal => (&node.left, &node.right),
+                Ordering::Greater => (&node.right, &node.left),
             };
 
             if let Some(candidate_node) = candidate {
                 let candidate_dist = candidate_node.median.squared_dist::<i64>(&point);
 
-                if candidate_dist < min_dist {
+                // FIXME: this check is broken, it doesn't allow nodes that
+                // should. See test_nearest_neighbor_comes_after_candidate.
+                if candidate_dist <= min_dist {
                     nodes.push(candidate_node);
                 }
             }
 
-            let good = match node.cmp_to_point_value(point) {
-                Ordering::Less | Ordering::Equal => &node.left,
-                Ordering::Greater => &node.right,
-            };
-
-            if let Some(good_node) = good {
-                nodes.push(good_node);
+            if let Some(next_node) = next {
+                nodes.push(next_node);
             }
         }
 
         neighbors
             .into_sorted_vec()
             .into_iter()
-            .take(k)
             .map(|ow| {
                 let (node, _) = ow.into();
                 (&node.median, &node.value)
@@ -241,6 +241,11 @@ fn axis_value<T>(pt: Point<T>, axis: u8) -> T {
 mod test {
     use super::{KdTree, Node};
 
+    extern crate num;
+    extern crate proptest;
+
+    use std::collections::HashSet;
+
     use geo::PointU32;
 
     #[test]
@@ -299,7 +304,7 @@ mod test {
     }
 
     #[test]
-    fn test_nearest_neighbor() {
+    fn test_basic_nearest_neighbor() {
         let mut kdtree = KdTree::new();
         kdtree.add(PointU32::new(3, 0), "foo");
         kdtree.add(PointU32::new(4, 6), "bar");
@@ -325,5 +330,69 @@ mod test {
             kdtree.nearest_neighbor(PointU32::new(0, 0)),
             Some((&PointU32::new(3, 0), &"foo"))
         );
+    }
+
+    #[test]
+    fn test_nearest_neighbor_comes_after_candidate() {
+        let mut kdtree = KdTree::new();
+        kdtree.add(PointU32::new(0, 1), ());
+        kdtree.add(PointU32::new(0, 0), ());
+        kdtree.add(PointU32::new(0, 2), ());
+
+        // this test doesn't pass because
+        // 1) the min_dist is initially set to dist((0, 1), (1, 2)) == 2.
+        // 2) we then check if the left candidate(since (1, 2).x > (0, 1).x) has
+        //    a distance < min_dist. In this case it doesn't because dist((0,
+        //    0), (1, 2)) = 5. Everything stops at this point.
+        //
+        // note that (0, 2) wasn't visited even though it has a dist < min_dist
+        // because its parent didn't have a dist < min_dist.
+
+        assert_eq!(
+            kdtree.nearest_neighbor(PointU32::new(1, 2)),
+            Some((&PointU32::new(0, 2), &()))
+        );
+    }
+
+    proptest! {
+        #![proptest_config(proptest::test_runner::Config::with_cases(300))]
+        #[test]
+        fn prop_kdtree_nearest_neight_same_as_loop(
+            points in proptest::collection::hash_set((0_u32..10, 0_u32..10), 1..5),
+            to_search in (0_u32..10, 0_u32..10)
+        ) {
+            same_as_brute_force_loop(points, to_search);
+        }
+    }
+
+    fn same_as_brute_force_loop(points: HashSet<(u32, u32)>, to_search: (u32, u32)) {
+        let points = points
+            .into_iter()
+            .map(|(x, y)| (PointU32::new(x, y), ()))
+            .collect::<Vec<_>>();
+
+        let tree = KdTree::from_vector(points.clone());
+        let to_search = PointU32::new(to_search.0, to_search.1);
+
+        let tree_closest_point = tree.nearest_neighbor(to_search);
+
+        let brute_force_closest_point = points
+            .iter()
+            .min_by_key(|(pt, _)| pt.squared_dist::<i64>(&to_search));
+
+        assert!(tree_closest_point.is_some());
+        assert!(brute_force_closest_point.is_some());
+
+        let brute_force_closest_point = brute_force_closest_point.unwrap().0;
+        let tree_closest_point = tree_closest_point.unwrap().0;
+
+        assert_eq!(
+            brute_force_closest_point.squared_dist::<i64>(&to_search),
+            tree_closest_point.squared_dist::<i64>(&to_search),
+            "brute_force: {:?}, kd-tree: {:?} tree: {:?}",
+            brute_force_closest_point,
+            tree_closest_point,
+            tree
+        )
     }
 }
