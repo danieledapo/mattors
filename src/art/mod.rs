@@ -8,3 +8,4 @@ pub mod primi;
 pub mod quantize;
 pub mod runes;
 pub mod sierpinski;
+pub mod voronoi;

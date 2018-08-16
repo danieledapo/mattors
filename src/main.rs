@@ -32,6 +32,7 @@ use matto::art::primi::Shape;
 use matto::art::quantize;
 use matto::art::runes;
 use matto::art::sierpinski;
+use matto::art::voronoi;
 
 const LIGHT_GREEN: [u8; 3] = [0x17, 0xB9, 0x78];
 const RED: [u8; 3] = [0xF6, 0x72, 0x80];
@@ -89,6 +90,10 @@ pub enum Command {
     /// Generate something similar to a proper delaunay triangulation.
     #[structopt(name = "delaunay")]
     Delaunay(Delaunay),
+
+    /// Generate some Voronoi Diagrams.
+    #[structopt(name = "voronoi")]
+    Voronoi(Voronoi),
 }
 
 /// Julia Set settings.
@@ -309,6 +314,26 @@ pub struct Delaunay {
     output_path: PathBuf,
 }
 
+/// Generate some Voronoi Diagrams.
+#[derive(StructOpt, Debug)]
+pub struct Voronoi {
+    /// Number of points used to generate the diagram.
+    #[structopt(short = "p", long = "points", default_value = "25")]
+    npoints: usize,
+
+    /// Width of the image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
+    width: u32,
+
+    /// Height of the image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
+    height: u32,
+
+    /// Where to write the final image.
+    #[structopt(short = "o", long = "output", default_value = "voronoi.png", parse(from_os_str))]
+    output_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -341,6 +366,7 @@ fn main() {
         Command::FractalTree(ref config) => fractal_tree(config),
         Command::Runes(ref config) => runes(config),
         Command::Delaunay(ref config) => delaunay(config),
+        Command::Voronoi(ref config) => voronoi(config),
     }
 }
 
@@ -645,6 +671,23 @@ fn delaunay(config: &Delaunay) {
     );
 
     delaunay::random_triangulation(&mut img, &mut color_config, config.grid_size, alpha);
+
+    img.save(&config.output_path).expect("cannot save image");
+}
+
+fn voronoi(config: &Voronoi) {
+    let mut color_config =
+        matto::color::RandomColorConfig::new().hue(matto::color::KnownHue::Green);
+
+    let mut img = image::RgbImage::from_pixel(
+        config.width,
+        config.height,
+        image::Rgb {
+            data: matto::color::random_color(&mut color_config).to_rgb(),
+        },
+    );
+
+    voronoi::random_voronoi(&mut img, &mut color_config, config.npoints);
 
     img.save(&config.output_path).expect("cannot save image");
 }
