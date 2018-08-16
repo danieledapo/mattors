@@ -1,6 +1,7 @@
 //! This module contains an implementation of
 //! [QuickSelect](https://en.wikipedia.org/wiki/Quickselect) to provide O(n)
-//! median search.
+//! median search. It's an in place selection algorithm that also has the nice
+//! side effect of partitioning the data according to the kth element.
 
 use std;
 use std::cmp::Ordering;
