@@ -1,6 +1,7 @@
-//! Geometric functions.
+//! Geometric functions, algorithms and data structures.
 
 pub mod delaunay;
+pub mod kdtree;
 pub mod line;
 pub mod point;
 pub mod rect;
