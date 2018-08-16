@@ -83,16 +83,7 @@ where
         let bisec_p0p1 = p0p1.perpendicular(&mid_p0p1);
         let bisec_p0p2 = p0p2.perpendicular(&mid_p0p2);
 
-        let res = bisec_p0p1.intersection(&bisec_p0p2);
-
-        if res.is_none() {
-            println!(
-                "p0p1 {:?} p0p2 {:?} bisec_p0p1 {:?} bisec_p0p2 {:?}",
-                p0p1, p0p2, bisec_p0p1, bisec_p0p2
-            );
-        }
-
-        res
+        bisec_p0p1.intersection(&bisec_p0p2)
     }
 
     /// Return the circumcicle that encloses this triangle as a pair of
