@@ -40,23 +40,10 @@ pub fn random_voronoi<R: Rng>(
 
     let points = kdtree::KdTree::from_vector(points);
 
-    println!("{:#?}", points);
-
     for (x, y, pix) in img.enumerate_pixels_mut() {
-        let (closest_point, closest_point_color) =
-            points.nearest_neighbor(PointU32::new(x, y)).unwrap();
+        let (_, closest_point_color) = points.nearest_neighbor(PointU32::new(x, y)).unwrap();
 
-        let dst = PointU32::new(x, y);
-        let foo = random_points
-            .iter()
-            .min_by_key(|pt| pt.squared_dist::<i64>(&dst))
-            .unwrap();
-
-        if closest_point.squared_dist::<i64>(&dst) != foo.squared_dist(&dst) {
-            *pix = image::Rgb { data: [0xFF, 0, 0] };
-        } else {
-            *pix = *closest_point_color;
-        }
+        *pix = *closest_point_color;
     }
 
     for point in random_points {

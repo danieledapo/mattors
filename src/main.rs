@@ -318,7 +318,7 @@ pub struct Delaunay {
 #[derive(StructOpt, Debug)]
 pub struct Voronoi {
     /// Number of points used to generate the diagram.
-    #[structopt(short = "p", long = "points", default_value = "25")]
+    #[structopt(short = "p", long = "points", default_value = "50")]
     npoints: usize,
 
     /// Width of the image.
@@ -676,8 +676,7 @@ fn delaunay(config: &Delaunay) {
 }
 
 fn voronoi(config: &Voronoi) {
-    let mut color_config =
-        matto::color::RandomColorConfig::new().hue(matto::color::KnownHue::Green);
+    let mut color_config = matto::color::RandomColorConfig::new();
 
     let mut img = image::RgbImage::from_pixel(
         config.width,
