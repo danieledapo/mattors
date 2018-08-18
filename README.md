@@ -26,6 +26,10 @@ inspired by [primitive](https://github.com/fogleman/primitive).
 
 ![delaunay](images/delaunay.png)
 
+## Voronoi
+
+![voronoi](images/voronoi.png)
+
 # Examples
 
 ```
@@ -48,6 +52,9 @@ cargo run --release -- primirs --shapes 200 --mutations 100 --scale-down 2 --dx 
 
 # delaunay
 cargo run -- delaunay --grid-size 50 -o images/delaunay.png
+
+# voronoi
+cargo run -- voronoi --points 150 -o images/voronoi.png
 
 # misc
 cargo run -- runes -p 3 -c 26

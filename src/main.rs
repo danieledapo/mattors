@@ -676,15 +676,10 @@ fn delaunay(config: &Delaunay) {
 }
 
 fn voronoi(config: &Voronoi) {
-    let mut color_config = matto::color::RandomColorConfig::new();
+    let mut color_config =
+        matto::color::RandomColorConfig::new().luminosity(matto::color::Luminosity::Light);
 
-    let mut img = image::RgbImage::from_pixel(
-        config.width,
-        config.height,
-        image::Rgb {
-            data: matto::color::random_color(&mut color_config).to_rgb(),
-        },
-    );
+    let mut img = image::RgbImage::new(config.width, config.height);
 
     voronoi::random_voronoi(&mut img, &mut color_config, config.npoints);
 
