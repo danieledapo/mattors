@@ -14,8 +14,8 @@ use self::rand::Rng;
 /// going from color1 to color2.
 pub fn gradient_voronoi(
     img: &mut image::RgbImage,
-    color1: &image::Rgb<u8>,
-    color2: &image::Rgb<u8>,
+    color1: image::Rgb<u8>,
+    color2: image::Rgb<u8>,
     npoints: usize,
 ) {
     if npoints == 0 {

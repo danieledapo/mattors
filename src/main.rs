@@ -692,8 +692,8 @@ fn voronoi(config: &Voronoi) {
 
         voronoi::gradient_voronoi(
             &mut img,
-            &image::Rgb { data: color1 },
-            &image::Rgb { data: color2 },
+            image::Rgb { data: color1 },
+            image::Rgb { data: color2 },
             config.npoints,
         )
     } else {
