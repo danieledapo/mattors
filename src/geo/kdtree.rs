@@ -147,7 +147,7 @@ where
                 neighbors.pop();
             }
 
-            // since nodes is a stack first push the data that will be computed
+            // since nodes is a stack, push first the data that must be computed
             // last. In this case we want to perform the wrong path after we
             // checked the good one.
 
@@ -157,6 +157,9 @@ where
             };
 
             if let Some(candidate_node) = candidate {
+                // check if there could be intersection on the wrong side of the
+                // plane. This is done by checking whether the candidate point's
+                // axis is still reachable within the current minimum distance.
                 let split_plane = i64::from(axis_value(node.median, node.axis));
                 let plane_dist = i64::from(axis_value(point, node.axis)) - split_plane;
                 let plane_dist2 = plane_dist * plane_dist;
