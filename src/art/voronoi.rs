@@ -46,9 +46,9 @@ pub fn random_voronoi<R: Rng>(
         *pix = *closest_point_color;
     }
 
-    for point in random_points {
-        img.put_pixel(point.x, point.y, image::Rgb { data: [0, 0, 0] });
-    }
+    // for point in random_points {
+    //     img.put_pixel(point.x, point.y, image::Rgb { data: [0, 0, 0] });
+    // }
 }
 
 fn generate_distinct_random_points<R: Rng>(
