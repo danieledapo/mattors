@@ -29,6 +29,7 @@ inspired by [primitive](https://github.com/fogleman/primitive).
 ## Voronoi
 
 ![voronoi](images/voronoi.png)
+![voronoi-gradient](images/voronoi-gradient.png)
 
 # Examples
 
@@ -55,6 +56,7 @@ cargo run -- delaunay --grid-size 50 -o images/delaunay.png
 
 # voronoi
 cargo run -- voronoi --points 150 -o images/voronoi.png
+cargo run -- voronoi --gradient-background --points 150 -o images/voronoi-gradient.png
 
 # misc
 cargo run -- runes -p 3 -c 26
