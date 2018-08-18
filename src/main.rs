@@ -321,6 +321,11 @@ pub struct Voronoi {
     #[structopt(short = "p", long = "points", default_value = "50")]
     npoints: usize,
 
+    /// Whether to use a gradient as the background of the image or randomly
+    /// generated colors.
+    #[structopt(short = "g", long = "gradient-background")]
+    gradient_background: bool,
+
     /// Width of the image.
     #[structopt(short = "w", long = "width", default_value = "1920")]
     width: u32,
@@ -677,11 +682,23 @@ fn delaunay(config: &Delaunay) {
 
 fn voronoi(config: &Voronoi) {
     let mut color_config =
-        matto::color::RandomColorConfig::new().luminosity(matto::color::Luminosity::Light);
+        matto::color::RandomColorConfig::new().luminosity(matto::color::Luminosity::Bright);
 
     let mut img = image::RgbImage::new(config.width, config.height);
 
-    voronoi::random_voronoi(&mut img, &mut color_config, config.npoints);
+    if config.gradient_background {
+        let color1 = matto::color::random_color(&mut color_config).to_rgb();
+        let color2 = matto::color::random_color(&mut color_config).to_rgb();
+
+        voronoi::gradient_voronoi(
+            &mut img,
+            &image::Rgb { data: color1 },
+            &image::Rgb { data: color2 },
+            config.npoints,
+        )
+    } else {
+        voronoi::random_voronoi(&mut img, &mut color_config, config.npoints);
+    }
 
     img.save(&config.output_path).expect("cannot save image");
 }

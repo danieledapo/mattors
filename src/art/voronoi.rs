@@ -10,6 +10,47 @@ use geo::{kdtree, PointU32, Rect};
 
 use self::rand::Rng;
 
+/// Generate a voronoi diagram where the colors are taken from the gradient
+/// going from color1 to color2.
+pub fn gradient_voronoi(
+    img: &mut image::RgbImage,
+    color1: &image::Rgb<u8>,
+    color2: &image::Rgb<u8>,
+    npoints: usize,
+) {
+    if npoints == 0 {
+        return;
+    }
+
+    let random_points = generate_distinct_random_points(
+        &mut rand::thread_rng(),
+        npoints,
+        &Rect::new(PointU32::new(0, 0), img.width(), img.height()),
+    );
+
+    let points = random_points.iter().map(|pt| (*pt, ())).collect();
+    let points = kdtree::KdTree::from_vector(points);
+
+    let dr = f64::from(color2[0]) - f64::from(color1[0]);
+    let dg = f64::from(color2[1]) - f64::from(color1[1]);
+    let db = f64::from(color2[2]) - f64::from(color1[2]);
+
+    let img_width = img.width();
+
+    for (x, y, pix) in img.enumerate_pixels_mut() {
+        let (closest_point, _) = points.nearest_neighbor(PointU32::new(x, y)).unwrap();
+
+        let c = f64::from(closest_point.x) / f64::from(img_width);
+        *pix = image::Rgb {
+            data: [
+                (f64::from(color1[0]) + c * dr) as u8,
+                (f64::from(color1[1]) + c * dg) as u8,
+                (f64::from(color1[2]) + c * db) as u8,
+            ],
+        };
+    }
+}
+
 /// Generate some random Voronoi diagrams.
 pub fn random_voronoi<R: Rng>(
     img: &mut image::RgbImage,
