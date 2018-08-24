@@ -6,7 +6,7 @@ extern crate num;
 use std::cmp::{Ord, Ordering};
 use std::collections::{BinaryHeap, VecDeque};
 
-use geo::Point;
+use geo::{Point, Rect};
 use utils::{ksmallest_by_key, split_element_at, OrdWrapper};
 
 /// The axis used to split the space at a given point.
@@ -44,6 +44,19 @@ struct Node<T, V> {
 
     left: Option<Box<Node<T, V>>>,
     right: Option<Box<Node<T, V>>>,
+}
+
+/// Simple trait that allow to support range queries for multiple types of
+/// shapes.
+pub trait Range<T> {
+    /// Return whether the given value is contained in the range.
+    fn contains(&self, v: &T) -> bool;
+
+    /// The type of the axis value.
+    type AxisValue;
+
+    /// Return the range that the axis values are in the given axis.
+    fn axis_value_range(&self, axis: Axis) -> (Self::AxisValue, Self::AxisValue);
 }
 
 impl<T, V> Default for KdTree<T, V> {
@@ -129,7 +142,49 @@ where
         old_value
     }
 
-    // TODO: range query
+    /// Return all the points that are in the given range.
+    pub fn in_range<'a, R>(self: &'a Self, range: &R) -> Vec<(&Point<T>, &V)>
+    where
+        R: Range<Point<T>, AxisValue = T>,
+    {
+        if self.root.is_none() {
+            return vec![];
+        }
+
+        let mut results = vec![];
+
+        let mut nodes = vec![self.root.as_ref().unwrap()];
+
+        while let Some(node) = nodes.pop() {
+            if range.contains(&node.median) {
+                results.push((&node.median, &node.value));
+            }
+
+            let (range_low, range_high) = range.axis_value_range(node.axis);
+            let median_axis_value = node.median.axis_value(node.axis);
+
+            let mut push_node = |node: &'a Option<Box<Node<T, V>>>| {
+                if let Some(ref n) = node {
+                    nodes.push(n);
+                }
+            };
+
+            // if there are no intersections between the range and the median
+            // axis value then search only on the side that contains the range.
+            // If there is an intersection then we must check both sides since
+            // the range could contain both of them.
+            if *median_axis_value < range_low {
+                push_node(&node.right);
+            } else if *median_axis_value > range_high {
+                push_node(&node.left);
+            } else {
+                push_node(&node.right);
+                push_node(&node.left);
+            }
+        }
+
+        results
+    }
 
     /// Return the nearest neighbor to the given point.
     pub fn nearest_neighbor(&self, point: Point<T>) -> Option<(&Point<T>, &V)>
@@ -271,6 +326,24 @@ impl<T> AxisValue for Point<T> {
     }
 }
 
+impl<T> Range<Point<T>> for Rect<T>
+where
+    T: num::Num + From<u8> + Copy + PartialOrd,
+{
+    type AxisValue = T;
+
+    fn contains(&self, point: &Point<T>) -> bool {
+        Rect::contains(self, point)
+    }
+
+    fn axis_value_range(&self, axis: Axis) -> (Self::AxisValue, Self::AxisValue) {
+        match axis {
+            Axis::X => (self.origin.x, self.origin.x + self.width),
+            Axis::Y => (self.origin.y, self.origin.y + self.height),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::{Axis, KdTree, Node};
@@ -280,7 +353,7 @@ mod test {
 
     use std::collections::HashSet;
 
-    use geo::PointU32;
+    use geo::{PointU32, Rect};
 
     #[test]
     fn test_from_vector() {
@@ -338,6 +411,70 @@ mod test {
     }
 
     #[test]
+    fn test_basic_range_query() {
+        let kdtree = KdTree::from_vector(vec![
+            (PointU32::new(0, 0), "origin"),
+            (PointU32::new(42, 73), "beautiful"),
+            (PointU32::new(7, 14), "random1"),
+            (PointU32::new(9, 1), "random2"),
+            (PointU32::new(6, 6), "number of the beast"),
+        ]);
+
+        assert_eq!(
+            kdtree.in_range(&Rect::new(PointU32::new(0, 0), 2, 5)),
+            vec![(&PointU32::new(0, 0), &"origin")]
+        );
+
+        assert_eq!(
+            kdtree.in_range(&Rect::new(PointU32::new(42, 73), 0, 0)),
+            vec![(&PointU32::new(42, 73), &"beautiful")]
+        );
+    }
+
+    proptest! {
+        #![proptest_config(proptest::test_runner::Config::with_cases(500))]
+        #[test]
+        fn prop_kdtree_in_range_same_as_loop(
+            points in proptest::collection::hash_set((0_u32..255, 0_u32..255), 0..100),
+            rect in (0_u32..255, 0_u32..255, 0_u32..255, 0_u32..255)
+        ) {
+            same_as_range_brute_force_loop(points, rect);
+        }
+    }
+
+    fn same_as_range_brute_force_loop(points: HashSet<(u32, u32)>, rect: (u32, u32, u32, u32)) {
+        let points = points
+            .into_iter()
+            .map(|(x, y)| (PointU32::new(x, y), ()))
+            .collect::<Vec<_>>();
+
+        let tree = KdTree::from_vector(points.clone());
+        let range = Rect::new(PointU32::new(rect.0, rect.1), rect.2, rect.3);
+
+        let mut contained_points = tree.in_range(&range);
+        let mut brute_force_contained_points = points
+            .iter()
+            .filter_map(|(pt, val)| {
+                if range.contains(pt) {
+                    Some((pt, val))
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        // arbitrary sorting just to ensure the order is the same in both arrays
+        fn sort(pts: &mut [(&PointU32, &())]) {
+            pts.sort_by_key(|(pt, _)| (pt.x, pt.y));
+        }
+
+        sort(&mut contained_points);
+        sort(&mut brute_force_contained_points);
+
+        assert_eq!(contained_points, brute_force_contained_points);
+    }
+
+    #[test]
     fn test_basic_nearest_neighbor() {
         let mut kdtree = KdTree::new();
         kdtree.add(PointU32::new(3, 0), "foo");
@@ -386,11 +523,11 @@ mod test {
             points in proptest::collection::hash_set((0_u32..255, 0_u32..255), 1..100),
             to_search in (0_u32..255, 0_u32..255)
         ) {
-            same_as_brute_force_loop(points, to_search);
+            same_as_nn_brute_force_loop(points, to_search);
         }
     }
 
-    fn same_as_brute_force_loop(points: HashSet<(u32, u32)>, to_search: (u32, u32)) {
+    fn same_as_nn_brute_force_loop(points: HashSet<(u32, u32)>, to_search: (u32, u32)) {
         let points = points
             .into_iter()
             .map(|(x, y)| (PointU32::new(x, y), ()))
