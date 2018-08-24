@@ -383,8 +383,8 @@ mod test {
         #![proptest_config(proptest::test_runner::Config::with_cases(500))]
         #[test]
         fn prop_kdtree_nearest_neight_same_as_loop(
-            points in proptest::collection::hash_set((0_u32..10, 0_u32..10), 1..5),
-            to_search in (0_u32..10, 0_u32..10)
+            points in proptest::collection::hash_set((0_u32..255, 0_u32..255), 1..100),
+            to_search in (0_u32..255, 0_u32..255)
         ) {
             same_as_brute_force_loop(points, to_search);
         }
