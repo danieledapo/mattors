@@ -142,6 +142,13 @@ where
         old_value
     }
 
+    /// Return an iterator over all the elements of the tree.
+    pub fn iter<'a>(self: &'a Self) -> KdTreeIter<'a, T, V> {
+        KdTreeIter {
+            nodes: self.root.as_ref().map(|r| vec![r]).unwrap_or_else(Vec::new),
+        }
+    }
+
     /// Return all the points that are in the given range.
     pub fn in_range_iter<'s, 'r, R>(self: &'s Self, range: &'r R) -> InRangeIter<'s, 'r, T, V, R>
     where
@@ -311,6 +318,29 @@ where
     }
 }
 
+/// Iterator over all the elements of a KdTree.
+pub struct KdTreeIter<'a, T: 'a, V: 'a> {
+    nodes: Vec<&'a Node<T, V>>,
+}
+
+impl<'a, T, V> Iterator for KdTreeIter<'a, T, V> {
+    type Item = (&'a Point<T>, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.nodes.pop().map(|node| {
+            if let Some(ref n) = node.right {
+                self.nodes.push(n);
+            }
+
+            if let Some(ref n) = node.left {
+                self.nodes.push(n);
+            }
+
+            (&node.median, &node.value)
+        })
+    }
+}
+
 /// Iterator over the points contained in the given range in the kdtree.
 pub struct InRangeIter<'a, 'r, T: 'a, V: 'a, R: 'r> {
     nodes: Vec<&'a Node<T, V>>,
@@ -368,6 +398,11 @@ mod test {
 
     use geo::{PointU32, Rect};
 
+    // arbitrary sorting just to ensure the order is the same in both arrays
+    fn sort_points(pts: &mut [(&PointU32, &())]) {
+        pts.sort_by_key(|(pt, _)| (pt.x, pt.y));
+    }
+
     #[test]
     fn test_from_vector() {
         let points = vec![
@@ -421,6 +456,27 @@ mod test {
                 })
             }
         );
+    }
+
+    proptest! {
+        #[test]
+        fn prop_kdtree_iter_same_points_as_input(
+            points in proptest::collection::hash_set((0_u32..255, 0_u32..255), 0..100)
+        ) {
+            let points = points
+                .into_iter()
+                .map(|(x, y)| (PointU32::new(x, y), ()))
+                .collect::<Vec<_>>();
+            let tree = KdTree::from_vector(points.clone());
+
+            let mut points = points.iter().map(|(pt, v)| (pt, v)).collect::<Vec<_>>();
+            let mut tree_points = tree.iter().collect::<Vec<_>>();
+
+            sort_points(&mut points);
+            sort_points(&mut tree_points);
+
+            assert_eq!(points, tree_points);
+        }
     }
 
     #[test]
@@ -480,13 +536,8 @@ mod test {
             })
             .collect::<Vec<_>>();
 
-        // arbitrary sorting just to ensure the order is the same in both arrays
-        fn sort(pts: &mut [(&PointU32, &())]) {
-            pts.sort_by_key(|(pt, _)| (pt.x, pt.y));
-        }
-
-        sort(&mut contained_points);
-        sort(&mut brute_force_contained_points);
+        sort_points(&mut contained_points);
+        sort_points(&mut brute_force_contained_points);
 
         assert_eq!(contained_points, brute_force_contained_points);
     }
