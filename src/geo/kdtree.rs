@@ -143,47 +143,14 @@ where
     }
 
     /// Return all the points that are in the given range.
-    pub fn in_range<'a, R>(self: &'a Self, range: &R) -> Vec<(&Point<T>, &V)>
+    pub fn in_range_iter<'s, 'r, R>(self: &'s Self, range: &'r R) -> InRangeIter<'s, 'r, T, V, R>
     where
         R: Range<Point<T>, AxisValue = T>,
     {
-        if self.root.is_none() {
-            return vec![];
+        InRangeIter {
+            nodes: self.root.as_ref().map(|r| vec![r]).unwrap_or_else(Vec::new),
+            range,
         }
-
-        let mut results = vec![];
-
-        let mut nodes = vec![self.root.as_ref().unwrap()];
-
-        while let Some(node) = nodes.pop() {
-            if range.contains(&node.median) {
-                results.push((&node.median, &node.value));
-            }
-
-            let (range_low, range_high) = range.axis_value_range(node.axis);
-            let median_axis_value = node.median.axis_value(node.axis);
-
-            let mut push_node = |node: &'a Option<Box<Node<T, V>>>| {
-                if let Some(ref n) = node {
-                    nodes.push(n);
-                }
-            };
-
-            // if there are no intersections between the range and the median
-            // axis value then search only on the side that contains the range.
-            // If there is an intersection then we must check both sides since
-            // the range could contain both of them.
-            if *median_axis_value < range_low {
-                push_node(&node.right);
-            } else if *median_axis_value > range_high {
-                push_node(&node.left);
-            } else {
-                push_node(&node.right);
-                push_node(&node.left);
-            }
-        }
-
-        results
     }
 
     /// Return the nearest neighbor to the given point.
@@ -344,6 +311,52 @@ where
     }
 }
 
+/// Iterator over the points contained in the given range in the kdtree.
+pub struct InRangeIter<'a, 'r, T: 'a, V: 'a, R: 'r> {
+    nodes: Vec<&'a Node<T, V>>,
+    range: &'r R,
+}
+
+impl<'a, 'r, T, V, R> Iterator for InRangeIter<'a, 'r, T, V, R>
+where
+    T: Copy + Ord,
+    R: Range<Point<T>, AxisValue = T>,
+{
+    type Item = (&'a Point<T>, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(node) = self.nodes.pop() {
+            let (range_low, range_high) = self.range.axis_value_range(node.axis);
+            let median_axis_value = node.median.axis_value(node.axis);
+
+            let mut push_node = |node: &'a Option<Box<Node<T, V>>>| {
+                if let Some(ref n) = node {
+                    self.nodes.push(n);
+                }
+            };
+
+            // if there are no intersections between the range and the median
+            // axis value then search only on the side that contains the range.
+            // If there is an intersection then we must check both sides since
+            // the range could contain both of them.
+            if *median_axis_value < range_low {
+                push_node(&node.right);
+            } else if *median_axis_value > range_high {
+                push_node(&node.left);
+            } else {
+                push_node(&node.right);
+                push_node(&node.left);
+            }
+
+            if self.range.contains(&node.median) {
+                return Some((&node.median, &node.value));
+            }
+        }
+
+        None
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::{Axis, KdTree, Node};
@@ -421,12 +434,16 @@ mod test {
         ]);
 
         assert_eq!(
-            kdtree.in_range(&Rect::new(PointU32::new(0, 0), 2, 5)),
+            kdtree
+                .in_range_iter(&Rect::new(PointU32::new(0, 0), 2, 5))
+                .collect::<Vec<_>>(),
             vec![(&PointU32::new(0, 0), &"origin")]
         );
 
         assert_eq!(
-            kdtree.in_range(&Rect::new(PointU32::new(42, 73), 0, 0)),
+            kdtree
+                .in_range_iter(&Rect::new(PointU32::new(42, 73), 0, 0))
+                .collect::<Vec<_>>(),
             vec![(&PointU32::new(42, 73), &"beautiful")]
         );
     }
@@ -451,7 +468,7 @@ mod test {
         let tree = KdTree::from_vector(points.clone());
         let range = Rect::new(PointU32::new(rect.0, rect.1), rect.2, rect.3);
 
-        let mut contained_points = tree.in_range(&range);
+        let mut contained_points = tree.in_range_iter(&range).collect::<Vec<_>>();
         let mut brute_force_contained_points = points
             .iter()
             .filter_map(|(pt, val)| {
