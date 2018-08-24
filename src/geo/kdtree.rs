@@ -9,6 +9,26 @@ use std::collections::{BinaryHeap, VecDeque};
 use geo::Point;
 use utils::{ksmallest_by_key, split_element_at, OrdWrapper};
 
+/// The axis used to split the space at a given point.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Axis {
+    /// X axis.
+    X,
+
+    /// Y axis.
+    Y,
+}
+
+/// Trait that allows to extract the axis value for a given axis from an entity
+/// contained in the KdTree.
+pub trait AxisValue {
+    /// The value that will be returned by axis_value.
+    type Value;
+
+    /// Return the value for the given axis.
+    fn axis_value(&self, axis: Axis) -> &Self::Value;
+}
+
 /// A [K-d Tree](https://en.wikipedia.org/wiki/K-d_tree).
 #[derive(Debug, PartialEq)]
 pub struct KdTree<T, V> {
@@ -18,7 +38,7 @@ pub struct KdTree<T, V> {
 
 #[derive(Debug, PartialEq)]
 struct Node<T, V> {
-    axis: u8,
+    axis: Axis,
     median: Point<T>,
     value: V,
 
@@ -38,6 +58,7 @@ impl<T, V> Default for KdTree<T, V> {
 impl<T, V> KdTree<T, V>
 where
     T: Copy + Ord,
+    Point<T>: AxisValue<Value = T>,
 {
     /// Create a new empty KdTree.
     pub fn new() -> Self {
@@ -62,7 +83,7 @@ where
         let mut kdtree = KdTree::default();
 
         let mut ranges = VecDeque::new();
-        ranges.push_back((points, 0));
+        ranges.push_back((points, Axis::X));
 
         while let Some((mut points, axis)) = ranges.pop_front() {
             if points.is_empty() {
@@ -73,7 +94,7 @@ where
 
             // this is actually partitioning data at the median
             ksmallest_by_key(&mut points, mid, |(pt, _val)| {
-                (axis_value(*pt, axis), axis_value(*pt, next_axis(axis)))
+                (*pt.axis_value(axis), *pt.axis_value(axis.next()))
             }).unwrap();
 
             let (left, elem, right) = split_element_at(points, mid);
@@ -81,8 +102,8 @@ where
             let (new_point, new_val) = elem.unwrap();
             kdtree.add(new_point, new_val);
 
-            ranges.push_back((left, next_axis(axis)));
-            ranges.push_back((right, next_axis(axis)));
+            ranges.push_back((left, axis.next()));
+            ranges.push_back((right, axis.next()));
         }
 
         kdtree
@@ -92,7 +113,7 @@ where
     /// prefer from_vector if the set of points is not dynamic.
     pub fn add(&mut self, point: Point<T>, value: V) -> Option<V> {
         if self.root.is_none() {
-            self.root = Some(Node::new(point, value, 0));
+            self.root = Some(Node::new(point, value, Axis::X));
             self.length = 1;
 
             return None;
@@ -160,8 +181,8 @@ where
                 // check if there could be intersection on the wrong side of the
                 // plane. This is done by checking whether the candidate point's
                 // axis is still reachable within the current minimum distance.
-                let split_plane = i64::from(axis_value(node.median, node.axis));
-                let plane_dist = i64::from(axis_value(point, node.axis)) - split_plane;
+                let split_plane = i64::from(*node.median.axis_value(node.axis));
+                let plane_dist = i64::from(*point.axis_value(node.axis)) - split_plane;
                 let plane_dist2 = plane_dist * plane_dist;
 
                 if plane_dist2 <= min_dist {
@@ -188,8 +209,9 @@ where
 impl<T, V> Node<T, V>
 where
     T: Copy + Ord,
+    Point<T>: AxisValue<Value = T>,
 {
-    fn new(pt: Point<T>, value: V, axis: u8) -> Self {
+    fn new(pt: Point<T>, value: V, axis: Axis) -> Self {
         Node {
             median: pt,
             axis,
@@ -211,7 +233,7 @@ where
         };
 
         if child.is_none() {
-            *child = Some(Box::new(Node::new(point, value, next_axis(self.axis))));
+            *child = Some(Box::new(Node::new(point, value, self.axis.next())));
             return None;
         }
 
@@ -221,28 +243,37 @@ where
     /// Return whether the given point lies before, in the same place or after
     /// this point.
     fn cmp_to_point_value(&self, point: Point<T>) -> Ordering {
-        let cur_axis_value = axis_value(self.median, self.axis);
-        let point_axis_value = axis_value(point, self.axis);
+        let cur_axis_value = self.median.axis_value(self.axis);
+        let point_axis_value = point.axis_value(self.axis);
 
         point_axis_value.cmp(&cur_axis_value)
     }
 }
 
-fn next_axis(axis: u8) -> u8 {
-    (axis + 1) % 2
+impl Axis {
+    /// Return the next axis, going back to the beginning if necessary.
+    pub fn next(self) -> Self {
+        match self {
+            Axis::X => Axis::Y,
+            Axis::Y => Axis::X,
+        }
+    }
 }
 
-fn axis_value<T>(pt: Point<T>, axis: u8) -> T {
-    match axis {
-        0 => pt.x,
-        1 => pt.y,
-        _ => unimplemented!("kd tree only works for 2d points"),
+impl<T> AxisValue for Point<T> {
+    type Value = T;
+
+    fn axis_value(&self, axis: Axis) -> &Self::Value {
+        match axis {
+            Axis::X => &self.x,
+            Axis::Y => &self.y,
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::{KdTree, Node};
+    use super::{Axis, KdTree, Node};
 
     extern crate num;
     extern crate proptest;
@@ -276,29 +307,29 @@ mod test {
                 length: 7,
                 root: Some(Node {
                     median: PointU32::new(4, 5),
-                    axis: 0,
+                    axis: Axis::X,
                     value: "root",
 
                     left: Some(Box::new(Node {
                         median: PointU32::new(1, 2),
-                        axis: 1,
+                        axis: Axis::Y,
                         value: "p(1,2)",
-                        left: Some(Box::new(Node::new(PointU32::new(0, 0), "p(0,0)", 0))),
+                        left: Some(Box::new(Node::new(PointU32::new(0, 0), "p(0,0)", Axis::X))),
                         right: Some(Box::new(Node {
                             median: PointU32::new(2, 9),
-                            axis: 0,
+                            axis: Axis::X,
                             value: "p(2,9)",
 
-                            left: Some(Box::new(Node::new(PointU32::new(2, 8), "p(2,8)", 1))),
+                            left: Some(Box::new(Node::new(PointU32::new(2, 8), "p(2,8)", Axis::Y))),
                             right: None,
                         })),
                     })),
 
                     right: Some(Box::new(Node {
                         median: PointU32::new(7, 8),
-                        axis: 1,
+                        axis: Axis::Y,
                         value: "p(7,8)",
-                        left: Some(Box::new(Node::new(PointU32::new(5, 2), "p(5,2)", 0))),
+                        left: Some(Box::new(Node::new(PointU32::new(5, 2), "p(5,2)", Axis::X))),
                         right: None,
                     })),
                 })
