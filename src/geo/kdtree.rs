@@ -143,7 +143,7 @@ where
     }
 
     /// Return an iterator over all the elements of the tree.
-    pub fn iter<'a>(self: &'a Self) -> KdTreeIter<'a, T, V> {
+    pub fn iter(&self) -> KdTreeIter<T, V> {
         KdTreeIter {
             nodes: self.root.as_ref().map(|r| vec![r]).unwrap_or_else(Vec::new),
         }

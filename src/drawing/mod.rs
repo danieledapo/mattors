@@ -170,13 +170,13 @@ where
     pub fn hollow_polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
         let mut points = points.into_iter();
 
-        points.next().map(|first| {
+        if let Some(first) = points.next() {
             points.fold(first, |prev, cur| {
                 self.line(prev, cur, pix);
 
                 cur
             });
-        });
+        }
     }
 
     /// Draw a polygon filled with the given pixel using a simplified version of
