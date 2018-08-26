@@ -340,34 +340,46 @@ pub struct Voronoi {
 }
 
 fn main() {
-    let mut img = image::RgbImage::new(100, 100);
+    let mut img = image::RgbImage::new(600, 600);
 
     {
         let mut drawer = matto::drawing::Drawer::new_with_no_blending(&mut img);
 
         // use rand::Rng;
         // let mut rng = rand::thread_rng();
-        // let points = (0..rng.gen_range(3, 8)).map(|_| {
-        //     let x = rng.gen_range(0, 100);
-        //     let y = rng.gen_range(0, 100);
+        // let points = (0..rng.gen_range(1, 10)).map(|_| {
+        //     let x = rng.gen_range(0, 600);
+        //     let y = rng.gen_range(0, 600);
 
         //     PointU32::new(x, y)
         // });
 
-        let points = vec![
-            PointU32::new(10, 20),
-            PointU32::new(20, 0),
-            PointU32::new(30, 20),
-            PointU32::new(60, 20),
-            PointU32::new(70, 10),
-            PointU32::new(60, 80),
-        ];
+        // let points = vec![
+        //     PointU32::new(10, 20),
+        //     PointU32::new(20, 0),
+        //     PointU32::new(30, 20),
+        //     PointU32::new(60, 20),
+        //     PointU32::new(70, 10),
+        //     PointU32::new(60, 80),
+        // ];
+        // drawer.line(
+        //     PointU32::new(30, 20),
+        //     PointU32::new(60, 20),
+        //     &image::Rgb { data: [0xFF, 0, 0] },
+        // );
 
-        drawer.line(
-            PointU32::new(30, 20),
-            PointU32::new(60, 20),
-            &image::Rgb { data: [0xFF, 0, 0] },
-        );
+        // self intersecting polygon
+        let points = vec![
+            matto::geo::Point { x: 392, y: 23 },
+            matto::geo::Point { x: 134, y: 59 },
+            matto::geo::Point { x: 251, y: 127 },
+            matto::geo::Point { x: 266, y: 143 },
+            matto::geo::Point { x: 380, y: 183 },
+            matto::geo::Point { x: 337, y: 44 },
+            matto::geo::Point { x: 229, y: 20 },
+            matto::geo::Point { x: 378, y: 496 },
+            matto::geo::Point { x: 392, y: 23 },
+        ];
 
         drawer.polygon(
             points,

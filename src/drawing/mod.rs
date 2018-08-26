@@ -179,11 +179,25 @@ where
         });
     }
 
-    /// Draw a polygon filled with the given pixel using the polygon fill algorithm.
+    /// Draw a polygon filled with the given pixel using a simplified version of
+    /// the polygon fill algorithm.
     pub fn polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
+        // TODO: doesn't work with self intersecting points. The fix could be to
+        // find the convex hull of the points and use that as the set of edges.
+
         let mut points = points.into_iter().collect::<Vec<_>>();
 
         if points.is_empty() {
+            return;
+        }
+
+        if points.len() == 1 {
+            self.draw_pixel(points[0].x, points[0].y, pix);
+            return;
+        }
+
+        if points.len() == 2 {
+            self.line(points[0], points[1], pix);
             return;
         }
 
@@ -197,8 +211,6 @@ where
             .fold((u32::max_value(), u32::min_value()), |(ymin, ymax), pt| {
                 (ymin.min(pt.y), ymax.max(pt.y))
             });
-
-        println!("points: {:?} ymin: {:?} ymax {:?}", points, ymin, ymax);
 
         for y in ymin..=ymax {
             let intersected_segments = points.windows(2).filter(|edge| {
