@@ -184,6 +184,8 @@ where
     pub fn polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
         // TODO: doesn't work with self intersecting points. The fix could be to
         // find the convex hull of the points and use that as the set of edges.
+        // EDIT: cannot use convex hull because the polygon is not the same
+        // since it doesn't take into account intersections.
 
         let mut points = points.into_iter().collect::<Vec<_>>();
 

@@ -1,6 +1,7 @@
 //! Geometric functions, algorithms and data structures.
 
 pub mod angle;
+pub mod convex_hull;
 pub mod delaunay;
 pub mod kdtree;
 pub mod line;
