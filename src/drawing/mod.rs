@@ -15,7 +15,7 @@ use self::image::Pixel;
 use self::line::BresenhamLineIter;
 use self::triangle::FlatTriangleIter;
 
-use geo::{Point, PointU32};
+use geo::{LineEquation, Point, PointU32};
 
 /// The `Blender` is the function that decides how to merge two pixels together.
 pub trait Blender<P: image::Pixel> {
@@ -162,6 +162,76 @@ where
                     }
                 }
                 _ => break,
+            }
+        }
+    }
+
+    /// Draw a hollow polygon.
+    pub fn hollow_polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
+        let mut points = points.into_iter();
+
+        points.next().map(|first| {
+            points.fold(first, |prev, cur| {
+                self.line(prev, cur, pix);
+
+                cur
+            });
+        });
+    }
+
+    /// Draw a polygon filled with the given pixel using the polygon fill algorithm.
+    pub fn polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
+        let mut points = points.into_iter().collect::<Vec<_>>();
+
+        if points.is_empty() {
+            return;
+        }
+
+        if points[0] != points[points.len() - 1] {
+            let p = points[0];
+            points.push(p);
+        }
+
+        let (ymin, ymax) = points
+            .iter()
+            .fold((u32::max_value(), u32::min_value()), |(ymin, ymax), pt| {
+                (ymin.min(pt.y), ymax.max(pt.y))
+            });
+
+        println!("points: {:?} ymin: {:?} ymax {:?}", points, ymin, ymax);
+
+        for y in ymin..=ymax {
+            let intersected_segments = points.windows(2).filter(|edge| {
+                let (edge_min_y, edge_max_y) = if edge[0].y < edge[1].y {
+                    (edge[0].y, edge[1].y)
+                } else {
+                    (edge[1].y, edge[0].y)
+                };
+
+                edge_min_y <= y && edge_max_y > y
+            });
+
+            let mut xs = intersected_segments
+                .map(|edge| {
+                    let line =
+                        LineEquation::between(&edge[0].cast::<f64>(), &edge[1].cast::<f64>());
+
+                    let x = line.x_at(f64::from(y)).unwrap();
+                    debug_assert!(x >= 0.0 && x <= f64::from(u32::max_value()));
+
+                    x as u32
+                })
+                .collect::<Vec<_>>();
+            xs.sort_unstable();
+
+            for pixs in xs.chunks(2) {
+                if pixs.len() < 2 {
+                    break;
+                }
+
+                for x in pixs[0]..=pixs[1] {
+                    self.draw_pixel(x, y, pix);
+                }
             }
         }
     }

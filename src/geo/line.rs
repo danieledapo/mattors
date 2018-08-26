@@ -74,6 +74,36 @@ where
         }
     }
 
+    /// Calculate the x coordinate at the given y. Returns `None` if it's a
+    /// horizontal line.
+    pub fn x_at(&self, y: T) -> Option<T> {
+        match *self {
+            LineEquation::VerticalLine(x) => Some(x),
+            LineEquation::Line { slope, yintercept } => {
+                if slope == T::from(0) {
+                    None
+                } else {
+                    Some((y - yintercept) / slope)
+                }
+            }
+        }
+    }
+
+    /// Return the delta x that corresponds to the given dy. `None` if the line
+    /// is horizontal.
+    pub fn dx_for(&self, dy: T) -> Option<T> {
+        match *self {
+            LineEquation::VerticalLine(_) => Some(T::from(0)),
+            LineEquation::Line { slope, .. } => {
+                if slope == T::from(0) {
+                    None
+                } else {
+                    Some(dy / slope)
+                }
+            }
+        }
+    }
+
     /// Calculate the intersection point between two lines. Returns `None` if
     /// the lines are parallel. **Note**: this method returns `None` even when
     /// `self` and `other` are the same `VerticalLine`.
@@ -183,6 +213,40 @@ mod test {
         let vertical = LineEquation::vertical(2);
         assert_eq!(vertical.y_at(7), None);
         assert_eq!(vertical.y_at(2), None);
+    }
+
+    #[test]
+    fn test_line_xat() {
+        let line1 = LineEquation::between(&PointI32::new(3, 4), &PointI32::new(9, 10));
+        assert_eq!(line1.x_at(4), Some(3));
+        assert_eq!(line1.x_at(10), Some(9));
+        assert_eq!(line1.x_at(1), Some(0));
+
+        let horizontal = LineEquation::horizonal(73);
+        assert_eq!(horizontal.x_at(0), None);
+        assert_eq!(horizontal.x_at(3), None);
+        assert_eq!(horizontal.x_at(-4), None);
+
+        let vertical = LineEquation::vertical(2);
+        assert_eq!(vertical.x_at(0), Some(2));
+        assert_eq!(vertical.x_at(-42), Some(2));
+    }
+
+    #[test]
+    fn test_line_dx_for() {
+        let line1 = LineEquation::between(&PointI32::new(3, 4), &PointI32::new(9, 10));
+        assert_eq!(line1.dx_for(5), Some(5));
+        assert_eq!(line1.dx_for(-3), Some(-3));
+        assert_eq!(line1.dx_for(0), Some(0));
+
+        let horizontal = LineEquation::horizonal(73);
+        assert_eq!(horizontal.dx_for(0), None);
+        assert_eq!(horizontal.dx_for(3), None);
+        assert_eq!(horizontal.dx_for(-4), None);
+
+        let vertical = LineEquation::vertical(2);
+        assert_eq!(vertical.dx_for(0), Some(0));
+        assert_eq!(vertical.dx_for(-42), Some(0));
     }
 
     #[test]
