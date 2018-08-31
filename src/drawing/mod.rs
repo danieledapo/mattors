@@ -171,11 +171,13 @@ where
         let mut points = points.into_iter();
 
         if let Some(first) = points.next() {
-            points.fold(first, |prev, cur| {
+            let last = points.fold(first, |prev, cur| {
                 self.line(prev, cur, pix);
 
                 cur
             });
+
+            self.line(last, first, pix);
         }
     }
 
