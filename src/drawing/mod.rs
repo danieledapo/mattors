@@ -182,13 +182,9 @@ where
     }
 
     /// Draw a polygon filled with the given pixel using a simplified version of
-    /// the polygon fill algorithm.
+    /// the polygon fill algorithm. Doesn't work with self intersecting polygons
+    /// and it does no checks to prevent that.
     pub fn polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
-        // TODO: doesn't work with self intersecting points. The fix could be to
-        // find the convex hull of the points and use that as the set of edges.
-        // EDIT: cannot use convex hull because the polygon is not the same
-        // since it doesn't take into account intersections.
-
         let mut points = points.into_iter().collect::<Vec<_>>();
 
         if points.is_empty() {
@@ -251,6 +247,23 @@ where
             }
         }
     }
+
+    // TODO: implement a version of polygon that works with self-intersecting
+    // polygons. Example points for a self-intersecting polygon:
+    //
+    // let points = vec![
+    //     matto::geo::Point { x: 392, y: 23 },
+    //     matto::geo::Point { x: 134, y: 59 },
+    //     matto::geo::Point { x: 251, y: 127 },
+    //     matto::geo::Point { x: 266, y: 143 },
+    //     matto::geo::Point { x: 380, y: 183 },
+    //     matto::geo::Point { x: 337, y: 44 },
+    //     matto::geo::Point { x: 229, y: 20 },
+    //     matto::geo::Point { x: 378, y: 496 },
+    //     matto::geo::Point { x: 392, y: 23 },
+    // ];
+    //
+    // pub fn polygon_flood_fill()
 }
 
 impl<'a, I, B> Drawer<'a, I, B>
