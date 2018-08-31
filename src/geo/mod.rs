@@ -4,6 +4,7 @@ pub mod angle;
 pub mod convex_hull;
 pub mod delaunay;
 pub mod kdtree;
+pub mod kmeans;
 pub mod line;
 pub mod point;
 pub mod rect;
