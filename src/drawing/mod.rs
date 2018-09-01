@@ -15,6 +15,7 @@ use self::image::Pixel;
 use self::line::BresenhamLineIter;
 use self::triangle::FlatTriangleIter;
 
+use geo::polygon::Polygon;
 use geo::{LineEquation, Point, PointU32};
 
 /// The `Blender` is the function that decides how to merge two pixels together.
@@ -166,8 +167,9 @@ where
         }
     }
 
-    /// Draw a hollow polygon.
-    pub fn hollow_polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
+    /// Draw a closed path formed by the given set of points. Note that the line
+    /// between the first and the last point is automatically drawn.
+    pub fn closed_path<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
         let mut points = points.into_iter();
 
         if let Some(first) = points.next() {
@@ -184,49 +186,28 @@ where
     /// Draw a polygon filled with the given pixel using a simplified version of
     /// the polygon fill algorithm. Doesn't work with self intersecting polygons
     /// and it does no checks to prevent that.
-    pub fn polygon<P: IntoIterator<Item = PointU32>>(&mut self, points: P, pix: &I::Pixel) {
-        let mut points = points.into_iter().collect::<Vec<_>>();
-
-        if points.is_empty() {
-            return;
-        }
-
-        if points.len() == 1 {
-            self.draw_pixel(points[0].x, points[0].y, pix);
-            return;
-        }
-
-        if points.len() == 2 {
-            self.line(points[0], points[1], pix);
-            return;
-        }
-
-        if points[0] != points[points.len() - 1] {
-            let p = points[0];
-            points.push(p);
-        }
-
-        let (ymin, ymax) = points
+    pub fn polygon(&mut self, polygon: &Polygon<u32>, pix: &I::Pixel) {
+        let (ymin, ymax) = polygon
+            .points()
             .iter()
             .fold((u32::max_value(), u32::min_value()), |(ymin, ymax), pt| {
                 (ymin.min(pt.y), ymax.max(pt.y))
             });
 
         for y in ymin..=ymax {
-            let intersected_segments = points.windows(2).filter(|edge| {
-                let (edge_min_y, edge_max_y) = if edge[0].y < edge[1].y {
-                    (edge[0].y, edge[1].y)
+            let intersected_segments = polygon.edges().filter(|(p0, p1)| {
+                let (edge_min_y, edge_max_y) = if p0.y < p1.y {
+                    (p0.y, p1.y)
                 } else {
-                    (edge[1].y, edge[0].y)
+                    (p1.y, p0.y)
                 };
 
                 edge_min_y <= y && edge_max_y > y
             });
 
             let mut xs = intersected_segments
-                .map(|edge| {
-                    let line =
-                        LineEquation::between(&edge[0].cast::<f64>(), &edge[1].cast::<f64>());
+                .map(|(p0, p1)| {
+                    let line = LineEquation::between(&p0.cast::<f64>(), &p1.cast::<f64>());
 
                     let x = line.x_at(f64::from(y)).unwrap();
                     debug_assert!(x >= 0.0 && x <= f64::from(u32::max_value()));
@@ -234,6 +215,7 @@ where
                     x as u32
                 })
                 .collect::<Vec<_>>();
+
             xs.sort_unstable();
 
             for pixs in xs.chunks(2) {

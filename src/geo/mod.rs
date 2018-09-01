@@ -7,6 +7,7 @@ pub mod kdtree;
 pub mod kmeans;
 pub mod line;
 pub mod point;
+pub mod polygon;
 pub mod rect;
 pub mod triangle;
 
