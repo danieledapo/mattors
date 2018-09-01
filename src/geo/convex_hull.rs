@@ -67,6 +67,10 @@ where
 mod tests {
     use super::convex_hull;
 
+    extern crate proptest;
+
+    use proptest::prelude::*;
+
     use geo::Point;
 
     #[test]
@@ -94,5 +98,32 @@ mod tests {
                 Point::new(134.0, 59.0),
             ]
         );
+    }
+
+    proptest! {
+        #![proptest_config(proptest::test_runner::Config::with_cases(500))]
+        #[test]
+        fn prop_convex_hull_lies_on_boundary(
+            points in prop::collection::vec((0_u8..255, 0_u8..255), 1..100)
+        ) {
+            _prop_convex_hull_lies_on_boundary(points)
+        }
+    }
+
+    fn _prop_convex_hull_lies_on_boundary(points: Vec<(u8, u8)>) {
+        let points = points
+            .into_iter()
+            .map(|(x, y)| Point::new(x, y))
+            .collect::<Vec<_>>();
+
+        let hull = convex_hull(points.iter().map(|p| p.cast::<f64>()));
+
+        for pt in hull {
+            let pt = Point::new(pt.x as u8, pt.y as u8);
+
+            let on_boundary = points.iter().find(|h| **h == pt).is_some();
+
+            assert!(on_boundary);
+        }
     }
 }
