@@ -6,7 +6,7 @@ extern crate num;
 use std::cmp::{Ord, Ordering};
 use std::collections::{BinaryHeap, VecDeque};
 
-use geo::{Point, Rect};
+use geo::{BoundingBox, Point};
 use utils::{ksmallest_by_key, split_element_at, OrdWrapper};
 
 /// The axis used to split the space at a given point.
@@ -300,20 +300,20 @@ impl<T> AxisValue for Point<T> {
     }
 }
 
-impl<T> Range<Point<T>> for Rect<T>
+impl<T> Range<Point<T>> for BoundingBox<T>
 where
-    T: num::Num + From<u8> + Copy + PartialOrd,
+    T: num::Num + num::Bounded + From<u8> + Copy + PartialOrd,
 {
     type AxisValue = T;
 
     fn contains(&self, point: &Point<T>) -> bool {
-        Rect::contains(self, point)
+        BoundingBox::contains(self, point)
     }
 
     fn axis_value_range(&self, axis: Axis) -> (Self::AxisValue, Self::AxisValue) {
         match axis {
-            Axis::X => (self.origin.x, self.origin.x + self.width),
-            Axis::Y => (self.origin.y, self.origin.y + self.height),
+            Axis::X => (self.min().x, self.max().x),
+            Axis::Y => (self.min().y, self.max().y),
         }
     }
 }
@@ -396,7 +396,7 @@ mod test {
 
     use std::collections::HashSet;
 
-    use geo::{PointU32, Rect};
+    use geo::{BoundingBox, PointU32};
 
     // arbitrary sorting just to ensure the order is the same in both arrays
     fn sort_points(pts: &mut [(&PointU32, &())]) {
@@ -491,14 +491,18 @@ mod test {
 
         assert_eq!(
             kdtree
-                .in_range_iter(&Rect::new(PointU32::new(0, 0), 2, 5))
+                .in_range_iter(&BoundingBox::from_dimensions(2, 5))
                 .collect::<Vec<_>>(),
             vec![(&PointU32::new(0, 0), &"origin")]
         );
 
         assert_eq!(
             kdtree
-                .in_range_iter(&Rect::new(PointU32::new(42, 73), 0, 0))
+                .in_range_iter(&BoundingBox::from_dimensions_and_origin(
+                    &PointU32::new(42, 73),
+                    0,
+                    0
+                ))
                 .collect::<Vec<_>>(),
             vec![(&PointU32::new(42, 73), &"beautiful")]
         );
@@ -522,7 +526,8 @@ mod test {
             .collect::<Vec<_>>();
 
         let tree = KdTree::from_vector(points.clone());
-        let range = Rect::new(PointU32::new(rect.0, rect.1), rect.2, rect.3);
+        let range =
+            BoundingBox::from_dimensions_and_origin(&PointU32::new(rect.0, rect.1), rect.2, rect.3);
 
         let mut contained_points = tree.in_range_iter(&range).collect::<Vec<_>>();
         let mut brute_force_contained_points = points

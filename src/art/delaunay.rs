@@ -7,7 +7,7 @@ use self::rand::Rng;
 
 use color::{random_color, RandomColorConfig};
 use drawing;
-use geo::{delaunay, PointF64, PointU32, Rect};
+use geo::{delaunay, BoundingBox, PointF64, PointU32};
 
 /// Generate a random triangulation and draws it onto the given image. The
 /// points are generated randomly but the image is divided into a grid and each
@@ -21,11 +21,7 @@ pub fn random_triangulation<R: Rng>(
     let points = random_points_in_grid(img.width(), img.height(), grid_size);
 
     let triangles = delaunay::triangulate(
-        &Rect::new(
-            PointF64::new(0.0, 0.0),
-            f64::from(img.width()),
-            f64::from(img.height()),
-        ),
+        &BoundingBox::from_dimensions(f64::from(img.width()), f64::from(img.height())),
         points,
     );
 

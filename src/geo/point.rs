@@ -90,18 +90,28 @@ where
 
 impl<T> Point<T>
 where
-    T: num::Num + From<u8> + Copy + Ord,
+    T: num::Num + From<u8> + Copy + PartialOrd,
 {
     /// Handy method that returns a point that's composed by the highest x and y
     /// values among the two points.
-    pub fn top_right(&self, other: &Self) -> Self {
-        Point::new(self.x.max(other.x), self.y.max(other.y))
+    pub fn highest(&self, other: &Self) -> Self {
+        let x =
+            if self.x > other.x { self.x } else { other.x };
+        let y =
+            if self.y > other.y { self.y } else { other.y };
+
+        Point::new(x, y)
     }
 
     /// Handy method that returns a point that's composed by the lowest x and y
     /// values among the two points.
-    pub fn bottom_left(&self, other: &Self) -> Self {
-        Point::new(self.x.min(other.x), self.y.min(other.y))
+    pub fn lowest(&self, other: &Self) -> Self {
+        let x =
+            if self.x < other.x { self.x } else { other.x };
+        let y =
+            if self.y < other.y { self.y } else { other.y };
+
+        Point::new(x, y)
     }
 }
 
@@ -215,41 +225,41 @@ mod test {
     }
 
     #[test]
-    fn test_top_right() {
+    fn test_highest() {
         assert_eq!(
-            PointU32::new(0, 0).top_right(&PointU32::new(4, 10)),
+            PointU32::new(0, 0).highest(&PointU32::new(4, 10)),
             PointU32::new(4, 10)
         );
         assert_eq!(
-            PointU32::new(10, 0).top_right(&PointU32::new(4, 10)),
+            PointU32::new(10, 0).highest(&PointU32::new(4, 10)),
             PointU32::new(10, 10)
         );
         assert_eq!(
-            PointU32::new(0, 12).top_right(&PointU32::new(4, 10)),
+            PointU32::new(0, 12).highest(&PointU32::new(4, 10)),
             PointU32::new(4, 12)
         );
         assert_eq!(
-            PointU32::new(10, 12).top_right(&PointU32::new(4, 10)),
+            PointU32::new(10, 12).highest(&PointU32::new(4, 10)),
             PointU32::new(10, 12)
         );
     }
 
     #[test]
-    fn test_bottom_left() {
+    fn test_lowest() {
         assert_eq!(
-            PointU32::new(0, 0).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(0, 0).lowest(&PointU32::new(4, 10)),
             PointU32::new(0, 0)
         );
         assert_eq!(
-            PointU32::new(10, 0).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(10, 0).lowest(&PointU32::new(4, 10)),
             PointU32::new(4, 0)
         );
         assert_eq!(
-            PointU32::new(0, 12).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(0, 12).lowest(&PointU32::new(4, 10)),
             PointU32::new(0, 10)
         );
         assert_eq!(
-            PointU32::new(10, 12).bottom_left(&PointU32::new(4, 10)),
+            PointU32::new(10, 12).lowest(&PointU32::new(4, 10)),
             PointU32::new(4, 10)
         );
     }

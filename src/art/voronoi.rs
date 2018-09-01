@@ -6,7 +6,7 @@ extern crate rand;
 use std::collections::HashSet;
 
 use color::{random_color, RandomColorConfig};
-use geo::{kdtree, PointU32, Rect};
+use geo::{kdtree, BoundingBox, PointU32};
 
 use self::rand::Rng;
 
@@ -25,7 +25,7 @@ pub fn gradient_voronoi(
     let random_points = generate_distinct_random_points(
         &mut rand::thread_rng(),
         npoints,
-        &Rect::new(PointU32::new(0, 0), img.width(), img.height()),
+        &BoundingBox::from_dimensions(img.width(), img.height()),
     );
 
     let points = random_points.iter().map(|pt| (*pt, ())).collect();
@@ -64,7 +64,7 @@ pub fn random_voronoi<R: Rng>(
     let random_points = generate_distinct_random_points(
         &mut rand::thread_rng(),
         npoints,
-        &Rect::new(PointU32::new(0, 0), img.width(), img.height()),
+        &BoundingBox::from_dimensions(img.width(), img.height()),
     );
 
     let points = random_points
@@ -95,7 +95,7 @@ pub fn random_voronoi<R: Rng>(
 fn generate_distinct_random_points<R: Rng>(
     rng: &mut R,
     n: usize,
-    bbox: &Rect<u32>,
+    bbox: &BoundingBox<u32>,
 ) -> HashSet<PointU32> {
     let mut points = HashSet::new();
 
@@ -103,8 +103,8 @@ fn generate_distinct_random_points<R: Rng>(
     // TODO: if n is high it's probably faster to generate all the points and
     // shuffle the array.
     while points.len() < n {
-        let x = rng.gen_range(bbox.origin.x, bbox.origin.x + bbox.width);
-        let y = rng.gen_range(bbox.origin.y, bbox.origin.y + bbox.height);
+        let x = rng.gen_range(bbox.min().x, bbox.max().x);
+        let y = rng.gen_range(bbox.min().y, bbox.max().y);
 
         points.insert(PointU32::new(x, y));
     }

@@ -1,11 +1,11 @@
 //! Simple module that implements [Delaunay
 //! triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation)
 
-use geo::{Point, PointF64, Rect, Triangle};
+use geo::{BoundingBox, Point, PointF64, Triangle};
 
 /// Triangulate the given set of points. This blows up if degenerate triangles
 /// are formed(e.g. completely flat triangles).
-pub fn triangulate(bounding_box: &Rect<f64>, points: Vec<PointF64>) -> Vec<Triangle<f64>> {
+pub fn triangulate(bounding_box: &BoundingBox<f64>, points: Vec<PointF64>) -> Vec<Triangle<f64>> {
     if points.len() < 3 {
         return vec![];
     }
@@ -26,7 +26,7 @@ pub fn triangulate(bounding_box: &Rect<f64>, points: Vec<PointF64>) -> Vec<Trian
 // point and divide the bounding box in 4 triangles that always cover the
 // entire space. It's not acceptable for real triangulation but we're having
 // fun here :).
-fn super_triangles(bounding_box: &Rect<f64>, first_point: &PointF64) -> Vec<Triangle<f64>> {
+fn super_triangles(bounding_box: &BoundingBox<f64>, first_point: &PointF64) -> Vec<Triangle<f64>> {
     let bounds = bounding_box.points();
 
     (0..bounds.len())
