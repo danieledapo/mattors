@@ -27,6 +27,7 @@ use matto::art::delaunay;
 use matto::art::dragon;
 use matto::art::fractree;
 use matto::art::julia::{FractalPoint, JuliaGenIter};
+use matto::art::patchwork;
 use matto::art::primi;
 use matto::art::primi::Shape;
 use matto::art::quantize;
@@ -94,6 +95,10 @@ pub enum Command {
     /// Generate some Voronoi Diagrams.
     #[structopt(name = "voronoi")]
     Voronoi(Voronoi),
+
+    /// Generate some art according to the Patchwork algorithm.
+    #[structopt(name = "patchwork")]
+    Patchwork(Patchwork),
 }
 
 /// Julia Set settings.
@@ -339,58 +344,32 @@ pub struct Voronoi {
     output_path: PathBuf,
 }
 
+/// Generate some art according to the PatchWork algorithm.
+#[derive(StructOpt, Debug)]
+pub struct Patchwork {
+    /// Number of points used to calculate clusters and convex hulls.
+    #[structopt(short = "p", long = "points", default_value = "5000")]
+    npoints: usize,
+
+    /// How many clusters to calculate at each step. Works best with low
+    /// numbers.
+    #[structopt(short = "c", long = "clusters", default_value = "3")]
+    clusters: usize,
+
+    /// Width of the image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
+    width: u32,
+
+    /// Height of the image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
+    height: u32,
+
+    /// Where to write the final image.
+    #[structopt(short = "o", long = "output", default_value = "patchwork.png", parse(from_os_str))]
+    output_path: PathBuf,
+}
+
 fn main() {
-    let mut img = image::RgbImage::new(600, 600);
-
-    {
-        let mut drawer = matto::drawing::Drawer::new_with_no_blending(&mut img);
-
-        // use rand::Rng;
-        // let mut rng = rand::thread_rng();
-        // let points = (0..rng.gen_range(1, 10)).map(|_| {
-        //     let x = rng.gen_range(0, 600);
-        //     let y = rng.gen_range(0, 600);
-
-        //     PointU32::new(x, y)
-        // });
-
-        // let points = vec![
-        //     PointU32::new(10, 20),
-        //     PointU32::new(20, 0),
-        //     PointU32::new(30, 20),
-        //     PointU32::new(60, 20),
-        //     PointU32::new(70, 10),
-        //     PointU32::new(60, 80),
-        // ];
-        // drawer.line(
-        //     PointU32::new(30, 20),
-        //     PointU32::new(60, 20),
-        //     &image::Rgb { data: [0xFF, 0, 0] },
-        // );
-
-        // self intersecting polygon
-        let points = vec![
-            matto::geo::Point { x: 392, y: 23 },
-            matto::geo::Point { x: 134, y: 59 },
-            matto::geo::Point { x: 251, y: 127 },
-            matto::geo::Point { x: 266, y: 143 },
-            matto::geo::Point { x: 380, y: 183 },
-            matto::geo::Point { x: 337, y: 44 },
-            matto::geo::Point { x: 229, y: 20 },
-            matto::geo::Point { x: 378, y: 496 },
-            matto::geo::Point { x: 392, y: 23 },
-        ];
-
-        drawer.polygon(
-            points,
-            &image::Rgb {
-                data: [0x40, 0xbe, 0xcd],
-            },
-        );
-    }
-
-    img.save("poly.png").unwrap();
-
     let command = Command::from_args();
 
     match command {
@@ -423,6 +402,7 @@ fn main() {
         Command::Runes(ref config) => runes(config),
         Command::Delaunay(ref config) => delaunay(config),
         Command::Voronoi(ref config) => voronoi(config),
+        Command::Patchwork(ref config) => patchwork(config),
     }
 }
 
@@ -750,6 +730,20 @@ fn voronoi(config: &Voronoi) {
     } else {
         voronoi::random_voronoi(&mut img, &mut color_config, config.npoints);
     }
+
+    img.save(&config.output_path).expect("cannot save image");
+}
+
+fn patchwork(config: &Patchwork) {
+    let mut img = image::RgbImage::from_pixel(
+        config.width,
+        config.height,
+        image::Rgb {
+            data: [0xFD, 0xFD, 0xFF],
+        },
+    );
+
+    patchwork::random_patchwork(&mut img, config.npoints, config.clusters);
 
     img.save(&config.output_path).expect("cannot save image");
 }
