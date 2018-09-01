@@ -3,12 +3,11 @@
 extern crate image;
 extern crate rand;
 
-use std::collections::HashSet;
+use self::rand::Rng;
 
+use art::generate_distinct_random_points;
 use color::{random_color, RandomColorConfig};
 use geo::{kdtree, BoundingBox, PointU32};
-
-use self::rand::Rng;
 
 /// Generate a voronoi diagram where the colors are taken from the gradient
 /// going from color1 to color2.
@@ -90,24 +89,4 @@ pub fn random_voronoi<R: Rng>(
     // for point in random_points {
     //     img.put_pixel(point.x, point.y, image::Rgb { data: [0, 0, 0] });
     // }
-}
-
-fn generate_distinct_random_points<R: Rng>(
-    rng: &mut R,
-    n: usize,
-    bbox: &BoundingBox<u32>,
-) -> HashSet<PointU32> {
-    let mut points = HashSet::new();
-
-    // TODO: if n > number of points in bbox panic!
-    // TODO: if n is high it's probably faster to generate all the points and
-    // shuffle the array.
-    while points.len() < n {
-        let x = rng.gen_range(bbox.min().x, bbox.max().x);
-        let y = rng.gen_range(bbox.min().y, bbox.max().y);
-
-        points.insert(PointU32::new(x, y));
-    }
-
-    points
 }

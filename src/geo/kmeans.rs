@@ -17,7 +17,7 @@ use geo::Point;
 /// that try to increase the number of max_iterations and/or shuffle the points.
 pub fn kmeans<T, I>(points: I, k: usize, max_iterations: usize) -> HashMap<Point<T>, Vec<Point<T>>>
 where
-    T: num::Num + Ord + Copy + Hash + From<u8> + ::std::fmt::Debug,
+    T: num::Num + Ord + Copy + Hash + From<u8> + Debug,
     I: IntoIterator<Item = Point<T>>,
 {
     if k == 0 {
