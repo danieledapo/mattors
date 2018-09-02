@@ -39,7 +39,13 @@ where
         let a1 = polar_angle(&lowest_point, p1);
         let a2 = polar_angle(&lowest_point, p2);
 
-        cmp_floats(a2, a1)
+        let angle_cmp = cmp_floats(a2, a1);
+
+        if let Ordering::Equal = angle_cmp {
+            cmp_floats(p2.x, p1.x)
+        } else {
+            angle_cmp
+        }
     });
 
     let mut hull = vec![];
@@ -96,6 +102,30 @@ mod tests {
                 Point::new(392.0, 23.0),
                 Point::new(378.0, 496.0),
                 Point::new(134.0, 59.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_convex_hull_multiple_points_on_same_y() {
+        use super::*;
+
+        let points = vec![
+            Point::new(4.0, 40.0),
+            Point::new(21.0, 21.0),
+            Point::new(37.0, 32.0),
+            Point::new(40.0, 21.0),
+        ];
+
+        let hull = convex_hull(points);
+
+        assert_eq!(
+            hull,
+            vec![
+                Point::new(21.0, 21.0),
+                Point::new(40.0, 21.0),
+                Point::new(37.0, 32.0),
+                Point::new(4.0, 40.0),
             ]
         );
     }
