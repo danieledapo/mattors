@@ -1,5 +1,7 @@
 //! some handy utils.
 
+extern crate num;
+
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -36,12 +38,12 @@ pub fn split_element_at<T>(mut v: Vec<T>, at: usize) -> (Vec<T>, Option<T>, Vec<
 }
 
 /// Simple utility to compare f64 taking into account float flakiness.
-pub fn cmp_f64(a1: f64, a2: f64) -> Ordering {
+pub fn cmp_floats<F: num::Float + From<f32>>(a1: F, a2: F) -> Ordering {
     if a1.is_nan() || a2.is_nan() {
         panic!("matto doesn't support nans, that'd be crazy ;)");
     }
 
-    if (a2 - a1).abs() < ::std::f64::EPSILON {
+    if (a2 - a1).abs() < From::from(1e-10) {
         return Ordering::Equal;
     }
 

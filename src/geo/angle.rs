@@ -3,7 +3,7 @@
 use std::cmp::Ordering;
 
 use geo::Point;
-use utils::cmp_f64;
+use utils::cmp_floats;
 
 /// The orientation of an angle, for example between three points.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -28,7 +28,7 @@ pub fn polar_angle(p1: &Point<f64>, p2: &Point<f64>) -> f64 {
 pub fn angle_orientation(p1: &Point<f64>, p2: &Point<f64>, p3: &Point<f64>) -> AngleOrientation {
     let area = (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
 
-    match cmp_f64(area, 0.0) {
+    match cmp_floats(area, 0.0) {
         Ordering::Equal => AngleOrientation::Colinear,
         Ordering::Less => AngleOrientation::Clockwise,
         Ordering::Greater => AngleOrientation::CounterClockwise,

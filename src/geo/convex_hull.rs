@@ -6,7 +6,7 @@ extern crate num;
 use std::cmp::Ordering;
 
 use geo::{angle_orientation, polar_angle, AngleOrientation, Point};
-use utils::cmp_f64;
+use utils::cmp_floats;
 
 /// Calculate the convex hull of a set of points and return the points that
 /// compose the convex hull.
@@ -23,10 +23,10 @@ where
     let lowest_point = *points
         .iter()
         .min_by(|p1, p2| {
-            let ycmp = cmp_f64(p1.y, p2.y);
+            let ycmp = cmp_floats(p1.y, p2.y);
 
             if let Ordering::Equal = ycmp {
-                cmp_f64(p1.x, p2.y)
+                cmp_floats(p1.x, p2.y)
             } else {
                 ycmp
             }
@@ -39,7 +39,7 @@ where
         let a1 = polar_angle(&lowest_point, p1);
         let a2 = polar_angle(&lowest_point, p2);
 
-        cmp_f64(a2, a1)
+        cmp_floats(a2, a1)
     });
 
     let mut hull = vec![];
