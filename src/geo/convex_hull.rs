@@ -26,7 +26,7 @@ where
             let ycmp = cmp_floats(p1.y, p2.y);
 
             if let Ordering::Equal = ycmp {
-                cmp_floats(p1.x, p2.y)
+                cmp_floats(p1.x, p2.x)
             } else {
                 ycmp
             }
