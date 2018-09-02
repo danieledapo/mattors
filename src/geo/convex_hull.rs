@@ -42,7 +42,13 @@ where
         let angle_cmp = cmp_floats(a2, a1);
 
         if let Ordering::Equal = angle_cmp {
-            cmp_floats(p2.x, p1.x)
+            let ycmp = cmp_floats(p2.y, p1.y);
+
+            if let Ordering::Equal = ycmp {
+                cmp_floats(p2.x, p1.x)
+            } else {
+                ycmp
+            }
         } else {
             angle_cmp
         }
@@ -77,7 +83,7 @@ mod tests {
 
     use proptest::prelude::*;
 
-    use geo::Point;
+    use geo::{Point, Polygon};
 
     #[test]
     fn test_convex_hull() {
@@ -108,8 +114,6 @@ mod tests {
 
     #[test]
     fn test_convex_hull_multiple_points_on_same_y() {
-        use super::*;
-
         let points = vec![
             Point::new(4.0, 40.0),
             Point::new(21.0, 21.0),
@@ -130,8 +134,57 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_convex_hull_colinear() {
+        let points = vec![
+            Point::new(12.0, 41.0),
+            Point::new(17.0, 36.0),
+            Point::new(42.0, 11.0),
+            Point::new(0.0, 12.0),
+        ];
+
+        let hull = convex_hull(points);
+
+        assert_eq!(
+            hull,
+            vec![
+                Point::new(42.0, 11.0),
+                Point::new(12.0, 41.0),
+                Point::new(0.0, 12.0),
+            ]
+        );
+    }
+
     proptest! {
         #![proptest_config(proptest::test_runner::Config::with_cases(500))]
+        #[test]
+        fn prop_convex_contains_all_the_points(
+            points in prop::collection::hash_set((0_u8..255, 0_u8..255), 3..100)
+        ) {
+            let points = points
+                .into_iter()
+                .map(|(x, y)| Point::new(f64::from(x), f64::from(y)))
+                .collect::<Vec<_>>();
+
+            let hull = convex_hull(points.clone());
+            prop_assume!(hull.len() > 2);
+
+            let hull = Polygon::new(hull).unwrap();
+
+            for pt in &points {
+                assert!(
+                    hull.contains(pt),
+                    "points {:?} hull {:?} point {:?}",
+                    points,
+                    hull,
+                    pt
+                );
+            }
+        }
+    }
+
+    proptest! {
+        #![proptest_config(proptest::test_runner::Config::with_cases(100))]
         #[test]
         fn prop_convex_hull_lies_on_boundary(
             points in prop::collection::vec((0_u8..255, 0_u8..255), 1..100)
