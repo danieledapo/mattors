@@ -43,6 +43,8 @@ pub fn cmp_floats<F: num::Float + From<f32>>(a1: F, a2: F) -> Ordering {
         panic!("matto doesn't support nans, that'd be crazy ;)");
     }
 
+    // 1e-10 is a random constant to try to ignore floating points precision
+    // errors.
     if (a2 - a1).abs() < From::from(1e-10) {
         return Ordering::Equal;
     }
