@@ -356,6 +356,10 @@ pub struct Patchwork {
     #[structopt(short = "c", long = "clusters", default_value = "3")]
     clusters: usize,
 
+    /// How many iterations the algorithm should perform.
+    #[structopt(short = "i", long = "iterations", default_value = "3")]
+    iterations: usize,
+
     /// Width of the image.
     #[structopt(short = "w", long = "width", default_value = "1920")]
     width: u32,
@@ -743,7 +747,7 @@ fn patchwork(config: &Patchwork) {
         },
     );
 
-    patchwork::random_patchwork(&mut img, config.npoints, config.clusters);
+    patchwork::random_patchwork(&mut img, config.npoints, config.clusters, config.iterations);
 
     img.save(&config.output_path).expect("cannot save image");
 }

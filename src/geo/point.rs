@@ -86,6 +86,15 @@ where
     {
         Point::new(O::from(self.x), O::from(self.y))
     }
+
+    /// Force cast to PointU32.
+    pub fn try_cast<O>(&self) -> Option<Point<O>>
+    where
+        T: num::ToPrimitive,
+        O: num::NumCast,
+    {
+        num::NumCast::from(self.x).and_then(|x| num::NumCast::from(self.y).map(|y| Point { x, y }))
+    }
 }
 
 impl<T> Point<T>

@@ -18,13 +18,17 @@ fn generate_distinct_random_points<R: Rng>(
     // TODO: if n is high it's probably faster to generate all the points and
     // shuffle the array.
     while points.len() < n {
-        let x = rng.gen_range(bbox.min().x, bbox.max().x);
-        let y = rng.gen_range(bbox.min().y, bbox.max().y);
-
-        points.insert(PointU32::new(x, y));
+        points.insert(random_point_in_bbox(rng, bbox));
     }
 
     points
+}
+
+fn random_point_in_bbox<R: Rng>(rng: &mut R, bbox: &BoundingBox<u32>) -> PointU32 {
+    let x = rng.gen_range(bbox.min().x, bbox.max().x);
+    let y = rng.gen_range(bbox.min().y, bbox.max().y);
+
+    PointU32::new(x, y)
 }
 
 pub mod delaunay;
