@@ -10,6 +10,7 @@ extern crate num;
 
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::ops::{Deref, DerefMut};
 
 use self::image::Pixel;
 use self::line::BresenhamLineIter;
@@ -57,6 +58,20 @@ where
     /// Create a new `Drawer` that performs pixel blending.
     pub fn new_with_default_blending(img: &'a mut I) -> Self {
         Drawer::new(img)
+    }
+}
+
+impl<'a, P: 'a, C, B> Drawer<'a, image::ImageBuffer<P, C>, B>
+where
+    P: image::Pixel + Debug + 'static,
+    B: Blender<P>,
+    C: Deref<Target = [P::Subpixel]> + DerefMut,
+{
+    /// Fills the image with the given pixel.
+    pub fn fill(&mut self, pix: &P) {
+        for p in self.img.pixels_mut() {
+            *p = *pix;
+        }
     }
 }
 
