@@ -10,8 +10,22 @@ use art::random_point_in_bbox;
 use drawing::{Blender, Drawer};
 use geo::{convex_hull, kmeans, Point, Polygon};
 
+const WHITE_EGG: image::Rgb<u8> = image::Rgb {
+    data: [0xFD, 0xFD, 0xFF],
+};
+
+const BLACK_MATTERHORN: image::Rgb<u8> = image::Rgb {
+    data: [0x52, 0x4B, 0x4B],
+};
+
 /// Generate random shapes according to the PatchWork algorithm.
-pub fn random_patchwork(img: &mut image::RgbImage, npoints: usize, k: usize, iterations: usize) {
+pub fn random_patchwork(
+    img: &mut image::RgbImage,
+    npoints: usize,
+    k: usize,
+    iterations: usize,
+    fill_polygons: bool,
+) {
     let mut generations = vec![vec![
         Polygon::new(vec![
             Point::new(0.0, 0.0),
@@ -23,10 +37,22 @@ pub fn random_patchwork(img: &mut image::RgbImage, npoints: usize, k: usize, ite
 
     let mut drawer = Drawer::new_with_no_blending(img);
 
+    drawer.fill(&WHITE_EGG);
+
     let mut i = 0;
 
     while let Some(polygons) = generations.pop() {
         if i >= iterations {
+            if fill_polygons {
+                for poly in polygons {
+                    let poly = Polygon::new(
+                        poly.points().into_iter().map(|p| p.try_cast().unwrap()),
+                    ).unwrap();
+
+                    drawer.polygon(&poly, &BLACK_MATTERHORN);
+                }
+            }
+
             break;
         }
 
@@ -34,7 +60,7 @@ pub fn random_patchwork(img: &mut image::RgbImage, npoints: usize, k: usize, ite
 
         let new_polygons = polygons
             .into_iter()
-            .flat_map(|poly| patchwork_step(&mut drawer, poly, npoints, k))
+            .flat_map(|poly| patchwork_step(&mut drawer, &poly, npoints, k, !fill_polygons))
             .collect::<Vec<_>>();
 
         if !new_polygons.is_empty() {
@@ -45,9 +71,10 @@ pub fn random_patchwork(img: &mut image::RgbImage, npoints: usize, k: usize, ite
 
 fn patchwork_step<B: Blender<image::Rgb<u8>>>(
     drawer: &mut Drawer<image::RgbImage, B>,
-    polygon: Polygon<f64>,
+    polygon: &Polygon<f64>,
     npoints: usize,
     k: usize,
+    draw_polygons_boundary: bool,
 ) -> Vec<Polygon<f64>> {
     let mut rng = rand::thread_rng();
 
@@ -88,11 +115,12 @@ fn patchwork_step<B: Blender<image::Rgb<u8>>>(
                     points.remove(&pt.try_cast().unwrap());
                 }
 
-                let pix = image::Rgb {
-                    data: [0x50, 0x50, 0x50],
-                };
-
-                drawer.closed_path(hull.iter().map(|p| p.try_cast().unwrap()), &pix);
+                if draw_polygons_boundary {
+                    drawer.closed_path(
+                        hull.iter().map(|p| p.try_cast().unwrap()),
+                        &BLACK_MATTERHORN,
+                    );
+                }
 
                 if let Some(new_poly) = Polygon::new(hull) {
                     polygons.push(new_poly);

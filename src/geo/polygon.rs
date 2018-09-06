@@ -71,6 +71,7 @@ where
     /// [1][Ray casting algorithm].
     ///
     /// [1]: (https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm).
+    #[cfg_attr(feature = "cargo-clippy", allow(collapsible_if))]
     pub fn contains(&self, pt: &Point<T>) -> bool
     where
         T: num::Float + From<f32>,

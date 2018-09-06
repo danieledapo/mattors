@@ -356,6 +356,10 @@ pub struct Patchwork {
     #[structopt(short = "c", long = "clusters", default_value = "3")]
     clusters: usize,
 
+    /// Whether to fill the polygons of the last generation or not.
+    #[structopt(short = "f", long = "fill-polygons")]
+    fill_polygons: bool,
+
     /// How many iterations the algorithm should perform.
     #[structopt(short = "i", long = "iterations", default_value = "3")]
     iterations: usize,
@@ -739,15 +743,15 @@ fn voronoi(config: &Voronoi) {
 }
 
 fn patchwork(config: &Patchwork) {
-    let mut img = image::RgbImage::from_pixel(
-        config.width,
-        config.height,
-        image::Rgb {
-            data: [0xFD, 0xFD, 0xFF],
-        },
-    );
+    let mut img = image::RgbImage::new(config.width, config.height);
 
-    patchwork::random_patchwork(&mut img, config.npoints, config.clusters, config.iterations);
+    patchwork::random_patchwork(
+        &mut img,
+        config.npoints,
+        config.clusters,
+        config.iterations,
+        config.fill_polygons,
+    );
 
     img.save(&config.output_path).expect("cannot save image");
 }
