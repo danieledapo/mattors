@@ -22,14 +22,22 @@ inspired by [primitive](https://github.com/fogleman/primitive).
 ![rb-primitized](images/rb-primitized.png)
 ![tiffanys-primitized](images/tiffanys-primitized.png)
 
-## Delaunay
-
-![delaunay](images/delaunay.png)
-
 ## Voronoi
 
 ![voronoi](images/voronoi.png)
 ![voronoi-gradient](images/voronoi-gradient.png)
+
+## Delaunay
+
+![delaunay](images/delaunay.png)
+
+## Patchwork
+
+inspired by [this article](https://mattdesl.svbtle.com/pen-plotter-2).
+
+![patchwork](images/patchwork.png)
+![patchwork-filled1](images/patchwork-filled1.png)
+![patchwork-filled2](images/patchwork-filled2.png)
 
 # Examples
 
@@ -51,12 +59,16 @@ cargo run -- quantize -d 1 images/baboon.jpeg -o images/baboon-quantized.jpeg
 cargo run --release -- primirs --shapes 200 --mutations 150 -o images/rb-primitized.png --dx 8 --dy 8 images/rb.png
 cargo run --release -- primirs --shapes 200 --mutations 100 --scale-down 2 --dx 16 --dy 16 -o primitized.png images/tiffanys.jpg
 
-# delaunay
-cargo run -- delaunay --grid-size 50 -o images/delaunay.png
-
 # voronoi
 cargo run -- voronoi --points 150 -o images/voronoi.png
 cargo run -- voronoi --gradient-background --points 150 -o images/voronoi-gradient.png
+
+# delaunay
+cargo run -- delaunay --grid-size 50 -o images/delaunay.png
+
+# patchwork
+cargo run -- patchwork
+cargo run --release -- patchwork -f --points 4000 --width 600 --height 600 --clusters 10
 
 # misc
 cargo run -- runes -p 3 -c 26
