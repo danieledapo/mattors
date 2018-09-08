@@ -18,7 +18,8 @@ impl<T> BoundingBox<T>
 where
     T: num::Num + num::Bounded + From<u8> + Copy + PartialOrd,
 {
-    /// Create a new empty BoundingBox.
+    /// Create a new empty BoundingBox. An empty box does not contain any point
+    /// and the min point is greater than the max one.
     pub fn new() -> Self {
         Self {
             min: Point::new(T::max_value(), T::max_value()),
@@ -43,6 +44,11 @@ where
         bbox
     }
 
+    /// Return whether this bounding box is empty.
+    pub fn is_empty(&self) -> bool {
+        self.max.x < self.min.x || self.max.y < self.min.y
+    }
+
     /// Return the point with the lowest coordinates.
     pub fn min(&self) -> &Point<T> {
         &self.min
@@ -51,6 +57,26 @@ where
     /// Return the point with the highest coordinates.
     pub fn max(&self) -> &Point<T> {
         &self.max
+    }
+
+    /// Return the width of this bounding box. None if the bounding box is empty.
+    pub fn width(&self) -> Option<T> {
+        self.dimensions().map(|(w, _)| w)
+    }
+
+    /// Return the height of this bounding box. None if the bounding box is empty.
+    pub fn height(&self) -> Option<T> {
+        self.dimensions().map(|(_, h)| h)
+    }
+
+    /// Return the width and the height of this bounding box as a tuple. None if
+    /// the box is empty.
+    pub fn dimensions(&self) -> Option<(T, T)> {
+        if self.is_empty() {
+            None
+        } else {
+            Some((self.max.x - self.min.x, self.max.y - self.min.y))
+        }
     }
 
     /// Expand this bounding box by the given point.
@@ -150,5 +176,22 @@ mod test {
         let rec = BoundingBox::from_dimensions_and_origin(&PointU32::new(2, 4), 8, 6);
 
         assert_eq!(rec.center(), PointU32::new(6, 7));
+    }
+
+    #[test]
+    fn test_dimensions() {
+        let mut bbox = BoundingBox::new();
+        assert!(bbox.is_empty());
+        assert!(bbox.dimensions().is_none());
+
+        bbox.expand_by_point(&PointU32::new(8, 8));
+        assert_eq!(bbox.dimensions(), Some((0, 0)));
+        assert_eq!(bbox.width(), Some(0));
+        assert_eq!(bbox.height(), Some(0));
+
+        bbox.expand_by_point(&PointU32::new(0, 0));
+        assert_eq!(bbox.dimensions(), Some((8, 8)));
+        assert_eq!(bbox.width(), Some(8));
+        assert_eq!(bbox.height(), Some(8));
     }
 }
