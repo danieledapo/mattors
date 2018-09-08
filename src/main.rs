@@ -33,6 +33,7 @@ use matto::art::primi::Shape;
 use matto::art::quantize;
 use matto::art::runes;
 use matto::art::sierpinski;
+use matto::art::stippling;
 use matto::art::voronoi;
 
 const LIGHT_GREEN: [u8; 3] = [0x17, 0xB9, 0x78];
@@ -99,6 +100,10 @@ pub enum Command {
     /// Generate some art according to the Patchwork algorithm.
     #[structopt(name = "patchwork")]
     Patchwork(Patchwork),
+
+    /// Generate some stippling art.
+    #[structopt(name = "stippling")]
+    Stippling(Stippling),
 }
 
 /// Julia Set settings.
@@ -377,6 +382,35 @@ pub struct Patchwork {
     output_path: PathBuf,
 }
 
+/// Generate some stippling art.
+#[derive(StructOpt, Debug)]
+pub struct Stippling {
+    /// Number of bands in the gradient.
+    #[structopt(short = "b", long = "bands", default_value = "5")]
+    bands: u32,
+
+    /// The number of points for the first band.
+    #[structopt(short = "p", long = "point", default_value = "5000")]
+    first_band_points: u32,
+
+    /// The grow coefficient is the factor that determines the number of points
+    /// in the next band. In particular npoints = prev_points + prev_points * k.
+    #[structopt(short = "k", long = "grow-coefficient", default_value = "2")]
+    grow_coeff: u32,
+
+    /// Width of the image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
+    width: u32,
+
+    /// Height of the image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
+    height: u32,
+
+    /// Where to write the final image.
+    #[structopt(short = "o", long = "output", default_value = "stippling.png", parse(from_os_str))]
+    output_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -411,6 +445,7 @@ fn main() {
         Command::Delaunay(ref config) => delaunay(config),
         Command::Voronoi(ref config) => voronoi(config),
         Command::Patchwork(ref config) => patchwork(config),
+        Command::Stippling(ref config) => stippling(config),
     }
 }
 
@@ -751,6 +786,36 @@ fn patchwork(config: &Patchwork) {
         config.clusters,
         config.iterations,
         config.fill_polygons,
+    );
+
+    img.save(&config.output_path).expect("cannot save image");
+}
+
+fn stippling(config: &Stippling) {
+    let mut img = image::RgbImage::from_pixel(
+        config.width,
+        config.height,
+        image::Rgb {
+            data: [0xFF, 0xFF, 0xFF],
+        },
+    );
+
+    stippling::gradient(
+        &mut img.sub_image(0, 0, config.width / 2, config.height),
+        config.bands,
+        config.first_band_points,
+        config.grow_coeff,
+        &image::Rgb { data: [0, 0, 0] },
+        stippling::Direction::RightToLeft,
+    );
+
+    stippling::gradient(
+        &mut img.sub_image(config.width / 2, 0, config.width / 2, config.height),
+        config.bands,
+        config.first_band_points,
+        config.grow_coeff,
+        &image::Rgb { data: [0, 0, 0] },
+        stippling::Direction::LeftToRight,
     );
 
     img.save(&config.output_path).expect("cannot save image");
