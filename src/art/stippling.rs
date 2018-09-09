@@ -8,7 +8,7 @@ use drawing::Drawer;
 use geo::{BoundingBox, PointU32};
 
 /// The direction of gradient made of stippled points.
-#[derive(Eq, Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Direction {
     /// The gradient is generated from left to right.
     LeftToRight,
