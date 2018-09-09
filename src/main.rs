@@ -801,22 +801,22 @@ fn stippling(config: &Stippling) {
     );
 
     stippling::gradient(
-        &mut img.sub_image(0, 0, config.width / 2, config.height),
+        &mut img,
         config.bands,
         config.first_band_points,
         config.grow_coeff,
         &image::Rgb { data: [0, 0, 0] },
-        stippling::Direction::RightToLeft,
+        stippling::Direction::TopToBottom,
     );
 
-    stippling::gradient(
-        &mut img.sub_image(config.width / 2, 0, config.width / 2, config.height),
-        config.bands,
-        config.first_band_points,
-        config.grow_coeff,
-        &image::Rgb { data: [0, 0, 0] },
-        stippling::Direction::LeftToRight,
-    );
+    // stippling::gradient(
+    //     &mut img.sub_image(config.width / 2, 0, config.width / 2, config.height),
+    //     config.bands,
+    //     config.first_band_points,
+    //     config.grow_coeff,
+    //     &image::Rgb { data: [0, 0, 0] },
+    //     stippling::Direction::LeftToRight,
+    // );
 
     img.save(&config.output_path).expect("cannot save image");
 }

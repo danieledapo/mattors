@@ -24,7 +24,7 @@ pub enum Direction {
 }
 
 /// Stipple the given image in bands with increasing number of points to
-/// simulate a gradient.
+/// simulate a gradient. Inspired by http://www.tylerlhobbs.com/works/series/st.
 pub fn gradient<I>(
     img: &mut I,
     bands: u32,
@@ -38,13 +38,37 @@ pub fn gradient<I>(
 {
     let mut rng = rand::thread_rng();
 
-    let mut drawer = Drawer::new_with_default_blending(img);
+    let mut drawer = Drawer::new_with_no_blending(img);
 
     let (width, height) = drawer.dimensions();
+
+    let mut band = initial_band(dir, width, height, bands);
+    let mut band_npoints = base_points_per_band;
+
+    for i in 0..bands {
+        for _ in 0..band_npoints {
+            let point = random_point_in_bbox(&mut rng, &band);
+
+            drawer.draw_pixel(point.x, point.y, &pix);
+        }
+
+        // prevent overflow when dir is either RightToLeft or BottomToTop,
+        // because at the (bands - 1)-th iteration we reached x = 0 or y = 0 and
+        // we cannot advance anymore.
+        if i == bands - 1 {
+            continue;
+        }
+
+        band = advance_band(&band, dir);
+        band_npoints += band_npoints * grow_coeff;
+    }
+}
+
+fn initial_band(dir: Direction, width: u32, height: u32, bands: u32) -> BoundingBox<u32> {
     let band_width = width / bands;
     let band_height = height / bands;
 
-    let mut band = match dir {
+    match dir {
         Direction::LeftToRight => BoundingBox::from_dimensions(band_width, height),
         Direction::RightToLeft => BoundingBox::from_dimensions_and_origin(
             &PointU32::new((bands - 1) * band_width, 0),
@@ -57,31 +81,18 @@ pub fn gradient<I>(
             width,
             band_height,
         ),
+    }
+}
+
+fn advance_band(band: &BoundingBox<u32>, dir: Direction) -> BoundingBox<u32> {
+    let (band_width, band_height) = band.dimensions().unwrap();
+
+    let band_new_origin = match dir {
+        Direction::LeftToRight => PointU32::new(band.max().x, 0),
+        Direction::RightToLeft => PointU32::new(band.min().x - band_width, 0),
+        Direction::TopToBottom => PointU32::new(0, band.max().y),
+        Direction::BottomToTop => PointU32::new(0, band.min().y - band_height),
     };
 
-    let mut band_npoints = base_points_per_band;
-
-    for i in 0..bands {
-        for _ in 0..band_npoints {
-            let point = random_point_in_bbox(&mut rng, &band);
-
-            drawer.draw_pixel(point.x, point.y, &pix);
-        }
-
-        if i == bands - 1 {
-            continue;
-        }
-
-        band_npoints += band_npoints * grow_coeff;
-
-        let band_new_origin = match dir {
-            Direction::LeftToRight => PointU32::new(band.max().x, 0),
-            Direction::RightToLeft => PointU32::new(band.min().x - band_width, 0),
-            Direction::TopToBottom => PointU32::new(0, band.max().y),
-            Direction::BottomToTop => PointU32::new(0, band.min().y - band_height),
-        };
-
-        let (w, h) = band.dimensions().unwrap();
-        band = BoundingBox::from_dimensions_and_origin(&band_new_origin, w, h);
-    }
+    BoundingBox::from_dimensions_and_origin(&band_new_origin, band_width, band_height)
 }
