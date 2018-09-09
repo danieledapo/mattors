@@ -39,6 +39,10 @@ inspired by [this article](https://mattdesl.svbtle.com/pen-plotter-2).
 ![patchwork-filled1](images/patchwork-filled1.png)
 ![patchwork-filled2](images/patchwork-filled2.png)
 
+## Stippling
+
+![stippling-gradient](images/stippling-gradient.png)
+
 # Examples
 
 ```
@@ -69,6 +73,9 @@ cargo run -- delaunay --grid-size 50 -o images/delaunay.png
 # patchwork
 cargo run -- patchwork
 cargo run --release -- patchwork -f --points 4000 --width 600 --height 600 --clusters 10
+
+# stippling
+cargo run -- stippling -p 1000 -k 5
 
 # misc
 cargo run -- runes -p 3 -c 26
