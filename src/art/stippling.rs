@@ -30,7 +30,7 @@ pub fn gradient(
     bands: u32,
     base_points_per_band: u32,
     grow_coeff: u32,
-    pix: &image::Rgb<u8>,
+    pix: image::Rgb<u8>,
     dir: Direction,
 ) {
     let mut band = initial_band(dir, img.width(), img.height(), bands);
@@ -39,7 +39,7 @@ pub fn gradient(
     let mut drawer = Drawer::new_with_no_blending(img);
 
     for i in 0..bands {
-        stipple(&mut drawer, &band, band_npoints, &pix);
+        stipple(&mut drawer, &band, band_npoints, pix);
 
         // prevent overflow when dir is either RightToLeft or BottomToTop,
         // because at the (bands - 1)-th iteration we reached x = 0 or y = 0 and
@@ -59,7 +59,7 @@ pub fn rects(
     iterations: usize,
     points: u32,
     minimum_area: u32,
-    pix: &image::Rgb<u8>,
+    pix: image::Rgb<u8>,
 ) {
     let mut rng = rand::thread_rng();
 
@@ -71,7 +71,7 @@ pub fn rects(
     for piece in pieces {
         // we cannot stipple lines therefore just draw a line.
         if piece.min().x >= piece.max().x || piece.min().y >= piece.max().y {
-            drawer.line(*piece.min(), *piece.max(), pix);
+            drawer.line(*piece.min(), *piece.max(), &pix);
             continue;
         }
 
@@ -84,14 +84,14 @@ pub fn stipple(
     drawer: &mut Drawer<image::RgbImage, NoopBlender>,
     bbox: &BoundingBox<u32>,
     points: u32,
-    pix: &image::Rgb<u8>,
+    pix: image::Rgb<u8>,
 ) {
     let mut rng = rand::thread_rng();
 
     for _ in 0..points {
         let point = random_point_in_bbox(&mut rng, bbox);
 
-        drawer.draw_pixel(point.x, point.y, pix);
+        drawer.draw_pixel(point.x, point.y, &pix);
     }
 }
 

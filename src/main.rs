@@ -883,7 +883,7 @@ fn stippling(config: &Stippling) {
                 gradient_config.bands,
                 gradient_config.first_band_points,
                 gradient_config.grow_coeff,
-                &image::Rgb { data: [0, 0, 0] },
+                image::Rgb { data: [0, 0, 0] },
                 stippling::Direction::TopToBottom,
             );
         }
@@ -893,61 +893,8 @@ fn stippling(config: &Stippling) {
                 rects_config.iterations,
                 rects_config.points,
                 rects_config.minimum_area,
-                &image::Rgb { data: [0, 0, 0] },
+                image::Rgb { data: [0, 0, 0] },
             );
-
-            //     let mut pieces = vec![geo::BoundingBox::from_dimensions_and_origin(
-            //         &PointU32::new(20, 20),
-            //         config.width - 40,
-            //         config.height - 40,
-            //     )];
-            //     let mut small_pieces = vec![];
-
-            //     use rand::Rng;
-            //     let mut rng = rand::thread_rng();
-
-            //     for _ in 0..rects_config.iterations {
-            //         if pieces.is_empty() {
-            //             break;
-            //         }
-
-            //         let i = rng.gen_range(0, pieces.len());
-            //         let piece = pieces.swap_remove(i);
-
-            //         if piece.min().x >= piece.max().x || piece.min().y >= piece.max().y {
-            //             continue;
-            //         }
-
-            //         let break_point = PointU32::new(
-            //             rng.gen_range(piece.min().x, piece.max().x),
-            //             rng.gen_range(piece.min().y, piece.max().y),
-            //         );
-
-            //         let mut add_piece = |p: geo::BoundingBox<u32>| {
-            //             if p.area().unwrap() <= rects_config.minimum_area {
-            //                 small_pieces.push(p);
-            //             } else {
-            //                 pieces.push(p);
-            //             }
-            //         };
-
-            //         for p in piece.split_at(&break_point).unwrap().iter() {
-            //             add_piece(p.clone());
-            //         }
-            //     }
-
-            //     for piece in small_pieces.into_iter().chain(pieces) {
-            //         if piece.min().x >= piece.max().x || piece.min().y >= piece.max().y {
-            //             continue;
-            //         }
-
-            //         stippling::stipple(
-            //             &mut img,
-            //             &piece,
-            //             rects_config.points,
-            //             &image::Rgb { data: [0, 0, 0] },
-            //         );
-            //     }
         }
     }
 
