@@ -104,10 +104,8 @@ where
     /// Handy method that returns a point that's composed by the highest x and y
     /// values among the two points.
     pub fn highest(&self, other: &Self) -> Self {
-        let x =
-            if self.x > other.x { self.x } else { other.x };
-        let y =
-            if self.y > other.y { self.y } else { other.y };
+        let x = if self.x > other.x { self.x } else { other.x };
+        let y = if self.y > other.y { self.y } else { other.y };
 
         Point::new(x, y)
     }
@@ -115,10 +113,8 @@ where
     /// Handy method that returns a point that's composed by the lowest x and y
     /// values among the two points.
     pub fn lowest(&self, other: &Self) -> Self {
-        let x =
-            if self.x < other.x { self.x } else { other.x };
-        let y =
-            if self.y < other.y { self.y } else { other.y };
+        let x = if self.x < other.x { self.x } else { other.x };
+        let y = if self.y < other.y { self.y } else { other.y };
 
         Point::new(x, y)
     }

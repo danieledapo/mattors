@@ -228,8 +228,7 @@ where
                     debug_assert!(x >= 0.0 && x <= f64::from(u32::max_value()));
 
                     x as u32
-                })
-                .collect::<Vec<_>>();
+                }).collect::<Vec<_>>();
 
             xs.sort_unstable();
 

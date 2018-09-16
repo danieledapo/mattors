@@ -230,8 +230,7 @@ where
             .map(|ow| {
                 let (node, _) = ow.into();
                 (&node.median, &node.value)
-            })
-            .collect()
+            }).collect()
     }
 }
 
@@ -502,8 +501,7 @@ mod test {
                     &PointU32::new(42, 73),
                     0,
                     0
-                ))
-                .collect::<Vec<_>>(),
+                )).collect::<Vec<_>>(),
             vec![(&PointU32::new(42, 73), &"beautiful")]
         );
     }
@@ -538,8 +536,7 @@ mod test {
                 } else {
                     None
                 }
-            })
-            .collect::<Vec<_>>();
+            }).collect::<Vec<_>>();
 
         sort_points(&mut contained_points);
         sort_points(&mut brute_force_contained_points);

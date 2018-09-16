@@ -182,7 +182,12 @@ pub struct Quantize {
     divide_steps: u32,
 
     /// Where to write the quantized image.
-    #[structopt(short = "o", long = "output", default_value = "quantized.png", parse(from_os_str))]
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "quantized.png",
+        parse(from_os_str)
+    )]
     output_path: PathBuf,
 
     /// Image to quantize.
@@ -203,7 +208,10 @@ pub struct Sierpinski {
 
     /// Where to write the output image.
     #[structopt(
-        short = "o", long = "output", default_value = "sierpinski.png", parse(from_os_str)
+        short = "o",
+        long = "output",
+        default_value = "sierpinski.png",
+        parse(from_os_str)
     )]
     output_path: PathBuf,
 
@@ -242,7 +250,10 @@ pub struct Primirs {
 
     /// Where to write the "primitized" image.
     #[structopt(
-        short = "o", long = "output", default_value = "primitized.png", parse(from_os_str)
+        short = "o",
+        long = "output",
+        default_value = "primitized.png",
+        parse(from_os_str)
     )]
     output_path: PathBuf,
 
@@ -275,7 +286,12 @@ pub struct FractalTree {
     height: u32,
 
     /// Where to write the fractal image.
-    #[structopt(short = "o", long = "output", default_value = "fractree.png", parse(from_os_str))]
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "fractree.png",
+        parse(from_os_str)
+    )]
     output_path: PathBuf,
 }
 
@@ -300,7 +316,12 @@ pub struct Runes {
     height: u32,
 
     /// Where to write the final image.
-    #[structopt(short = "o", long = "output", default_value = "runes.png", parse(from_os_str))]
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "runes.png",
+        parse(from_os_str)
+    )]
     output_path: PathBuf,
 }
 
@@ -320,7 +341,12 @@ pub struct Delaunay {
     height: u32,
 
     /// Where to write the final image.
-    #[structopt(short = "o", long = "output", default_value = "delaunay.png", parse(from_os_str))]
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "delaunay.png",
+        parse(from_os_str)
+    )]
     output_path: PathBuf,
 }
 
@@ -345,7 +371,12 @@ pub struct Voronoi {
     height: u32,
 
     /// Where to write the final image.
-    #[structopt(short = "o", long = "output", default_value = "voronoi.png", parse(from_os_str))]
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "voronoi.png",
+        parse(from_os_str)
+    )]
     output_path: PathBuf,
 }
 
@@ -378,7 +409,12 @@ pub struct Patchwork {
     height: u32,
 
     /// Where to write the final image.
-    #[structopt(short = "o", long = "output", default_value = "patchwork.png", parse(from_os_str))]
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "patchwork.png",
+        parse(from_os_str)
+    )]
     output_path: PathBuf,
 }
 
@@ -407,7 +443,12 @@ pub struct Stippling {
     height: u32,
 
     /// Where to write the final image.
-    #[structopt(short = "o", long = "output", default_value = "stippling.png", parse(from_os_str))]
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "stippling.png",
+        parse(from_os_str)
+    )]
     output_path: PathBuf,
 }
 

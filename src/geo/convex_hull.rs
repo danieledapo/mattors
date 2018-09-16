@@ -30,8 +30,7 @@ where
             } else {
                 ycmp
             }
-        })
-        .unwrap();
+        }).unwrap();
 
     // sort in descending order so that we remove points from the back which is
     // amortized O(1).
