@@ -3,7 +3,7 @@
 
 extern crate num;
 
-use std::iter::FromIterator;
+use std::iter::{Extend, FromIterator, IntoIterator};
 
 use geo::Point;
 
@@ -25,6 +25,11 @@ where
             min: Point::new(T::max_value(), T::max_value()),
             max: Point::new(T::min_value(), T::min_value()),
         }
+    }
+
+    /// Create a new BoundingBox that covers all the given points.
+    pub fn from_points(pts: &[Point<T>]) -> Self {
+        pts.iter().collect()
     }
 
     /// Create a new BoundingBox of the given width and height starting from the
@@ -118,21 +123,35 @@ where
     }
 }
 
-impl<T> FromIterator<Point<T>> for BoundingBox<T>
+impl<'a, T: 'a> FromIterator<&'a Point<T>> for BoundingBox<T>
 where
     T: num::Num + num::Bounded + From<u8> + Copy + PartialOrd,
 {
     fn from_iter<I>(points: I) -> Self
     where
-        I: IntoIterator<Item = Point<T>>,
+        I: IntoIterator<Item = &'a Point<T>>,
     {
         let mut bbox = BoundingBox::new();
 
         for point in points {
-            bbox.expand_by_point(&point);
+            bbox.expand_by_point(point);
         }
 
         bbox
+    }
+}
+
+impl<'a, T: 'a> Extend<&'a Point<T>> for BoundingBox<T>
+where
+    T: num::Num + num::Bounded + From<u8> + Copy + PartialOrd,
+{
+    fn extend<I>(&mut self, iter: I)
+    where
+        I: IntoIterator<Item = &'a Point<T>>,
+    {
+        for pt in iter {
+            self.expand_by_point(pt);
+        }
     }
 }
 

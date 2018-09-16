@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 use art::random_point_in_bbox;
 use drawing::{Blender, Drawer};
-use geo::{convex_hull, kmeans, Point, Polygon};
+use geo::{convex_hull, kmeans, BoundingBox, Point, Polygon};
 
 const WHITE_EGG: image::Rgb<u8> = image::Rgb {
     data: [0xFD, 0xFD, 0xFF],
@@ -45,9 +45,9 @@ pub fn random_patchwork(
         if i >= iterations {
             if fill_polygons {
                 for poly in polygons {
-                    let poly = Polygon::new(
-                        poly.points().into_iter().map(|p| p.try_cast().unwrap()),
-                    ).unwrap();
+                    let poly =
+                        Polygon::new(poly.points().into_iter().map(|p| p.try_cast().unwrap()))
+                            .unwrap();
 
                     drawer.polygon(&poly, &BLACK_MATTERHORN);
                 }
@@ -78,11 +78,10 @@ fn patchwork_step<B: Blender<image::Rgb<u8>>>(
 ) -> Vec<Polygon<f64>> {
     let mut rng = rand::thread_rng();
 
-    let polygon_bbox = vec![
+    let polygon_bbox = BoundingBox::from_points(&[
         polygon.bounding_box().min().try_cast().unwrap(),
         polygon.bounding_box().max().try_cast().unwrap(),
-    ].into_iter()
-        .collect();
+    ]);
 
     let mut points = (0..npoints)
         .map(|_| random_point_in_bbox(&mut rng, &polygon_bbox))
