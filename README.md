@@ -75,7 +75,7 @@ cargo run -- patchwork
 cargo run --release -- patchwork -f --points 4000 --width 600 --height 600 --clusters 10
 
 # stippling
-cargo run -- stippling -p 1000 -k 5
+cargo run -- stippling gradient -p 1000 -k 5
 
 # misc
 cargo run -- runes -p 3 -c 26
