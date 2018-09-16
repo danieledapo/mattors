@@ -95,6 +95,33 @@ where
         self.max = self.max.highest(pt);
     }
 
+    /// Split this BoundingBox into 4 given a point inside this bounding box. If
+    /// the bounding box is empty `None` is returned.
+    pub fn split_at(&self, pt: &Point<T>) -> Option<(Self, Self, Self, Self)> {
+        if !self.contains(pt) {
+            return None;
+        }
+
+        Some((
+            BoundingBox {
+                min: self.min,
+                max: *pt,
+            },
+            BoundingBox {
+                min: Point::new(pt.x, self.min.y),
+                max: Point::new(self.max.x, pt.y),
+            },
+            BoundingBox {
+                min: Point::new(self.min.x, pt.y),
+                max: Point::new(pt.x, self.max.y),
+            },
+            BoundingBox {
+                min: *pt,
+                max: self.max,
+            },
+        ))
+    }
+
     /// Check if a point lies inside this bounding box.
     pub fn contains(&self, pt: &Point<T>) -> bool {
         self.min.x <= pt.x && self.max.x >= pt.x && self.min.y <= pt.y && self.max.y >= pt.y
@@ -230,5 +257,60 @@ mod test {
 
         bbox.expand_by_point(&PointU32::new(8, 9));
         assert_eq!(bbox.area(), Some(20));
+    }
+
+    #[test]
+    fn test_split_at() {
+        let mut bbox = BoundingBox::new();
+
+        assert!(bbox.split_at(&PointU32::new(0, 0)).is_none());
+
+        bbox.expand_by_point(&PointU32::new(0, 0));
+        assert!(bbox.split_at(&PointU32::new(42, 42)).is_none());
+        assert_eq!(
+            bbox.split_at(&PointU32::new(0, 0)),
+            Some((
+                BoundingBox {
+                    min: PointU32::new(0, 0),
+                    max: PointU32::new(0, 0)
+                },
+                BoundingBox {
+                    min: PointU32::new(0, 0),
+                    max: PointU32::new(0, 0)
+                },
+                BoundingBox {
+                    min: PointU32::new(0, 0),
+                    max: PointU32::new(0, 0)
+                },
+                BoundingBox {
+                    min: PointU32::new(0, 0),
+                    max: PointU32::new(0, 0)
+                }
+            ))
+        );
+
+        bbox.expand_by_point(&PointU32::new(8, 8));
+        assert!(bbox.split_at(&PointU32::new(42, 42)).is_none());
+        assert_eq!(
+            bbox.split_at(&PointU32::new(4, 4)),
+            Some((
+                BoundingBox {
+                    min: PointU32::new(0, 0),
+                    max: PointU32::new(4, 4)
+                },
+                BoundingBox {
+                    min: PointU32::new(4, 0),
+                    max: PointU32::new(8, 4)
+                },
+                BoundingBox {
+                    min: PointU32::new(0, 4),
+                    max: PointU32::new(4, 8)
+                },
+                BoundingBox {
+                    min: PointU32::new(4, 4),
+                    max: PointU32::new(8, 8)
+                }
+            ))
+        );
     }
 }
