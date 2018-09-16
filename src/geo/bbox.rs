@@ -64,6 +64,11 @@ where
         &self.max
     }
 
+    /// Return the area of this bounding box. None if the bounding box is empty.
+    pub fn area(&self) -> Option<T> {
+        self.dimensions().map(|(w, h)| w * h)
+    }
+
     /// Return the width of this bounding box. None if the bounding box is empty.
     pub fn width(&self) -> Option<T> {
         self.dimensions().map(|(w, _)| w)
@@ -212,5 +217,18 @@ mod test {
         assert_eq!(bbox.dimensions(), Some((8, 8)));
         assert_eq!(bbox.width(), Some(8));
         assert_eq!(bbox.height(), Some(8));
+    }
+
+    #[test]
+    fn test_area() {
+        let mut bbox = BoundingBox::new();
+
+        assert!(bbox.area().is_none());
+
+        bbox.expand_by_point(&PointU32::new(4, 4));
+        assert_eq!(bbox.area(), Some(0));
+
+        bbox.expand_by_point(&PointU32::new(8, 9));
+        assert_eq!(bbox.area(), Some(20));
     }
 }
