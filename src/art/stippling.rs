@@ -3,8 +3,8 @@
 extern crate image;
 extern crate rand;
 
-use art::random_point_in_bbox;
-use drawing::Drawer;
+use art::{random_bbox_subdivisions, random_point_in_bbox};
+use drawing::{Drawer, NoopBlender};
 use geo::{BoundingBox, PointU32};
 
 /// The direction of gradient made of stippled points.
@@ -25,32 +25,21 @@ pub enum Direction {
 
 /// Stipple the given image in bands with increasing number of points to
 /// simulate a gradient. Inspired by http://www.tylerlhobbs.com/works/series/st.
-pub fn gradient<I>(
-    img: &mut I,
+pub fn gradient(
+    img: &mut image::RgbImage,
     bands: u32,
     base_points_per_band: u32,
     grow_coeff: u32,
-    pix: &I::Pixel,
+    pix: &image::Rgb<u8>,
     dir: Direction,
-) where
-    I: image::GenericImage,
-    I::Pixel: ::std::fmt::Debug,
-{
-    let mut rng = rand::thread_rng();
+) {
+    let mut band = initial_band(dir, img.width(), img.height(), bands);
+    let mut band_npoints = base_points_per_band;
 
     let mut drawer = Drawer::new_with_no_blending(img);
 
-    let (width, height) = drawer.dimensions();
-
-    let mut band = initial_band(dir, width, height, bands);
-    let mut band_npoints = base_points_per_band;
-
     for i in 0..bands {
-        for _ in 0..band_npoints {
-            let point = random_point_in_bbox(&mut rng, &band);
-
-            drawer.draw_pixel(point.x, point.y, &pix);
-        }
+        stipple(&mut drawer, &band, band_npoints, &pix);
 
         // prevent overflow when dir is either RightToLeft or BottomToTop,
         // because at the (bands - 1)-th iteration we reached x = 0 or y = 0 and
@@ -61,6 +50,48 @@ pub fn gradient<I>(
 
         band = advance_band(&band, dir);
         band_npoints += band_npoints * grow_coeff;
+    }
+}
+
+/// Stipple random rectangles.
+pub fn rects(
+    img: &mut image::RgbImage,
+    iterations: usize,
+    points: u32,
+    minimum_area: u32,
+    pix: &image::Rgb<u8>,
+) {
+    let mut rng = rand::thread_rng();
+
+    let bbox = BoundingBox::from_dimensions(img.width(), img.height());
+    let pieces = random_bbox_subdivisions(iterations, bbox, minimum_area, &mut rng);
+
+    let mut drawer = Drawer::new_with_no_blending(img);
+
+    for piece in pieces {
+        // we cannot stipple lines therefore just draw a line.
+        if piece.min().x >= piece.max().x || piece.min().y >= piece.max().y {
+            drawer.line(*piece.min(), *piece.max(), pix);
+            continue;
+        }
+
+        stipple(&mut drawer, &piece, points, pix);
+    }
+}
+
+/// Stipple the given bbox of the image with the desired amount of points.
+pub fn stipple(
+    drawer: &mut Drawer<image::RgbImage, NoopBlender>,
+    bbox: &BoundingBox<u32>,
+    points: u32,
+    pix: &image::Rgb<u8>,
+) {
+    let mut rng = rand::thread_rng();
+
+    for _ in 0..points {
+        let point = random_point_in_bbox(&mut rng, bbox);
+
+        drawer.draw_pixel(point.x, point.y, pix);
     }
 }
 

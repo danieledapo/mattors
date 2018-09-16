@@ -421,18 +421,8 @@ pub struct Patchwork {
 /// Generate some stippling art.
 #[derive(StructOpt, Debug)]
 pub struct Stippling {
-    /// Number of bands in the gradient.
-    #[structopt(short = "b", long = "bands", default_value = "5")]
-    bands: u32,
-
-    /// The number of points for the first band.
-    #[structopt(short = "p", long = "point", default_value = "5000")]
-    first_band_points: u32,
-
-    /// The grow coefficient is the factor that determines the number of points
-    /// in the next band. In particular npoints = prev_points + prev_points * k.
-    #[structopt(short = "k", long = "grow-coefficient", default_value = "2")]
-    grow_coeff: u32,
+    #[structopt(subcommand)]
+    command: StipplingCommand,
 
     /// Width of the image.
     #[structopt(short = "w", long = "width", default_value = "1920")]
@@ -450,6 +440,51 @@ pub struct Stippling {
         parse(from_os_str)
     )]
     output_path: PathBuf,
+}
+
+/// Generate some stippling art.
+#[derive(StructOpt, Debug)]
+pub enum StipplingCommand {
+    /// Stippling some bands to give a gradient-like look.
+    #[structopt(name = "gradient")]
+    Gradient(StipplingGradient),
+
+    /// Stippling some rectangles.
+    #[structopt(name = "rects")]
+    StipplingRects(StipplingRects),
+}
+
+/// Stippling some bands to give a gradient-like look.
+#[derive(StructOpt, Debug)]
+pub struct StipplingGradient {
+    /// Number of bands in the gradient.
+    #[structopt(short = "b", long = "bands", default_value = "5")]
+    bands: u32,
+
+    /// The number of points for the first band.
+    #[structopt(short = "p", long = "point", default_value = "5000")]
+    first_band_points: u32,
+
+    /// The grow coefficient is the factor that determines the number of points
+    /// in the next band. In particular npoints = prev_points + prev_points * k.
+    #[structopt(short = "k", long = "grow-coefficient", default_value = "2")]
+    grow_coeff: u32,
+}
+
+/// Stippling some rectangles.
+#[derive(StructOpt, Debug)]
+pub struct StipplingRects {
+    /// Number of iterations to divive the given image of.
+    #[structopt(short = "i", long = "iterations", default_value = "500")]
+    iterations: usize,
+
+    /// The number of points in each rectangle.
+    #[structopt(short = "p", long = "point", default_value = "300")]
+    points: u32,
+
+    /// The minimum area each rectangle must have in order to recurse in it.
+    #[structopt(short = "a", long = "minimum-area", default_value = "1000")]
+    minimum_area: u32,
 }
 
 fn main() {
@@ -841,23 +876,80 @@ fn stippling(config: &Stippling) {
         },
     );
 
-    stippling::gradient(
-        &mut img,
-        config.bands,
-        config.first_band_points,
-        config.grow_coeff,
-        &image::Rgb { data: [0, 0, 0] },
-        stippling::Direction::TopToBottom,
-    );
+    match config.command {
+        StipplingCommand::Gradient(ref gradient_config) => {
+            stippling::gradient(
+                &mut img,
+                gradient_config.bands,
+                gradient_config.first_band_points,
+                gradient_config.grow_coeff,
+                &image::Rgb { data: [0, 0, 0] },
+                stippling::Direction::TopToBottom,
+            );
+        }
+        StipplingCommand::StipplingRects(ref rects_config) => {
+            stippling::rects(
+                &mut img,
+                rects_config.iterations,
+                rects_config.points,
+                rects_config.minimum_area,
+                &image::Rgb { data: [0, 0, 0] },
+            );
 
-    // stippling::gradient(
-    //     &mut img.sub_image(config.width / 2, 0, config.width / 2, config.height),
-    //     config.bands,
-    //     config.first_band_points,
-    //     config.grow_coeff,
-    //     &image::Rgb { data: [0, 0, 0] },
-    //     stippling::Direction::LeftToRight,
-    // );
+            //     let mut pieces = vec![geo::BoundingBox::from_dimensions_and_origin(
+            //         &PointU32::new(20, 20),
+            //         config.width - 40,
+            //         config.height - 40,
+            //     )];
+            //     let mut small_pieces = vec![];
+
+            //     use rand::Rng;
+            //     let mut rng = rand::thread_rng();
+
+            //     for _ in 0..rects_config.iterations {
+            //         if pieces.is_empty() {
+            //             break;
+            //         }
+
+            //         let i = rng.gen_range(0, pieces.len());
+            //         let piece = pieces.swap_remove(i);
+
+            //         if piece.min().x >= piece.max().x || piece.min().y >= piece.max().y {
+            //             continue;
+            //         }
+
+            //         let break_point = PointU32::new(
+            //             rng.gen_range(piece.min().x, piece.max().x),
+            //             rng.gen_range(piece.min().y, piece.max().y),
+            //         );
+
+            //         let mut add_piece = |p: geo::BoundingBox<u32>| {
+            //             if p.area().unwrap() <= rects_config.minimum_area {
+            //                 small_pieces.push(p);
+            //             } else {
+            //                 pieces.push(p);
+            //             }
+            //         };
+
+            //         for p in piece.split_at(&break_point).unwrap().iter() {
+            //             add_piece(p.clone());
+            //         }
+            //     }
+
+            //     for piece in small_pieces.into_iter().chain(pieces) {
+            //         if piece.min().x >= piece.max().x || piece.min().y >= piece.max().y {
+            //             continue;
+            //         }
+
+            //         stippling::stipple(
+            //             &mut img,
+            //             &piece,
+            //             rects_config.points,
+            //             &image::Rgb { data: [0, 0, 0] },
+            //         );
+            //     }
+        }
+    }
 
     img.save(&config.output_path).expect("cannot save image");
 }
