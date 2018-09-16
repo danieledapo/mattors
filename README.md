@@ -42,6 +42,7 @@ inspired by [this article](https://mattdesl.svbtle.com/pen-plotter-2).
 ## Stippling
 
 ![stippling-gradient](images/stippling-gradient.png)
+![stippling-rects](images/stippling-rects.png)
 
 # Examples
 
@@ -76,6 +77,7 @@ cargo run --release -- patchwork -f --points 4000 --width 600 --height 600 --clu
 
 # stippling
 cargo run -- stippling gradient -p 1000 -k 5
+cargo run -- stippling rects --iterations 1500
 
 # misc
 cargo run -- runes -p 3 -c 26
