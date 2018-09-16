@@ -7,6 +7,49 @@ use std::collections::HashSet;
 
 use geo::{BoundingBox, PointU32};
 
+fn random_bbox_subdivisions<R: Rng>(
+    n: usize,
+    bbox: BoundingBox<u32>,
+    minimum_area: u32,
+    rng: &mut R,
+) -> impl Iterator<Item = BoundingBox<u32>> {
+    let mut small_bboxes = vec![];
+    let mut boxes = vec![bbox];
+
+    for _ in 0..n {
+        if boxes.is_empty() {
+            break;
+        }
+
+        let i = rng.gen_range(0, boxes.len());
+        let b = boxes.swap_remove(i);
+
+        // if either the x or y coordinates are the same then we cannot get a
+        // random number because it wouldn't make sense. Just skip the item.
+        if b.min().x == b.max().x || b.min().y == b.max().y {
+            continue;
+        }
+
+        let random_point = random_point_in_bbox(rng, &b);
+        let sub_boxes = b.split_at(&random_point).unwrap();
+
+        let mut add_piece = |p: BoundingBox<u32>| {
+            if p.area().unwrap() <= minimum_area {
+                small_bboxes.push(p);
+            } else {
+                boxes.push(p);
+            }
+        };
+
+        add_piece(sub_boxes.0);
+        add_piece(sub_boxes.1);
+        add_piece(sub_boxes.2);
+        add_piece(sub_boxes.3);
+    }
+
+    boxes.into_iter().chain(small_bboxes)
+}
+
 fn generate_distinct_random_points<R: Rng>(
     rng: &mut R,
     n: usize,
