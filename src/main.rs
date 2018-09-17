@@ -104,6 +104,10 @@ pub enum Command {
     /// Generate some stippling art.
     #[structopt(name = "stippling")]
     Stippling(Stippling),
+
+    /// Generate some pop art.
+    #[structopt(name = "pop")]
+    Pop(Pop),
 }
 
 /// Julia Set settings.
@@ -487,6 +491,27 @@ pub struct StipplingRects {
     minimum_area: u32,
 }
 
+/// Generate some stippling art.
+#[derive(StructOpt, Debug)]
+pub struct Pop {
+    /// Width of the image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
+    width: u32,
+
+    /// Height of the image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
+    height: u32,
+
+    /// Where to write the final image.
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "pop.png",
+        parse(from_os_str)
+    )]
+    output_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -522,6 +547,7 @@ fn main() {
         Command::Voronoi(ref config) => voronoi(config),
         Command::Patchwork(ref config) => patchwork(config),
         Command::Stippling(ref config) => stippling(config),
+        Command::Pop(ref config) => pop_rects(config),
     }
 }
 
@@ -894,6 +920,67 @@ fn stippling(config: &Stippling) {
                 rects_config.points,
                 rects_config.minimum_area,
                 image::Rgb { data: [0, 0, 0] },
+            );
+        }
+    }
+
+    img.save(&config.output_path).expect("cannot save image");
+}
+
+fn pop_rects(config: &Pop) {
+    use rand::Rng;
+
+    let mut rng = rand::thread_rng();
+
+    let mut img = image::RgbImage::new(config.width, config.height);
+
+    // let mut color_config = matto::color::RandomColorConfig::new()
+    //     // .hue(matto::color::KnownHue::Green)
+    //     .luminosity(matto::color::Luminosity::Bright);
+
+    let fill_palette = [
+        image::Rgb {
+            data: [0x8d, 0x22, 0x02],
+        },
+        image::Rgb {
+            data: [0x0b, 0x18, 0x3b],
+        },
+        image::Rgb {
+            data: [0xd0, 0x95, 0x02],
+        },
+    ];
+
+    {
+        let mut drawer = matto::drawing::Drawer::new_with_no_blending(&mut img);
+
+        let rects = matto::art::random_bbox_subdivisions(
+            5,
+            matto::geo::BoundingBox::from_dimensions(config.width, config.height),
+            300,
+            &mut rng,
+        );
+
+        for rect in rects {
+            // let pix = &image::Rgb {
+            //     data: matto::color::random_color(&mut color_config).to_rgb(),
+            // };
+
+            // let pix = rng.choose(&palette).unwrap();
+
+            let pix = if rng.gen::<f64>() <= 0.9 {
+                &image::Rgb {
+                    data: [0xe6, 0xeb, 0xc3],
+                }
+            } else {
+                rng.choose(&fill_palette).unwrap()
+            };
+
+            println!("{:?} {:?}", rect, pix);
+
+            drawer.rect(&rect, pix);
+            drawer.closed_path(
+                rect.points().iter().cloned(),
+                &image::Rgb { data: [0, 0, 0] },
             );
         }
     }
