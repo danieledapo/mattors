@@ -17,7 +17,7 @@ use self::line::BresenhamLineIter;
 use self::triangle::FlatTriangleIter;
 
 use geo::polygon::Polygon;
-use geo::{LineEquation, Point, PointU32};
+use geo::{BoundingBox, LineEquation, Point, PointU32};
 
 /// The `Blender` is the function that decides how to merge two pixels together.
 pub trait Blender<P: image::Pixel> {
@@ -179,6 +179,21 @@ where
                 }
                 _ => break,
             }
+        }
+    }
+
+    /// Draw a rectangle filled with the given pixel.
+    pub fn rect(&mut self, rect: &BoundingBox<u32>, pix: &I::Pixel) {
+        if rect.is_empty() {
+            return;
+        }
+
+        for y in rect.min().y..=rect.max().y {
+            self.line(
+                PointU32::new(rect.min().x, y),
+                PointU32::new(rect.max().x, y),
+                pix,
+            );
         }
     }
 
