@@ -7,7 +7,9 @@ use std::collections::HashSet;
 
 use geo::{BoundingBox, PointU32};
 
-fn random_bbox_subdivisions<R: Rng>(
+/// Randomly subdive the given box in at most n subboxes of at least
+/// minimum_area.
+pub fn random_bbox_subdivisions<R: Rng>(
     n: usize,
     bbox: BoundingBox<u32>,
     minimum_area: u32,
@@ -50,7 +52,8 @@ fn random_bbox_subdivisions<R: Rng>(
     boxes.into_iter().chain(small_bboxes)
 }
 
-fn generate_distinct_random_points<R: Rng>(
+/// Generate n distinct random points in bbox.
+pub fn generate_distinct_random_points<R: Rng>(
     rng: &mut R,
     n: usize,
     bbox: &BoundingBox<u32>,
@@ -67,7 +70,8 @@ fn generate_distinct_random_points<R: Rng>(
     points
 }
 
-fn random_point_in_bbox<R: Rng>(rng: &mut R, bbox: &BoundingBox<u32>) -> PointU32 {
+/// Generate a random point in a bbox.
+pub fn random_point_in_bbox<R: Rng>(rng: &mut R, bbox: &BoundingBox<u32>) -> PointU32 {
     let x = rng.gen_range(bbox.min().x, bbox.max().x);
     let y = rng.gen_range(bbox.min().y, bbox.max().y);
 
