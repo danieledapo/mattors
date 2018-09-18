@@ -494,6 +494,14 @@ pub struct StipplingRects {
 /// Generate some stippling art.
 #[derive(StructOpt, Debug)]
 pub struct Pop {
+    /// Number of iterations to divive the given image of.
+    #[structopt(short = "i", long = "iterations", default_value = "5")]
+    iterations: usize,
+
+    /// The minimum area each rectangle must have in order to recurse in it.
+    #[structopt(short = "a", long = "minimum-area", default_value = "1000")]
+    minimum_area: u32,
+
     /// Width of the image.
     #[structopt(short = "w", long = "width", default_value = "1920")]
     width: u32,
@@ -934,10 +942,6 @@ fn pop_rects(config: &Pop) {
 
     let mut img = image::RgbImage::new(config.width, config.height);
 
-    // let mut color_config = matto::color::RandomColorConfig::new()
-    //     // .hue(matto::color::KnownHue::Green)
-    //     .luminosity(matto::color::Luminosity::Bright);
-
     let fill_palette = [
         image::Rgb {
             data: [0x8d, 0x22, 0x02],
@@ -954,34 +958,84 @@ fn pop_rects(config: &Pop) {
         let mut drawer = matto::drawing::Drawer::new_with_no_blending(&mut img);
 
         let rects = matto::art::random_bbox_subdivisions(
-            5,
+            config.iterations,
             matto::geo::BoundingBox::from_dimensions(config.width, config.height),
-            300,
+            config.minimum_area,
             &mut rng,
-        );
+        ).collect::<Vec<_>>();
 
-        for rect in rects {
-            // let pix = &image::Rgb {
-            //     data: matto::color::random_color(&mut color_config).to_rgb(),
-            // };
+        let mut draw_rect = |rect, pix| {
+            drawer.rect(rect, pix);
 
-            // let pix = rng.choose(&palette).unwrap();
+            // TODO: drawing borders should be done by the drawing mod.
+            let border_width = 10;
 
-            let pix = if rng.gen::<f64>() <= 0.9 {
+            let horizontal_band_width = rect.width().unwrap();
+            let vertical_band_height = matto::utils::clamp(
+                i64::from(rect.height().unwrap()) - i64::from(border_width) * 2,
+                0,
+                config.height,
+            );
+
+            let borders = [
+                geo::BoundingBox::from_dimensions_and_origin(
+                    rect.min(),
+                    horizontal_band_width,
+                    border_width,
+                ),
+                geo::BoundingBox::from_dimensions_and_origin(
+                    &PointU32::new(rect.min().x, rect.min().y + border_width),
+                    border_width,
+                    vertical_band_height,
+                ),
+                geo::BoundingBox::from_dimensions_and_origin(
+                    &PointU32::new(
+                        matto::utils::clamp(
+                            i64::from(rect.max().x) - i64::from(border_width),
+                            0,
+                            config.width,
+                        ),
+                        rect.min().y + border_width,
+                    ),
+                    border_width,
+                    vertical_band_height,
+                ),
+                geo::BoundingBox::from_dimensions_and_origin(
+                    &PointU32::new(
+                        rect.min().x,
+                        matto::utils::clamp(
+                            i64::from(rect.max().y) - i64::from(border_width),
+                            0,
+                            config.height,
+                        ),
+                    ),
+                    horizontal_band_width,
+                    border_width,
+                ),
+            ];
+
+            for border in &borders {
+                drawer.rect(border, &image::Rgb { data: [0, 0, 0] });
+            }
+        };
+
+        for rect in &rects {
+            draw_rect(
+                rect,
                 &image::Rgb {
                     data: [0xe6, 0xeb, 0xc3],
-                }
-            } else {
-                rng.choose(&fill_palette).unwrap()
-            };
-
-            println!("{:?} {:?}", rect, pix);
-
-            drawer.rect(&rect, pix);
-            drawer.closed_path(
-                rect.points().iter().cloned(),
-                &image::Rgb { data: [0, 0, 0] },
+                },
             );
+        }
+
+        if !rects.is_empty() {
+            let k = rng.gen_range(0, fill_palette.len() + 1);
+
+            for pix in &fill_palette[..k] {
+                let r = rng.gen_range(0, rects.len());
+
+                draw_rect(&rects[r], pix);
+            }
         }
     }
 
