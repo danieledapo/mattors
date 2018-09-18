@@ -27,6 +27,7 @@ use matto::art::delaunay;
 use matto::art::dragon;
 use matto::art::fractree;
 use matto::art::julia::{FractalPoint, JuliaGenIter};
+use matto::art::mondrian;
 use matto::art::patchwork;
 use matto::art::primi;
 use matto::art::primi::Shape;
@@ -936,10 +937,6 @@ fn stippling(config: &Stippling) {
 }
 
 fn pop_rects(config: &Pop) {
-    use rand::Rng;
-
-    let mut rng = rand::thread_rng();
-
     let mut img = image::RgbImage::new(config.width, config.height);
 
     let fill_palette = [
@@ -954,90 +951,16 @@ fn pop_rects(config: &Pop) {
         },
     ];
 
-    {
-        let mut drawer = matto::drawing::Drawer::new_with_no_blending(&mut img);
-
-        let rects = matto::art::random_bbox_subdivisions(
-            config.iterations,
-            matto::geo::BoundingBox::from_dimensions(config.width, config.height),
-            config.minimum_area,
-            &mut rng,
-        ).collect::<Vec<_>>();
-
-        let mut draw_rect = |rect, pix| {
-            drawer.rect(rect, pix);
-
-            // TODO: drawing borders should be done by the drawing mod.
-            let border_width = 10;
-
-            let horizontal_band_width = rect.width().unwrap();
-            let vertical_band_height = matto::utils::clamp(
-                i64::from(rect.height().unwrap()) - i64::from(border_width) * 2,
-                0,
-                config.height,
-            );
-
-            let borders = [
-                geo::BoundingBox::from_dimensions_and_origin(
-                    rect.min(),
-                    horizontal_band_width,
-                    border_width,
-                ),
-                geo::BoundingBox::from_dimensions_and_origin(
-                    &PointU32::new(rect.min().x, rect.min().y + border_width),
-                    border_width,
-                    vertical_band_height,
-                ),
-                geo::BoundingBox::from_dimensions_and_origin(
-                    &PointU32::new(
-                        matto::utils::clamp(
-                            i64::from(rect.max().x) - i64::from(border_width),
-                            0,
-                            config.width,
-                        ),
-                        rect.min().y + border_width,
-                    ),
-                    border_width,
-                    vertical_band_height,
-                ),
-                geo::BoundingBox::from_dimensions_and_origin(
-                    &PointU32::new(
-                        rect.min().x,
-                        matto::utils::clamp(
-                            i64::from(rect.max().y) - i64::from(border_width),
-                            0,
-                            config.height,
-                        ),
-                    ),
-                    horizontal_band_width,
-                    border_width,
-                ),
-            ];
-
-            for border in &borders {
-                drawer.rect(border, &image::Rgb { data: [0, 0, 0] });
-            }
-        };
-
-        for rect in &rects {
-            draw_rect(
-                rect,
-                &image::Rgb {
-                    data: [0xe6, 0xeb, 0xc3],
-                },
-            );
-        }
-
-        if !rects.is_empty() {
-            let k = rng.gen_range(0, fill_palette.len() + 1);
-
-            for pix in &fill_palette[..k] {
-                let r = rng.gen_range(0, rects.len());
-
-                draw_rect(&rects[r], pix);
-            }
-        }
-    }
+    mondrian::generate(
+        &mut img,
+        config.iterations,
+        config.minimum_area,
+        image::Rgb {
+            data: [0xe6, 0xeb, 0xc3],
+        },
+        &fill_palette,
+        10,
+    );
 
     img.save(&config.output_path).expect("cannot save image");
 }

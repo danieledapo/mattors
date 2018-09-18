@@ -82,6 +82,7 @@ pub mod delaunay;
 pub mod dragon;
 pub mod fractree;
 pub mod julia;
+pub mod mondrian;
 pub mod patchwork;
 pub mod primi;
 pub mod quantize;
