@@ -106,9 +106,9 @@ pub enum Command {
     #[structopt(name = "stippling")]
     Stippling(Stippling),
 
-    /// Generate some pop art.
-    #[structopt(name = "pop")]
-    Pop(Pop),
+    /// Generate some mondrian inspired art.
+    #[structopt(name = "mondrian")]
+    Mondrian(Mondrian),
 }
 
 /// Julia Set settings.
@@ -492,9 +492,10 @@ pub struct StipplingRects {
     minimum_area: u32,
 }
 
-/// Generate some stippling art.
+/// Generate some art inspired by Mondrian's Composition in Red, Blue and
+/// Yellow.
 #[derive(StructOpt, Debug)]
-pub struct Pop {
+pub struct Mondrian {
     /// Number of iterations to divive the given image of.
     #[structopt(short = "i", long = "iterations", default_value = "5")]
     iterations: usize,
@@ -515,7 +516,7 @@ pub struct Pop {
     #[structopt(
         short = "o",
         long = "output",
-        default_value = "pop.png",
+        default_value = "mondrian.png",
         parse(from_os_str)
     )]
     output_path: PathBuf,
@@ -556,7 +557,7 @@ fn main() {
         Command::Voronoi(ref config) => voronoi(config),
         Command::Patchwork(ref config) => patchwork(config),
         Command::Stippling(ref config) => stippling(config),
-        Command::Pop(ref config) => pop_rects(config),
+        Command::Mondrian(ref config) => mondrian(config),
     }
 }
 
@@ -936,7 +937,7 @@ fn stippling(config: &Stippling) {
     img.save(&config.output_path).expect("cannot save image");
 }
 
-fn pop_rects(config: &Pop) {
+fn mondrian(config: &Mondrian) {
     let mut img = image::RgbImage::new(config.width, config.height);
 
     let fill_palette = [

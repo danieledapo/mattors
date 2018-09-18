@@ -79,6 +79,9 @@ cargo run --release -- patchwork -f --points 4000 --width 600 --height 600 --clu
 cargo run -- stippling gradient -p 1000 -k 5
 cargo run -- stippling rects --iterations 1500
 
+# Mondrian
+cargo run -- mondrian -w 800 -h 800
+
 # misc
 cargo run -- runes -p 3 -c 26
 ```
