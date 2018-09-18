@@ -7,6 +7,11 @@ use std::collections::HashMap;
 
 use std::hash::Hash;
 
+/// Clamp the given i64 between two u32 inclusive.
+pub fn clamp(x: i64, l: u32, h: u32) -> u32 {
+    x.max(i64::from(l)).min(i64::from(h)) as u32
+}
+
 /// Build a `HashMap` from the keys in the iterator to the number of its
 /// occurences.
 pub fn build_hashmap_counter<K, I>(it: I) -> HashMap<K, u64>

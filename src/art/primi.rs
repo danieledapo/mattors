@@ -5,6 +5,7 @@ extern crate image;
 extern crate num;
 extern crate rand;
 
+use std;
 use std::clone::Clone;
 use std::convert::From;
 use std::fmt::Debug;
@@ -16,7 +17,7 @@ use self::rand::Rng;
 use art::quantize;
 use drawing;
 use geo;
-use std;
+use utils::clamp;
 
 /// A shape that can be used in the `primitify` function.
 pub trait Shape {
@@ -160,10 +161,6 @@ where
         .map(|(x, y)| (f64::from(x.clone()), f64::from(y.clone())))
         .fold(0.0, |acc, (x, y)| acc + (x - y).powi(2))
         .sqrt()
-}
-
-fn clamp(x: i64, l: u32, h: u32) -> u32 {
-    x.max(i64::from(l)).min(i64::from(h)) as u32
 }
 
 impl Shape for geo::Triangle<u32> {
