@@ -44,6 +44,13 @@ inspired by [this article](https://mattdesl.svbtle.com/pen-plotter-2).
 ![stippling-gradient](images/stippling-gradient.png)
 ![stippling-rects](images/stippling-rects.png)
 
+## Mondrian
+
+inspired by `Composition in Red, Blue and Yellow` by Mondrian.
+
+![mondrian1](images/mondrian1.png)
+![mondrian2](images/mondrian2.png)
+
 # Examples
 
 ```
