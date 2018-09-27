@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        //
+        // base
+        //
+        "target": "es6",
+        "lib": [
+            "es5",
+            "es6",
+            "dom"
+        ],
+
+        //
+        // UI
+        //
+        "jsx": "react",
+
+        //
+        // strictness
+        //
+        "alwaysStrict": true,
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
+        "strictNullChecks": true,
+
+        // misc
+        "sourceMap": true,
+    }
+}
