@@ -1,6 +1,8 @@
 import * as React from "react";
 import { render } from "react-dom";
 
+@import "./index.scss";
+
 import P5 from "p5";
 
 import { Sketch } from "./sketches/sketch";
@@ -9,6 +11,8 @@ import { Print10 } from "./sketches/print10";
 export const SKETCHES = [
     new Print10()
 ];
+
+const CANVAS_ID = "piece-canvas-container";
 
 interface State {
     p5Object: any;
@@ -33,30 +37,57 @@ export class App extends React.Component<{}, State> {
     }
 
     public render() {
-        const sketches = [];
+        let intro = <div></div>;
+        let centeringClasses: string;
 
-        for (const sketchName of this.sketchesMap.keys()) {
-            sketches.push(
-                <option value={sketchName} key={sketchName}>{sketchName}</option>
-            )
+        if (this.state.p5Object === undefined) {
+            const sketches = [];
+
+            for (const sketchName of this.sketchesMap.keys()) {
+                sketches.push(
+                    <option value={sketchName} key={sketchName}>{sketchName}</option>
+                )
+            }
+
+            intro = (
+                <div>
+                    <p>
+                        Matto is a generative art playground built on top of Typescript and Rust.
+                        It also uses the p5js library.
+                    </p>
+
+                    <div className="input-group">
+                        <select
+                            className="form-select"
+                            onChange={this.changeSketch}
+                            value={this.state.selectedSketchName}
+                        >
+                            ${sketches}
+                        </select>
+                        <button className="btn input-group-btn" onClick={this.startSketch}>
+                            Start Sketch
+                        </button>
+                    </div>
+
+                </div>
+            );
+
+            centeringClasses = "col-4 col-sm-8 col-mx-auto";
+        } else {
+            centeringClasses = "col-10 col-sm-12 col-mx-auto";
         }
 
-        const disabled = this.state.p5Object !== undefined;
-
         return (
-            <div>
-                <p>Sketches</p>
-
-                <select
-                    onChange={this.changeSketch}
-                    disabled={disabled}
-                    value={this.state.selectedSketchName}
-                >
-                    ${sketches}
-                </select>
-                <button onClick={this.startSketch} disabled={disabled}>
-                    Start Sketch
-                </button>
+            <div className="container">
+                <h1 className="text-center">Matto</h1>
+                <div className="columns">
+                    <div className={`column ${centeringClasses}`}>
+                        {intro}
+                        <div style={{ overflow: "scroll" }}>
+                            <div id={CANVAS_ID}></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -99,7 +130,7 @@ export class App extends React.Component<{}, State> {
                 p.draw();
             };
 
-        });
+        }, CANVAS_ID);
 
         this.setState({ p5Object });
     }
