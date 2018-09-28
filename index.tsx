@@ -91,6 +91,10 @@ export class App extends React.Component<{}, State> {
             };
 
             p.mouseClicked = () => {
+                if (p.mouseButton !== p.LEFT) {
+                    return;
+                }
+
                 sketch.reset(p);
                 p.draw();
             };
