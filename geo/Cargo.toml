@@ -4,8 +4,16 @@ version = "0.1.0"
 authors = ["Daniele D'Orazio <d.dorazio96@gmail.com>"]
 edition = "2018"
 
+[lib]
+crate-type = ["cdylib", "lib"]
+
 [dependencies]
 num = "0.2"
+
+# wasm-pack doesn't work with workspaces, see
+# https://github.com/rustwasm/wasm-pack/issues/252 and
+# https://github.com/rustwasm/wasm-pack/issues/305
+wasm-bindgen = "0.2"
 
 [dev-dependencies]
 proptest = "0.8.4"

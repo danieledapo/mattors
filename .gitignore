@@ -1,9 +1,15 @@
+# rust
 target
 *.rs.bk
 
-*.png
-!images/*.png
+# wasm-pack
+pkg
 
+# node
 node_modules
 dist
 .cache
+
+# images
+*.png
+!images/*.png
