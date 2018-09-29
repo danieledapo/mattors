@@ -30,7 +30,8 @@ pub fn random_patchwork(
             Point::new(f64::from(img.width() - 1), 0.0),
             Point::new(f64::from(img.width() - 1), f64::from(img.height() - 1)),
             Point::new(0.0, f64::from(img.height() - 1)),
-        ]).unwrap(),
+        ])
+        .unwrap(),
     ]];
 
     let mut drawer = Drawer::new_with_no_blending(img);

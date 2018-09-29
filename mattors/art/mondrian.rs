@@ -28,7 +28,8 @@ pub fn generate(
         BoundingBox::from_dimensions(width, height),
         minimum_area,
         &mut rng,
-    ).collect::<Vec<_>>();
+    )
+    .collect::<Vec<_>>();
 
     let mut draw_rect = |rect, pix| {
         drawer.rect(rect, &pix);

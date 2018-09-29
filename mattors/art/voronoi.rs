@@ -73,7 +73,8 @@ pub fn random_voronoi<R: Rng>(
                     data: random_color(color_config).to_rgb(),
                 },
             )
-        }).collect();
+        })
+        .collect();
 
     let points = kdtree::KdTree::from_vector(points);
 

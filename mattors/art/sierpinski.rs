@@ -111,7 +111,8 @@ pub fn fancy_sierpinski<I>(
                         }
                     });
             });
-        }).unwrap();
+        })
+        .unwrap();
 }
 
 #[cfg(test)]

@@ -773,7 +773,8 @@ fn primirs(config: &Primirs) {
             config.nmutations,
             config.dx,
             config.dy,
-        ).map(|prim| {
+        )
+        .map(|prim| {
             let mut upscaled_img =
                 image::RgbaImage::from_pixel(rgba.width(), rgba.height(), prim.dominant_color);
 
@@ -792,7 +793,8 @@ fn primirs(config: &Primirs) {
             config.nmutations,
             config.dx,
             config.dy,
-        ).map(|prim| (prim.best_image, prim.best_error))
+        )
+        .map(|prim| (prim.best_image, prim.best_error))
     };
 
     let (best_image, best_error) = primitized.expect("primirs error");

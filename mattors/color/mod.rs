@@ -118,7 +118,8 @@ fn pick_brightness(hue: u16, saturation: u8) -> u8 {
                 &Point::new(i16::from(sat2), i16::from(bri1)),
                 &Point::new(i16::from(sat1), i16::from(bri2)),
                 i16::from(saturation),
-            ).unwrap() as u8;
+            )
+            .unwrap() as u8;
         }
     }
 

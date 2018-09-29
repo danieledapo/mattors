@@ -23,7 +23,8 @@ impl Simmetry {
             Simmetry::None,
             Simmetry::Vertical,
             Simmetry::VerticalAndHorizontal,
-        ]).unwrap()
+        ])
+        .unwrap()
     }
 
     fn divide(&self, width: u32, height: u32) -> (u32, u32) {
