@@ -2,16 +2,11 @@
 //! Set](https://en.wikipedia.org/wiki/Julia_set). The most famous one is
 //! probably the [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set).
 
-extern crate image;
-extern crate num;
-
-extern crate geo;
-
 use std::iter::Iterator;
 
-use self::num::complex::Complex64;
+use num::complex::Complex64;
 
-use self::geo::PointF64;
+use geo::PointF64;
 
 /// This struct is mainly used to pass some data used when converting to raw
 /// pixels.

@@ -1,17 +1,12 @@
 //! Some art inspired by the [Patchwork
 //! algorithm](https://mattdesl.svbtle.com/pen-plotter-2).
 
-extern crate image;
-extern crate rand;
-
-extern crate geo;
-
 use std::collections::HashSet;
 
-use self::geo::{convex_hull, kmeans, BoundingBox, Point, Polygon};
+use geo::{convex_hull, kmeans, BoundingBox, Point, Polygon};
 
-use art::random_point_in_bbox;
-use drawing::{Blender, Drawer};
+use crate::art::random_point_in_bbox;
+use crate::drawing::{Blender, Drawer};
 
 const WHITE_EGG: image::Rgb<u8> = image::Rgb {
     data: [0xFD, 0xFD, 0xFF],

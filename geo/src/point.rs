@@ -1,7 +1,5 @@
 //! Handy `Point` struct and utility functions.
 
-extern crate num;
-
 use std::error::Error;
 use std::str::FromStr;
 

@@ -2,6 +2,7 @@
 name = "matto"
 version = "0.1.0"
 authors = ["daniele <d.dorazio96@gmail.com>"]
+edition = "2018"
 
 [workspace]
 members = [

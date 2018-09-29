@@ -1,11 +1,9 @@
 //! This module contains an implementation of a [Minimum bounding
 //! box](https://en.wikipedia.org/wiki/Minimum_bounding_box) or AABB.
 
-extern crate num;
-
 use std::iter::{Extend, FromIterator, IntoIterator};
 
-use point::Point;
+use crate::point::Point;
 
 /// Simple axis aligned bounding box implementation.
 #[derive(Clone, Debug, PartialEq)]

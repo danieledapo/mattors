@@ -1,15 +1,11 @@
 //! Generate some awesome Fractal Trees.
 
-extern crate image;
-
-extern crate geo;
-
 use std::f64;
 use std::fmt::Debug;
 
-use self::geo::PointU32;
+use geo::PointU32;
 
-use drawing;
+use crate::drawing;
 
 /// Draw a fractal tree onto the given `img` using the given `pix` starting from
 /// `pt`. `branching_angle` is the angle to use to draw the branches and

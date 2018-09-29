@@ -1,16 +1,11 @@
 //! Draw some [Voronoi diagrams](https://en.wikipedia.org/wiki/Voronoi_diagram).
 
-extern crate image;
-extern crate rand;
+use rand::Rng;
 
-extern crate geo;
+use geo::{kdtree, BoundingBox, PointU32};
 
-use self::rand::Rng;
-
-use self::geo::{kdtree, BoundingBox, PointU32};
-
-use art::generate_distinct_random_points;
-use color::{random_color, RandomColorConfig};
+use crate::art::generate_distinct_random_points;
+use crate::color::{random_color, RandomColorConfig};
 
 /// Generate a voronoi diagram where the colors are taken from the gradient
 /// going from color1 to color2.

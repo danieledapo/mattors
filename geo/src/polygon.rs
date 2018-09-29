@@ -1,13 +1,11 @@
 //! This module contains a simple definition of a closed polygon.
 
-extern crate num;
-
 use std::cmp::Ordering;
 
-use bbox::BoundingBox;
-use line::LineEquation;
-use point::Point;
-use utils::cmp_floats;
+use crate::bbox::BoundingBox;
+use crate::line::LineEquation;
+use crate::point::Point;
+use crate::utils::cmp_floats;
 
 /// A simple closed Polygon primitive.
 #[derive(Debug, Clone, PartialEq)]

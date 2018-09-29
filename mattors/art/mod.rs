@@ -1,13 +1,10 @@
 //! This module contains the code to generate the images
 
-extern crate rand;
-
-extern crate geo;
-
-use self::rand::Rng;
 use std::collections::HashSet;
 
-use self::geo::{BoundingBox, PointU32};
+use rand::Rng;
+
+use geo::{BoundingBox, PointU32};
 
 /// Randomly subdive the given box in at most n subboxes of at least
 /// minimum_area.

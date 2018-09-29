@@ -1,10 +1,8 @@
 //! Low level implementation details of line drawing algorithms.
 
-extern crate geo;
-
 use std::mem;
 
-use self::geo::{Point, PointU32};
+use geo::{Point, PointU32};
 
 /// Iterator that returns all the points that compose the line from start to
 /// end. It uses the [Bresenham's line

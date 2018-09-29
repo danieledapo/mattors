@@ -5,21 +5,17 @@
 pub mod line;
 pub mod triangle;
 
-extern crate image;
-extern crate num;
-
-extern crate geo;
-
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
 
-use self::image::Pixel;
-use self::line::BresenhamLineIter;
-use self::triangle::FlatTriangleIter;
+use image::Pixel;
 
-use self::geo::polygon::Polygon;
-use self::geo::{BoundingBox, LineEquation, Point, PointU32};
+use geo::polygon::Polygon;
+use geo::{BoundingBox, LineEquation, Point, PointU32};
+
+use crate::drawing::line::BresenhamLineIter;
+use crate::drawing::triangle::FlatTriangleIter;
 
 /// The `Blender` is the function that decides how to merge two pixels together.
 pub trait Blender<P: image::Pixel> {
@@ -245,7 +241,8 @@ where
                     debug_assert!(x >= 0.0 && x <= f64::from(u32::max_value()));
 
                     x as u32
-                }).collect::<Vec<_>>();
+                })
+                .collect::<Vec<_>>();
 
             xs.sort_unstable();
 
@@ -334,7 +331,7 @@ where
     ) {
         // local import because otherwise using convert::From in other parts
         // will be a pain
-        use self::num::traits::cast::NumCast;
+        use num::traits::cast::NumCast;
 
         debug_assert!(dx >= dy);
         debug_assert!(start.x <= end.x);
@@ -364,7 +361,8 @@ where
                 let pix = pix.map(|c| {
                     <<I::Pixel as image::Pixel>::Subpixel as NumCast>::from(
                         <f64 as From<_>>::from(c) * weight,
-                    ).unwrap()
+                    )
+                    .unwrap()
                 });
 
                 let (x, y) = coord_selector(x, *y as u32);

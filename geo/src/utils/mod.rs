@@ -1,7 +1,5 @@
 //! some handy utils.
 
-extern crate num;
-
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -70,8 +68,6 @@ pub use self::ordwrapper::OrdWrapper;
 #[cfg(test)]
 mod test {
     use super::split_element_at;
-
-    extern crate proptest;
 
     use std::iter;
 

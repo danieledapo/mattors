@@ -1,8 +1,6 @@
 //! Simple module to work with lines.
 
-extern crate num;
-
-use point::Point;
+use crate::point::Point;
 
 /// Linearly interpolate the point at the given x using the line that goes
 /// between the two points.

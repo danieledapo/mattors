@@ -1,9 +1,9 @@
 //! Simple module that implements [Delaunay
 //! triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation)
 
-use bbox::BoundingBox;
-use point::{Point, PointF64};
-use triangle::Triangle;
+use crate::bbox::BoundingBox;
+use crate::point::{Point, PointF64};
+use crate::triangle::Triangle;
 
 /// Triangulate the given set of points. This blows up if degenerate triangles
 /// are formed(e.g. completely flat triangles).

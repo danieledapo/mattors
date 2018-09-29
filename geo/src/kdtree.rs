@@ -1,14 +1,12 @@
 //! A simple(and probably inefficient) implementation of a [K-d
 //! Tree](https://en.wikipedia.org/wiki/K-d_tree). Only 2D as of now.
 
-extern crate num;
-
 use std::cmp::{Ord, Ordering};
 use std::collections::{BinaryHeap, VecDeque};
 
-use bbox::BoundingBox;
-use point::Point;
-use utils::{ksmallest_by_key, split_element_at, OrdWrapper};
+use crate::bbox::BoundingBox;
+use crate::point::Point;
+use crate::utils::{ksmallest_by_key, split_element_at, OrdWrapper};
 
 /// The axis used to split the space at a given point.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -109,7 +107,8 @@ where
             // this is actually partitioning data at the median
             ksmallest_by_key(&mut points, mid, |(pt, _val)| {
                 (*pt.axis_value(axis), *pt.axis_value(axis.next()))
-            }).unwrap();
+            })
+            .unwrap();
 
             let (left, elem, right) = split_element_at(points, mid);
 
@@ -231,7 +230,8 @@ where
             .map(|ow| {
                 let (node, _) = ow.into();
                 (&node.median, &node.value)
-            }).collect()
+            })
+            .collect()
     }
 }
 
@@ -391,9 +391,6 @@ where
 mod test {
     use super::{Axis, KdTree, Node};
 
-    extern crate num;
-    extern crate proptest;
-
     use std::collections::HashSet;
 
     use geo::{BoundingBox, PointU32};
@@ -502,7 +499,8 @@ mod test {
                     &PointU32::new(42, 73),
                     0,
                     0
-                )).collect::<Vec<_>>(),
+                ))
+                .collect::<Vec<_>>(),
             vec![(&PointU32::new(42, 73), &"beautiful")]
         );
     }
@@ -537,7 +535,8 @@ mod test {
                 } else {
                     None
                 }
-            }).collect::<Vec<_>>();
+            })
+            .collect::<Vec<_>>();
 
         sort_points(&mut contained_points);
         sort_points(&mut brute_force_contained_points);

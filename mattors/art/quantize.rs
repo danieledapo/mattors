@@ -2,21 +2,15 @@
 //! quantization](https://en.wikipedia.org/wiki/Quantization_(image_processing))
 //! by implemeting [Median Cut](https://en.wikipedia.org/wiki/Median_cut).
 
-extern crate image;
-extern crate num;
-
-extern crate geo;
-
 use std::collections::HashMap;
 use std::convert::From;
 use std::hash::Hash;
 
-use self::image::Pixel;
+use image::Pixel;
+use num::cast::NumCast;
+use num::ToPrimitive;
 
-use self::num::cast::NumCast;
-use self::num::ToPrimitive;
-
-use self::geo::utils;
+use geo::utils;
 
 /// Handy type alias to store the occurrence count for a Pixel in a `Vec`.
 pub type PixelFreq<P> = (P, u64);
@@ -170,7 +164,7 @@ where
 mod tests {
     use super::*;
 
-    use self::image::Rgb;
+    use image::Rgb;
 
     #[test]
     fn test_empty_pixels() {

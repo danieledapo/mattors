@@ -1,14 +1,12 @@
 //! A simple [K-Means](https://en.wikipedia.org/wiki/K-means_clustering)
 //! implementation.
 
-extern crate num;
-
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter;
 
-use point::Point;
+use crate::point::Point;
 
 /// Cluster the given set of points in at most k clusters. If k is greater or
 /// equal than the set of unique points then all the input points are returned.
@@ -127,8 +125,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::kmeans;
-
-    extern crate proptest;
 
     use proptest::prelude::*;
 

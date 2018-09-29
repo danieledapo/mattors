@@ -1,16 +1,10 @@
 //! Generate some triangly art using Delaunay triangulation.
 
-extern crate image;
-extern crate rand;
+use geo::{delaunay, BoundingBox, PointF64, PointU32};
+use rand::Rng;
 
-extern crate geo;
-
-use self::rand::Rng;
-
-use self::geo::{delaunay, BoundingBox, PointF64, PointU32};
-
-use color::{random_color, RandomColorConfig};
-use drawing;
+use crate::color::{random_color, RandomColorConfig};
+use crate::drawing;
 
 /// Generate a random triangulation and draws it onto the given image. The
 /// points are generated randomly but the image is divided into a grid and each

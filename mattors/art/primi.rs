@@ -1,12 +1,6 @@
 //! Simple Rust implementation of
 //! [primitive](https://github.com/fogleman/primitive)
 
-extern crate image;
-extern crate num;
-extern crate rand;
-
-extern crate geo;
-
 use std;
 use std::clone::Clone;
 use std::convert::From;
@@ -14,12 +8,12 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::Iterator;
 
-use self::rand::Rng;
+use rand::Rng;
 
-use self::geo::utils::clamp;
+use geo::utils::clamp;
 
-use art::quantize;
-use drawing;
+use crate::art::quantize;
+use crate::drawing;
 
 /// A shape that can be used in the `primitify` function.
 pub trait Shape {
@@ -127,7 +121,7 @@ where
         let mut new_primified = best_primified.clone();
         new_shape.draw(origin, &mut new_primified);
 
-        let mut new_error = get_error(origin.iter(), new_primified.iter());
+        let new_error = get_error(origin.iter(), new_primified.iter());
 
         // println!("error: {:?} new_error: {:?}", error, new_error);
 

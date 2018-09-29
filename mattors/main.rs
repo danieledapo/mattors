@@ -1,16 +1,6 @@
 //! Create some generative art.
 #![deny(missing_docs, warnings)]
 
-#[macro_use]
-extern crate structopt;
-
-extern crate image;
-extern crate num;
-extern crate rand;
-
-extern crate geo;
-extern crate matto;
-
 use std::f64;
 use std::num::ParseFloatError;
 use std::path::PathBuf;
@@ -22,7 +12,7 @@ use num::complex::{Complex64, ParseComplexError};
 
 use structopt::StructOpt;
 
-use self::geo::{PointF64, PointU32};
+use geo::{PointF64, PointU32};
 
 use matto::art::delaunay;
 use matto::art::dragon;

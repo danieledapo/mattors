@@ -1,13 +1,11 @@
 //! Module that allows to compute the [Convex
 //! Hull](https://en.wikipedia.org/wiki/Convex_hull) of a set of points.
 
-extern crate num;
-
 use std::cmp::Ordering;
 
-use angle::{angle_orientation, polar_angle, AngleOrientation};
-use point::Point;
-use utils::cmp_floats;
+use crate::angle::{angle_orientation, polar_angle, AngleOrientation};
+use crate::point::Point;
+use crate::utils::cmp_floats;
 
 /// Calculate the convex hull of a set of points and return the points that
 /// compose the convex hull.
@@ -31,7 +29,8 @@ where
             } else {
                 ycmp
             }
-        }).unwrap();
+        })
+        .unwrap();
 
     // sort in descending order so that we remove points from the back which is
     // amortized O(1).
@@ -78,8 +77,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::convex_hull;
-
-    extern crate proptest;
 
     use proptest::prelude::*;
 

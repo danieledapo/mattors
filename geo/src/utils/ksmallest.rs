@@ -72,8 +72,6 @@ where
 mod test {
     use super::{ksmallest, ksmallest_by};
 
-    extern crate proptest;
-
     proptest! {
         #![proptest_config(proptest::test_runner::Config::with_cases(100))]
         #[test]

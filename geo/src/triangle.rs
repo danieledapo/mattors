@@ -1,9 +1,7 @@
 //! Module to work with triangles.
 
-extern crate num;
-
-use line::LineEquation;
-use point::Point;
+use crate::line::LineEquation;
+use crate::point::Point;
 
 /// Simple Triangle shape.
 #[derive(Clone, Debug, PartialEq)]

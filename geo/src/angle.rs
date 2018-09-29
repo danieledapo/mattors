@@ -2,8 +2,8 @@
 
 use std::cmp::Ordering;
 
-use point::Point;
-use utils::cmp_floats;
+use crate::point::Point;
+use crate::utils::cmp_floats;
 
 /// The orientation of an angle, for example between three points.
 #[derive(Debug, Clone, Copy, PartialEq)]

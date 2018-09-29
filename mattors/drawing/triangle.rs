@@ -1,10 +1,8 @@
 //! Low level implementation details of the triangle primitive.
 
-extern crate geo;
+use geo::PointU32;
 
-use self::geo::PointU32;
-
-use drawing::line::BresenhamLineIter;
+use crate::drawing::line::BresenhamLineIter;
 
 /// Iterator that returns the edge points of a flat triangle that is a triangle
 /// that has at least 2 points on the same y.
@@ -79,8 +77,8 @@ impl Iterator for FlatTriangleIter {
 
 #[cfg(test)]
 mod tests {
-    use self::geo::Point;
     use super::*;
+    use geo::Point;
 
     #[test]
     fn test_flat_upper_triangle_iter() {

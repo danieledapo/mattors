@@ -1,17 +1,12 @@
 //! Generate some art inspired by `Composition in Red, Blue and Yellow` by
 //! [Mondrian](https://en.wikipedia.org/wiki/Piet_Mondrian).
 
-extern crate image;
-extern crate rand;
+use rand::Rng;
 
-extern crate geo;
+use geo::{utils::clamp, BoundingBox, PointU32};
 
-use self::rand::Rng;
-
-use self::geo::{utils::clamp, BoundingBox, PointU32};
-
-use art::random_bbox_subdivisions;
-use drawing::{Drawer, NoopBlender};
+use crate::art::random_bbox_subdivisions;
+use crate::drawing::{Drawer, NoopBlender};
 
 /// Generate some Mondrian inspired artwork.
 pub fn generate(

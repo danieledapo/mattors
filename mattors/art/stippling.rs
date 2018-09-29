@@ -1,14 +1,9 @@
 //! Generate some stippling art.
 
-extern crate image;
-extern crate rand;
+use geo::{BoundingBox, PointU32};
 
-extern crate geo;
-
-use self::geo::{BoundingBox, PointU32};
-
-use art::{random_bbox_subdivisions, random_point_in_bbox};
-use drawing::{Drawer, NoopBlender};
+use crate::art::{random_bbox_subdivisions, random_point_in_bbox};
+use crate::drawing::{Drawer, NoopBlender};
 
 /// The direction of gradient made of stippled points.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

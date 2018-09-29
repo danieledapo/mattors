@@ -1,15 +1,12 @@
 //! Simple module to generate some rune like characters
-extern crate image;
-extern crate rand;
-
-extern crate geo;
 
 use std::fmt::Debug;
 
-use self::rand::Rng;
+use rand::Rng;
 
-use self::geo::PointU32;
-use drawing::Drawer;
+use geo::PointU32;
+
+use crate::drawing::Drawer;
 
 #[derive(Debug)]
 enum Simmetry {

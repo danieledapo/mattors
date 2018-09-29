@@ -1,18 +1,13 @@
 //! Generate sierpinski triangle
 
-extern crate image;
-extern crate rand;
-
-extern crate geo;
-
 use std::fmt::Debug;
 use std::iter::Iterator;
 
-use self::rand::Rng;
+use rand::Rng;
 
-use self::geo::PointU32;
+use geo::PointU32;
 
-use drawing;
+use crate::drawing;
 
 /// Handy alias for a [Sierpinski
 /// Triangle](https://en.wikipedia.org/wiki/Sierpinski_triangle). Order is top,

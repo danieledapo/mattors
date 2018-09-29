@@ -1,13 +1,9 @@
 //! Simple module that helps with generating good looking colors.
 
-extern crate rand;
+use rand::Rng;
 
-extern crate geo;
-
-use self::rand::Rng;
-
-use self::geo::line::linear_interpolate;
-use self::geo::point::Point;
+use geo::line::linear_interpolate;
+use geo::point::Point;
 
 /// Simple struct to hold colors in HSV colorspace.
 #[derive(Clone, Debug, PartialEq)]

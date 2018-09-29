@@ -1,13 +1,9 @@
 //! Simple module to draw some [Dragon
 //! Curves](https://en.wikipedia.org/wiki/Dragon_curve).
 
-extern crate image;
+use geo::PointU32;
 
-extern crate geo;
-
-use self::geo::PointU32;
-
-use drawing;
+use crate::drawing;
 
 /// A move the Dragon Fractal can take
 #[derive(Clone, Debug)]
