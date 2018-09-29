@@ -3,7 +3,21 @@ name = "matto"
 version = "0.1.0"
 authors = ["daniele <d.dorazio96@gmail.com>"]
 
+[workspace]
+members = [
+    "geo",
+]
+
+[lib]
+path = "mattors/lib.rs"
+
+[[bin]]
+name = "matto"
+path = "mattors/main.rs"
+
 [dependencies]
+geo = { path = "./geo" }
+
 image = { git = "https://github.com/PistonDevelopers/image", branch = "master" }
 num = "0.2"
 rand = "0.5"
@@ -11,4 +25,3 @@ structopt = "0.2"
 
 [dev-dependencies]
 maplit = "1.0"
-proptest = "0.8.4"
