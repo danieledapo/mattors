@@ -10,6 +10,10 @@
             "dom"
         ],
 
+        // we need the moduleResolution be be node because of
+        // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/24788.
+        "moduleResolution": "node",
+
         //
         // UI
         //

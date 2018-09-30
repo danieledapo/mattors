@@ -9,6 +9,7 @@
 //
 // Spectre.css customization
 //
-// customize primary-color?
 
-@import "spectre.css";
+$primary-color: green;
+
+@import "node_modules/spectre.css/src/spectre.scss";

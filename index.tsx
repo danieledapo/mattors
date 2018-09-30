@@ -1,8 +1,9 @@
 import * as React from "react";
 import { render } from "react-dom";
 
-@import "./index.scss";
+import "./index.scss";
 
+// TODO: lazy load this
 import P5 from "p5";
 
 import { CubicDisarray } from "./sketches/cubic-disarray";
