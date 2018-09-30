@@ -1,4 +1,4 @@
-export interface Sketch {
+export interface ISketch {
     name: string;
     description: string;
 

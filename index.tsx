@@ -5,23 +5,23 @@ import { render } from "react-dom";
 
 import P5 from "p5";
 
-import { Sketch } from "./sketches/sketch";
 import { Print10 } from "./sketches/print10";
+import { ISketch } from "./sketches/sketch";
 
 export const SKETCHES = [
-    new Print10()
+    new Print10(),
 ];
 
 const CANVAS_ID = "piece-canvas-container";
 
-interface State {
+interface IState {
     p5Object: any;
     selectedSketchName: string;
 }
 
-export class App extends React.Component<{}, State> {
+export class App extends React.Component<{}, IState> {
     private readonly sketchesMap = new Map(
-        SKETCHES.map(s => [s.name, s] as [string, Sketch])
+        SKETCHES.map((s) => [s.name, s] as [string, ISketch]),
     );
 
     constructor(props: Readonly<{}>) {
@@ -31,8 +31,8 @@ export class App extends React.Component<{}, State> {
         this.startSketch = this.startSketch.bind(this);
 
         this.state = {
-            selectedSketchName: SKETCHES[0].name,
             p5Object: undefined,
+            selectedSketchName: SKETCHES[0].name,
         };
     }
 
@@ -45,8 +45,8 @@ export class App extends React.Component<{}, State> {
 
             for (const sketchName of this.sketchesMap.keys()) {
                 sketches.push(
-                    <option value={sketchName} key={sketchName}>{sketchName}</option>
-                )
+                    <option value={sketchName} key={sketchName}>{sketchName}</option>,
+                );
             }
 
             intro = (
@@ -94,7 +94,7 @@ export class App extends React.Component<{}, State> {
 
     public changeSketch(evt: React.ChangeEvent<HTMLSelectElement>) {
         this.setState({
-            selectedSketchName: evt.target.value
+            selectedSketchName: evt.target.value,
         });
     }
 
