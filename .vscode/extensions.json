@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "eg2.tslint",
+        "rust-lang.rls"
+    ]
+}
