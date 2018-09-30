@@ -5,11 +5,13 @@ import { render } from "react-dom";
 
 import P5 from "p5";
 
+import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Print10 } from "./sketches/print10";
 import { ISketch } from "./sketches/sketch";
 
 export const SKETCHES = [
     new Print10(),
+    new CubicDisarray(),
 ];
 
 const CANVAS_ID = "piece-canvas-container";
