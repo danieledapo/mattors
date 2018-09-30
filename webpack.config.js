@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const dist = path.resolve(__dirname, "dist");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
     entry: "./index.tsx",
@@ -20,6 +21,11 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             template: 'index.html'
+        }),
+
+        new MiniCssExtractPlugin({
+            filename: "[name].css",
+            chunkFilename: "[id].css"
         }),
 
         // TODO: uncomment when wasm-pack supports workspaces
@@ -46,15 +52,13 @@ module.exports = {
                 loader: "source-map-loader"
             },
 
-            // TODO: in production load scss separately from JS using
-            // https://github.com/webpack-contrib/mini-css-extract-plugin
             {
                 test: /\.scss$/,
                 use: [
-                    "style-loader", // creates style nodes from JS strings
-                    "css-loader", // translates CSS into CommonJS
+                    process.env.NODE_ENV !== 'production' ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    "css-loader",
                     "postcss-loader", // spectre.css needs autoprefixer
-                    "sass-loader" // compiles Sass to CSS, using Node Sass by default
+                    "sass-loader"
                 ]
             }
         ]
