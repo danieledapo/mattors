@@ -6,6 +6,7 @@ import "./index.scss";
 // TODO: lazy load this
 import P5 from "p5";
 
+import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Print10 } from "./sketches/print10";
 import { ISketch } from "./sketches/sketch";
@@ -13,6 +14,7 @@ import { ISketch } from "./sketches/sketch";
 export const SKETCHES = [
     new Print10(),
     new CubicDisarray(),
+    new BloodySpiderWeb(),
 ];
 
 const CANVAS_ID = "piece-canvas-container";
