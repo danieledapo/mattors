@@ -137,6 +137,15 @@ export class App extends React.Component<{}, IState> {
                 p.draw();
             };
 
+            p.keyPressed = () => {
+                if (p.key !== " ") {
+                    return;
+                }
+
+                sketch.reset(p);
+                p.draw();
+            };
+
         }, CANVAS_ID);
 
         this.setState({ p5Object });
