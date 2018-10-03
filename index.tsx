@@ -120,8 +120,12 @@ export class App extends React.Component<{}, IState> {
             };
 
             p.draw = () => {
+                p.push();
+
                 sketch.draw(p);
                 p.noLoop();
+
+                p.pop();
             };
 
             p.mouseClicked = () => {
