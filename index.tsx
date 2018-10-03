@@ -132,11 +132,13 @@ export class App extends React.Component<{}, IState> {
 
             p.mouseClicked = () => {
                 if (p.mouseButton !== p.LEFT) {
-                    return;
+                    return false;
                 }
 
                 sketch.reset(p);
                 p.draw();
+
+                return false;
             };
 
             p.keyPressed = () => {
@@ -146,6 +148,8 @@ export class App extends React.Component<{}, IState> {
 
                 sketch.reset(p);
                 p.draw();
+
+                return false;
             };
 
         }, CANVAS_ID);
