@@ -1,11 +1,14 @@
 import * as React from "react";
 import { render } from "react-dom";
 
+import { HashRouter, Route, RouteComponentProps, withRouter } from "react-router-dom";
+
 import "./index.scss";
 
 // TODO: lazy load this
 import P5 from "p5";
 
+import { StaticContext } from "react-router";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Print10 } from "./sketches/print10";
@@ -17,79 +20,63 @@ export const SKETCHES = [
     new BloodySpiderWeb(),
 ];
 
-const CANVAS_ID = "piece-canvas-container";
+const sketchesMap = new Map(
+    SKETCHES.map((s) => [s.name, s] as [string, ISketch]),
+);
 
-interface IState {
-    p5Object: any;
-    selectedSketchName: string;
+interface ISketchSelectorState {
+    selectedSketch: string;
 }
 
-export class App extends React.Component<{}, IState> {
-    private readonly sketchesMap = new Map(
-        SKETCHES.map((s) => [s.name, s] as [string, ISketch]),
-    );
-
-    constructor(props: Readonly<{}>) {
+class SketchSelector extends
+    React.Component<
+    RouteComponentProps<any, StaticContext, any>,
+    ISketchSelectorState
+    > {
+    constructor(props: Readonly<RouteComponentProps<any, StaticContext, any>>) {
         super(props);
 
         this.changeSketch = this.changeSketch.bind(this);
         this.startSketch = this.startSketch.bind(this);
 
         this.state = {
-            p5Object: undefined,
-            selectedSketchName: SKETCHES[0].name,
+            selectedSketch: SKETCHES[0].name,
         };
     }
 
     public render() {
-        let intro = <div></div>;
-        let centeringClasses: string;
+        const sketches = [];
 
-        if (this.state.p5Object === undefined) {
-            const sketches = [];
-
-            for (const sketchName of this.sketchesMap.keys()) {
-                sketches.push(
-                    <option value={sketchName} key={sketchName}>{sketchName}</option>,
-                );
-            }
-
-            intro = (
-                <div>
-                    <p>
-                        Matto is a generative art playground built on top of Typescript and Rust.
-                        It also uses the p5js library.
-                    </p>
-
-                    <div className="input-group">
-                        <select
-                            className="form-select"
-                            onChange={this.changeSketch}
-                            value={this.state.selectedSketchName}
-                        >
-                            ${sketches}
-                        </select>
-                        <button className="btn input-group-btn" onClick={this.startSketch}>
-                            Start Sketch
-                        </button>
-                    </div>
-
-                </div>
+        for (const sketchName of sketchesMap.keys()) {
+            sketches.push(
+                <option value={sketchName} key={sketchName}>{sketchName}</option>,
             );
-
-            centeringClasses = "col-4 col-sm-8 col-mx-auto";
-        } else {
-            centeringClasses = "col-10 col-sm-12 col-mx-auto";
         }
 
         return (
             <div className="container">
                 <h1 className="text-center">Matto</h1>
                 <div className="columns">
-                    <div className={`column ${centeringClasses}`}>
-                        {intro}
-                        <div style={{ overflow: "scroll" }}>
-                            <div id={CANVAS_ID}></div>
+                    <div className={"column col-4 col-sm-8 col-mx-auto"}>
+                        <p>
+                            Matto is a generative art playground built on top of Typescript and Rust.
+                            It also uses the p5js library.
+                    </p>
+
+                        <div className="input-group">
+                            <select
+                                className="form-select"
+                                onChange={this.changeSketch}
+                                value={this.state.selectedSketch}
+                            >
+                                ${sketches}
+                            </select>
+                            <button
+                                className="btn input-group-btn"
+                                onClick={this.startSketch}
+                            >
+                                Start Sketch
+                        </button>
                         </div>
                     </div>
                 </div>
@@ -97,23 +84,54 @@ export class App extends React.Component<{}, IState> {
         );
     }
 
-    public changeSketch(evt: React.ChangeEvent<HTMLSelectElement>) {
+    private changeSketch(evt: React.ChangeEvent<HTMLSelectElement>) {
         this.setState({
-            selectedSketchName: evt.target.value,
+            selectedSketch: evt.target.value,
         });
     }
 
-    public startSketch() {
-        this.runSketch(this.state.selectedSketchName);
+    private startSketch() {
+        this.props.history.push(`/sketch/${this.state.selectedSketch}`);
+    }
+}
+
+interface ISketchIProps {
+    match: {
+        params: {
+            sketchId: string,
+        },
+    };
+}
+
+class Sketch extends React.Component<ISketchIProps, {}> {
+    public static readonly CANVAS_ID = "piece-canvas-container";
+
+    public render() {
+        return (
+            <div className="container">
+                <h1 className="text-center">Matto</h1>
+                <div className="columns">
+                    <div className={"column col-10 col-sm-12 col-mx-auto"}>
+                        <div style={{ overflow: "scroll" }}>
+                            <div id={Sketch.CANVAS_ID}></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
-    public runSketch(sketchName: string) {
-        const sketch = this.sketchesMap.get(sketchName);
+    public componentDidMount() {
+        this.runSketch(this.props.match.params.sketchId);
+    }
+
+    private runSketch(sketchName: string) {
+        const sketch = sketchesMap.get(sketchName);
         if (sketch === undefined) {
-            throw new Error("da fuck bro?");
+            throw new Error(`da fuck bro? ${sketchName} is not a valid sketch`);
         }
 
-        const p5Object = new P5((p: p5) => {
+        return new P5((p: p5) => {
 
             p.setup = () => {
                 p.createCanvas(sketch.width, sketch.height);
@@ -152,11 +170,16 @@ export class App extends React.Component<{}, IState> {
                 return false;
             };
 
-        }, CANVAS_ID);
-
-        this.setState({ p5Object });
+        }, Sketch.CANVAS_ID);
     }
 }
 
 const mountNode = document.getElementById("app");
-render(<App />, mountNode);
+render((
+    <HashRouter>
+        <div>
+            <Route path="/sketch/:sketchId" component={Sketch} />
+            <Route exact path="/" component={withRouter(SketchSelector)} />
+        </div>
+    </HashRouter>
+), mountNode);
