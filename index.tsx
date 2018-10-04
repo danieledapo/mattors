@@ -113,7 +113,7 @@ class Sketch extends React.Component<ISketchIProps, {}> {
                 <h1 className="text-center">Matto</h1>
                 <div className="columns">
                     <div className={"column col-10 col-sm-12 col-mx-auto"}>
-                        <div style={{ overflow: "scroll" }}>
+                        <div style={{ overflow: "hidden" }}>
                             <div id={Sketch.CANVAS_ID}></div>
                         </div>
                     </div>
