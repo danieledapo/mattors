@@ -1,6 +1,5 @@
 export interface ISketch {
     name: string;
-    description: string;
 
     width: number;
     height: number;

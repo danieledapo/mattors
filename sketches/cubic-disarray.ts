@@ -5,7 +5,6 @@ import {
 // Port of George Ness Cubic Disarray piece
 export class CubicDisarray implements ISketch {
     public readonly name = "Cubic disarray";
-    public readonly description = "Port of Cubic Disarray by George Ness";
 
     public readonly borderMargin = 30;
     public readonly width = 600;

@@ -3,7 +3,6 @@ import { ISketch } from "./sketch";
 // https://10print.org/
 export class Print10 implements ISketch {
     public readonly name = "10Print";
-    public readonly description = "10 Print replica";
 
     public readonly width = 600;
     public readonly height = 600;

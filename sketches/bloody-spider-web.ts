@@ -2,7 +2,6 @@ import { ISketch } from "./sketch";
 
 export class BloodySpiderWeb implements ISketch {
     public readonly name = "Bloody spider web";
-    public readonly description = "Bloody spider web";
 
     public readonly width = 1920;
     public readonly height = 1080;
