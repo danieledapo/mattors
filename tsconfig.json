@@ -10,6 +10,9 @@
             "dom"
         ],
 
+        // esnext allows dynamic imports which is useful because p5js is heavy
+        "module": "esnext",
+
         // we need the moduleResolution be be node because of
         // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/24788.
         "moduleResolution": "node",
@@ -30,5 +33,7 @@
 
         // misc
         "sourceMap": true,
+
+        "removeComments": false,
     }
 }

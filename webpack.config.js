@@ -9,7 +9,8 @@ module.exports = {
     entry: "./index.tsx",
     output: {
         path: dist,
-        filename: "bundle.js"
+        filename: "bundle.js",
+        chunkFilename: '[name].bundle.js',
     },
 
     devtool: "source-map",

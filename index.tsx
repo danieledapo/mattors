@@ -5,14 +5,15 @@ import { HashRouter, Route, RouteComponentProps, withRouter } from "react-router
 
 import "./index.scss";
 
-// TODO: lazy load this
-import P5 from "p5";
-
 import { StaticContext } from "react-router";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Print10 } from "./sketches/print10";
 import { ISketch } from "./sketches/sketch";
+
+// p5js is dynamically loaded so reduce bundle size and to better use caching
+// since p5js isn't updated too often.
+let P5: any;
 
 export const SKETCHES = [
     new Print10(),
@@ -174,12 +175,20 @@ class Sketch extends React.Component<ISketchIProps, {}> {
     }
 }
 
-const mountNode = document.getElementById("app");
-render((
-    <HashRouter>
-        <div>
-            <Route path="/sketch/:sketchId" component={Sketch} />
-            <Route exact path="/" component={withRouter(SketchSelector)} />
-        </div>
-    </HashRouter>
-), mountNode);
+import(
+    /* webpackChunkName: "p5" */
+    /* webpackMode: "lazy" */
+    "p5",
+).then(({ default: pro }) => {
+    P5 = pro;
+
+    const mountNode = document.getElementById("app");
+    render((
+        <HashRouter>
+            <div>
+                <Route path="/sketch/:sketchId" component={Sketch} />
+                <Route exact path="/" component={withRouter(SketchSelector)} />
+            </div>
+        </HashRouter>
+    ), mountNode);
+});
