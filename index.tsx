@@ -6,6 +6,7 @@ import { HashRouter, Route, RouteComponentProps, withRouter } from "react-router
 import "./index.scss";
 
 import { StaticContext } from "react-router";
+import { Annulus } from "./sketches/annulus";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Print10 } from "./sketches/print10";
@@ -19,6 +20,7 @@ export const SKETCHES = [
     new Print10(),
     new CubicDisarray(),
     new BloodySpiderWeb(),
+    new Annulus(),
 ];
 
 const sketchesMap = new Map(
