@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render } from "react-dom";
 
-import { HashRouter, Route, RouteComponentProps, withRouter } from "react-router-dom";
+import { HashRouter, Link, Route, RouteComponentProps, withRouter } from "react-router-dom";
 
 import "./index.scss";
 
@@ -60,13 +60,19 @@ class SketchSelector extends
 
         return (
             <div className="container">
-                <h1 className="text-center">Matto</h1>
+                <h1 className="text-center">
+                    <ul className="breadcrumb">
+                        <li className="breadcrumb-item">
+                            Matto
+                        </li>
+                    </ul>
+                </h1>
                 <div className="columns">
                     <div className={"column col-4 col-sm-8 col-mx-auto"}>
                         <p>
                             Matto is a generative art playground built on top of Typescript and Rust.
                             It also uses the p5js library.
-                    </p>
+                        </p>
 
                         <div className="input-group">
                             <select
@@ -114,7 +120,16 @@ class Sketch extends React.Component<ISketchIProps, {}> {
     public render() {
         return (
             <div className="container">
-                <h1 className="text-center">Matto - {this.props.match.params.sketchId}</h1>
+                <h1 className="text-center">
+                    <ul className="breadcrumb">
+                        <li className="breadcrumb-item">
+                            <Link to="/">Matto</Link>
+                        </li>
+                        <li className="breadcrumb-item">
+                            {this.props.match.params.sketchId}
+                        </li>
+                    </ul>
+                </h1>
                 <div className="columns">
                     <div className={"column col-10 col-sm-12 col-mx-auto"}>
                         <div style={{ overflow: "hidden" }}>
