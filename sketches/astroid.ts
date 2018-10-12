@@ -12,11 +12,34 @@ export class Astroid implements ISketch {
     public readonly perturbations = 30;
     public readonly maxRoughness = 20;
 
-    public reset(p: p5) {
-        p.background("#4e5a65");
-    }
+    // tslint:disable-next-line:no-empty
+    public reset() { }
 
     public draw(p: p5) {
+        this.blackboardBackground(p);
+        this.astroid(p);
+        this.snow(p);
+    }
+
+    private blackboardBackground(p: p5, linesCount: number = 5000) {
+        p.background("#4e5a65");
+
+        p.stroke(255, 255, 255, 5);
+        p.strokeWeight(3);
+
+        for (let i = 0; i < linesCount; ++i) {
+            p.line(
+                p.random(0, this.width),
+                p.random(0, this.height),
+                p.random(0, this.width),
+                p.random(0, this.height),
+            );
+        }
+    }
+
+    private astroid(p: p5) {
+        p.push();
+
         p.translate(this.width / 2, this.height / 2);
 
         p.stroke(255, 255, 255, 30);
@@ -38,6 +61,32 @@ export class Astroid implements ISketch {
             }
 
             prev = astro;
+        }
+
+        p.pop();
+    }
+
+    private snow(p: p5, snowflakesCount: number = 1000) {
+        p.stroke(255, 255, 255, 5);
+        p.strokeWeight(3);
+
+        for (let i = 0; i < snowflakesCount; ++i) {
+            p.push();
+
+            const cx = p.random(0, this.width);
+            const cy = p.random(0, this.height);
+            const cr = p.random(1, 10);
+
+            p.translate(cx, cy);
+
+            for (let j = 0; j < 5; ++j) {
+                const p1 = randomPointInCircle(p, cr);
+                const p2 = randomPointInCircle(p, cr);
+
+                drawApproximatedLine(p, p1, p2, 5, 3);
+            }
+
+            p.pop();
         }
     }
 }
@@ -92,4 +141,15 @@ export function drawApproximatedLine(
             p1[1] + p.random(-roughness, roughness),
         );
     }
+}
+
+/**
+ * Pickup a random point in circle with the given radius. The center is assumed
+ * to be centered in the origin.
+ */
+export function randomPointInCircle(p: p5, maxr: number): [number, number] {
+    const a = p.random(0, p.TWO_PI);
+    const r = p.random(1, maxr);
+
+    return [Math.cos(a) * r, Math.sin(a) * r];
 }
