@@ -7,6 +7,7 @@ import "./index.scss";
 
 import { StaticContext } from "react-router";
 import { Annulus } from "./sketches/annulus";
+import { NeonLines } from "./sketches/neon-lines";
 import { Astroid } from "./sketches/astroid";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
@@ -23,6 +24,7 @@ export const SKETCHES = [
     new BloodySpiderWeb(),
     new Annulus(),
     new Astroid(),
+    new NeonLines(),
 ];
 
 const sketchesMap = new Map(
