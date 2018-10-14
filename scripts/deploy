@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -eux
+
+git add .
+git commit
+
+git push origin HEAD
+git subtree push --prefix dist origin gh-pages
