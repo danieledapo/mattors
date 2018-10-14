@@ -7,7 +7,6 @@ pkg
 
 # node
 node_modules
-dist
 .cache
 
 # images
