@@ -7,16 +7,12 @@ import "./index.scss";
 
 import { StaticContext } from "react-router";
 import { Annulus } from "./sketches/annulus";
-import { NeonLines } from "./sketches/neon-lines";
 import { Astroid } from "./sketches/astroid";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
+import { NeonLines } from "./sketches/neon-lines";
 import { Print10 } from "./sketches/print10";
 import { ISketch } from "./sketches/sketch";
-
-// p5js is dynamically loaded so reduce bundle size and to better use caching
-// since p5js isn't updated too often.
-let P5: any;
 
 export const SKETCHES = [
     new Print10(),
@@ -153,7 +149,7 @@ class Sketch extends React.Component<ISketchIProps, {}> {
             throw new Error(`da fuck bro? ${sketchName} is not a valid sketch`);
         }
 
-        return new P5((p: p5) => {
+        return new (p5 as any)((p: p5) => {
 
             p.setup = () => {
                 p.createCanvas(sketch.width, sketch.height);
@@ -196,20 +192,12 @@ class Sketch extends React.Component<ISketchIProps, {}> {
     }
 }
 
-import(
-    /* webpackChunkName: "p5" */
-    /* webpackMode: "lazy" */
-    "p5",
-).then(({ default: pro }) => {
-    P5 = pro;
-
-    const mountNode = document.getElementById("app");
-    render((
-        <HashRouter>
-            <div>
-                <Route path="/sketch/:sketchId" component={Sketch} />
-                <Route exact path="/" component={withRouter(SketchSelector)} />
-            </div>
-        </HashRouter>
-    ), mountNode);
-});
+const mountNode = document.getElementById("app");
+render((
+    <HashRouter>
+        <div>
+            <Route path="/sketch/:sketchId" component={Sketch} />
+            <Route exact path="/" component={withRouter(SketchSelector)} />
+        </div>
+    </HashRouter>
+), mountNode);
