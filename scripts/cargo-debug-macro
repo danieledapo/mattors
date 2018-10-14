@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+cargo +nightly rustc --profile test --lib -- -Z external-macro-backtrace -Z unstable-options --pretty=expanded
