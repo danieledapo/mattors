@@ -165,6 +165,7 @@ mod tests {
     use super::*;
 
     use image::Rgb;
+    use maplit::hashmap;
 
     #[test]
     fn test_empty_pixels() {

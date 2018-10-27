@@ -1,9 +1,5 @@
 //! Geometric functions, algorithms and data structures.
 
-#[cfg(test)]
-#[macro_use]
-extern crate proptest;
-
 pub mod angle;
 pub mod bbox;
 pub mod convex_hull;
