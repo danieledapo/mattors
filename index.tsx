@@ -10,8 +10,8 @@ import { Annulus } from "./sketches/annulus";
 import { Astroid } from "./sketches/astroid";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
-import { IrregularIslands } from "./sketches/irregular-islands";
 import { NeonLines } from "./sketches/neon-lines";
+import { Nucleus } from "./sketches/nucleus";
 import { Print10 } from "./sketches/print10";
 import { ISketch } from "./sketches/sketch";
 
@@ -22,7 +22,7 @@ export const SKETCHES = [
     new Annulus(),
     new Astroid(),
     new NeonLines(),
-    new IrregularIslands(),
+    new Nucleus(),
 ];
 
 const sketchesMap = new Map(

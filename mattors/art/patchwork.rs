@@ -45,8 +45,8 @@ pub fn random_patchwork(
             if fill_polygons {
                 for poly in polygons {
                     let poly =
-                        Polygon::new(poly.points().into_iter().map(|p| p.try_cast().unwrap()))
-                            .unwrap();
+                        Polygon::new(poly.points().into_iter().map(|p| p))
+                            .unwpar();
 
                     drawer.polygon(&poly, &BLACK_MATTERHORN);
                 }
