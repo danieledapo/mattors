@@ -5,50 +5,80 @@ export class NeonLines implements ISketch {
 
     public readonly width = 600;
     public readonly height = 600;
+    public readonly gridSize = 20;
 
-    public readonly lines = 500;
+    public readonly lines = 12;
+    public readonly pointsPerLine = 15;
 
     public reset(p: p5) {
-        p.background("black");
+        p.background("white");
     }
 
     public draw(p: p5) {
-        p.strokeWeight(2);
+        const backgroundColor = p.color("rgb(0,46,99)");
+        p.background(backgroundColor);
 
-        const astep = p.PI / 4;
-
-        const rects = [
-            [0, 0, this.width, this.height],
-        ];
-
-        let a = 0;
         for (let i = 0; i < this.lines; ++i) {
-            const ri = Math.floor(p.random(0, rects.length));
-            const [ox, oy, w, h] = rects[ri];
+            this.drawLine(p, backgroundColor);
+        }
+    }
 
-            const cx = ox + w / 2;
-            const cy = oy + h / 2;
+    private drawLine(p: p5, backgroundColor: p5.Color) {
+        p.strokeWeight(5);
 
-            const x = Math.cos(a) * w;
-            const y = Math.sin(a) * h;
+        const c = p.color(
+            p.red(backgroundColor) + p.random(255 - p.red(backgroundColor)),
+            p.blue(backgroundColor) + p.random(255 - p.blue(backgroundColor)),
+            p.green(backgroundColor) + p.random(255 - p.green(backgroundColor)),
+        );
+        p.stroke(c);
+        p.fill(c);
+        p.strokeCap(p.PROJECT);
 
-            p.stroke(p.random(255), p.random(255), p.random(255), 200);
-            p.line(cx - x, cy - y, cx + x, cy + y);
+        let prev: [number, number] | null = null;
 
-            a = (a + astep) % p.TWO_PI;
+        for (const [x, y] of this.randomWalk(p, this.pointsPerLine)) {
+            if (prev !== null) {
+                p.line(prev[0], prev[1], x, y);
+            }
 
-            rects.splice(ri, 1);
+            prev = [x, y];
+        }
 
-            const subRects = [
-                [ox, oy, w / 2, h / 2],
-                [ox + w / 2, oy, w / 2, h / 2],
-                [ox, oy + h / 2, w / 2, h / 2],
-                [ox + w / 2, oy + h / 2, w / 2, h / 2],
-            ];
+        if (prev !== null) {
+            p.ellipse(prev[0], prev[1], 10, 10);
+        }
+    }
 
-            for (const subRect of subRects) {
-                if (subRect[2] * subRect[3] > 100) {
-                    rects.push(subRect);
+    private * randomWalk(p: p5, n: number): Iterable<[number, number]> {
+        const cellWidth = this.width / this.gridSize;
+        const cellHeight = this.height / this.gridSize;
+
+        // start on the left or top edge and walk towards bottom right
+        let startx = 0;
+        let starty = 0;
+        if (p.random() > 0.5) {
+            startx = Math.floor(p.random(0, this.gridSize)) * cellWidth;
+        } else {
+            starty = Math.floor(p.random(0, this.gridSize)) * cellHeight;
+        }
+
+        const pt: [number, number] = [startx, starty];
+
+        for (let i = 0; i < n; ++i) {
+            yield pt;
+
+            if (p.random() > 0.2) {
+                pt[0] += cellWidth;
+                if (pt[0] >= this.width) {
+                    break;
+                }
+            }
+
+            if (p.random() > 0.2) {
+                pt[1] += p.random([cellHeight]);
+                if (pt[1] >= this.height) {
+                    break;
                 }
             }
         }
