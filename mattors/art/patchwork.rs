@@ -24,15 +24,13 @@ pub fn random_patchwork(
     iterations: usize,
     fill_polygons: bool,
 ) {
-    let mut generations = vec![vec![
-        Polygon::new(vec![
-            Point::new(0.0, 0.0),
-            Point::new(f64::from(img.width() - 1), 0.0),
-            Point::new(f64::from(img.width() - 1), f64::from(img.height() - 1)),
-            Point::new(0.0, f64::from(img.height() - 1)),
-        ])
-        .unwrap(),
-    ]];
+    let mut generations = vec![vec![Polygon::new(vec![
+        Point::new(0.0, 0.0),
+        Point::new(f64::from(img.width() - 1), 0.0),
+        Point::new(f64::from(img.width() - 1), f64::from(img.height() - 1)),
+        Point::new(0.0, f64::from(img.height() - 1)),
+    ])
+    .unwrap()]];
 
     let mut drawer = Drawer::new_with_no_blending(img);
 
@@ -45,8 +43,8 @@ pub fn random_patchwork(
             if fill_polygons {
                 for poly in polygons {
                     let poly =
-                        Polygon::new(poly.points().into_iter().map(|p| p))
-                            .unwpar();
+                        Polygon::new(poly.points().into_iter().map(|p| p.try_cast().unwrap()))
+                            .unwrap();
 
                     drawer.polygon(&poly, &BLACK_MATTERHORN);
                 }
