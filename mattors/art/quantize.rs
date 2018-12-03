@@ -196,7 +196,7 @@ mod tests {
         let black = Rgb { data: [0, 0, 0] };
         let red = Rgb { data: [255, 0, 0] };
 
-        let divide_steps = 42;
+        let divide_steps = 10;
         let pixs = vec![black, black, black, black, black, red, red, red];
         let expected = Some(QuantizeResult {
             colors: vec![black, red],
