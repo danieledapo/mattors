@@ -1,6 +1,6 @@
 //! Simple module that helps with generating good looking colors.
 
-use rand::Rng;
+use rand::prelude::*;
 
 use geo::line::linear_interpolate;
 use geo::point::Point;
@@ -118,8 +118,7 @@ fn pick_brightness(hue: u16, saturation: u8) -> u8 {
                 &Point::new(i16::from(sat2), i16::from(bri1)),
                 &Point::new(i16::from(sat1), i16::from(bri2)),
                 i16::from(saturation),
-            )
-            .unwrap() as u8;
+            ).unwrap() as u8;
         }
     }
 
@@ -171,14 +170,14 @@ impl Hsv {
     }
 }
 
-impl RandomColorConfig<rand::ThreadRng> {
+impl RandomColorConfig<ThreadRng> {
     /// Create a new RandomColorConfig.
     pub fn new() -> Self {
         Default::default()
     }
 }
 
-impl Default for RandomColorConfig<rand::ThreadRng> {
+impl Default for RandomColorConfig<ThreadRng> {
     fn default() -> Self {
         RandomColorConfig {
             hue: None,

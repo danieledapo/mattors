@@ -19,9 +19,9 @@ path = "mattors/main.rs"
 [dependencies]
 geo = { path = "./geo" }
 
-image = { git = "https://github.com/PistonDevelopers/image", branch = "master" }
+image = "0.20"
 num = "0.2"
-rand = "0.5"
+rand = "0.6"
 structopt = "0.2"
 
 [dev-dependencies]

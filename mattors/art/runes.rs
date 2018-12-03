@@ -2,7 +2,7 @@
 
 use std::fmt::Debug;
 
-use rand::Rng;
+use rand::prelude::*;
 
 use geo::PointU32;
 
@@ -18,13 +18,14 @@ enum Simmetry {
 
 impl Simmetry {
     fn random<'a, R: Rng>(rng: &mut R) -> &'a Self {
-        rng.choose(&[
+        [
             Simmetry::Horizontal,
             Simmetry::None,
             Simmetry::Vertical,
             Simmetry::VerticalAndHorizontal,
-        ])
-        .unwrap()
+        ]
+            .choose(rng)
+            .unwrap()
     }
 
     fn divide(&self, width: u32, height: u32) -> (u32, u32) {

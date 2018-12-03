@@ -3,7 +3,7 @@
 use std::fmt::Debug;
 use std::iter::Iterator;
 
-use rand::Rng;
+use rand::prelude::*;
 
 use geo::PointU32;
 
@@ -95,14 +95,14 @@ pub fn fancy_sierpinski<I>(
                 triangles[0].0,
                 triangles[0].1,
                 triangles[0].2,
-                rng.choose(pixs).unwrap(),
+                pixs.choose(&mut rng).unwrap(),
             );
 
             siter.take(iterations).for_each(|triangles| {
                 triangles
                     .iter()
                     .for_each(|&(ref mid_left, ref mid_right, ref mid_bottom)| {
-                        let pix = rng.choose(pixs).unwrap();
+                        let pix = pixs.choose(&mut rng).unwrap();
 
                         if hollow_triangles {
                             drawer.hollow_triangle(*mid_left, *mid_right, *mid_bottom, pix);
@@ -111,8 +111,7 @@ pub fn fancy_sierpinski<I>(
                         }
                     });
             });
-        })
-        .unwrap();
+        }).unwrap();
 }
 
 #[cfg(test)]
