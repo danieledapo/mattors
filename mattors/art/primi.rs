@@ -64,6 +64,7 @@ where
     P: 'static + Eq + Hash + image::Pixel + Debug,
     P::Subpixel: Ord + From<u8> + std::fmt::Debug,
     f64: From<P::Subpixel>,
+    u64: From<P::Subpixel>,
     S: Shape,
 {
     if let Some(dominant) = get_dominant_color(img) {
@@ -140,10 +141,11 @@ where
     I: image::GenericImageView,
     I::Pixel: Eq + Hash,
     <<I as image::GenericImageView>::Pixel as image::Pixel>::Subpixel: Ord,
+    u64: From<<<I as image::GenericImageView>::Pixel as image::Pixel>::Subpixel>,
 {
     let pixels_it = img.pixels().map(|(_, _, p)| p);
 
-    quantize::quantize(pixels_it, 0).map(|res| res.colors[0])
+    quantize::quantize(pixels_it, 0).colors.into_iter().next()
 }
 
 fn get_error<'a, I, D>(it1: I, it2: I) -> f64
