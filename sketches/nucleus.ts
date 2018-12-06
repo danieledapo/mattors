@@ -21,7 +21,7 @@ export class Nucleus implements ISketch {
 
     private drawDrop(p: p5) {
         if (p.random() > 0.5) {
-            p.blendMode(p.DIFFERENCE);
+            p.blendMode(p.EXCLUSION);
         }
 
         p.fill(p.random(255), p.random(255), p.random(255), 10);
