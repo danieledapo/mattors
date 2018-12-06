@@ -10,6 +10,7 @@ import { Annulus } from "./sketches/annulus";
 import { Astroid } from "./sketches/astroid";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
+import { RoughBalls } from "./sketches/rough-balls";
 import { NeonLines } from "./sketches/neon-lines";
 import { Nucleus } from "./sketches/nucleus";
 import { Print10 } from "./sketches/print10";
@@ -23,6 +24,7 @@ export const SKETCHES = [
     new Astroid(),
     new NeonLines(),
     new Nucleus(),
+    new RoughBalls(),
 ];
 
 const sketchesMap = new Map(
