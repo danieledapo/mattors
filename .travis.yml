@@ -8,6 +8,5 @@ rust:
 
 matrix:
   allow_failures:
-    # - rust: nightly
-    - rust: stable
+    - rust: nightly
   fast_finish: true
