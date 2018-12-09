@@ -5,6 +5,7 @@ export class RoughBalls implements ISketch {
 
     public readonly width = 1300;
     public readonly height = 800;
+    public readonly loop = false;
 
     public readonly radius = 200;
 

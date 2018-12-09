@@ -6,6 +6,7 @@ export class Nucleus implements ISketch {
 
     public readonly width = 600;
     public readonly height = 600;
+    public readonly loop = false;
 
     public readonly circleDeformations = 15;
     public readonly perturbations = 10;

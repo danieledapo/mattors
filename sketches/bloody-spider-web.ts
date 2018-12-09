@@ -5,6 +5,7 @@ export class BloodySpiderWeb implements ISketch {
 
     public readonly width = 1920;
     public readonly height = 1080;
+    public readonly loop = false;
 
     public readonly lines = 1000;
 

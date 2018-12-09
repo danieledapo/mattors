@@ -5,6 +5,7 @@ export class Annulus implements ISketch {
 
     public readonly width = 1920;
     public readonly height = 1080;
+    public readonly loop = false;
 
     // expose to the ui
     public readonly nArcs = 1000;

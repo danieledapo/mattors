@@ -9,6 +9,7 @@ export class CubicDisarray implements ISketch {
     public readonly borderMargin = 30;
     public readonly width = 600;
     public readonly height = 720;
+    public readonly loop = false;
 
     public readonly cols = 20;
     public readonly rows = 24;

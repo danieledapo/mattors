@@ -7,6 +7,7 @@ export class Astroid implements ISketch {
 
     public readonly width = 600;
     public readonly height = 600;
+    public readonly loop = false;
 
     public readonly radius = 200;
     public readonly step = Math.PI / 24;

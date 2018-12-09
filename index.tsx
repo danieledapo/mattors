@@ -165,7 +165,9 @@ class Sketch extends React.Component<ISketchIProps, {}> {
                 p.push();
 
                 sketch.draw(p);
-                p.noLoop();
+                if (!sketch.loop) {
+                    p.noLoop();
+                }
 
                 p.pop();
             };
@@ -182,12 +184,16 @@ class Sketch extends React.Component<ISketchIProps, {}> {
             };
 
             p.keyPressed = () => {
-                if (p.key !== " ") {
+                if (p.key === " ") {
+                    sketch.reset(p);
+                    p.draw();
+                } else if (p.key === "s") {
+                    p.noLoop();
+                } else if (p.key === "p" && sketch.loop) {
+                    p.loop();
+                } else {
                     return;
                 }
-
-                sketch.reset(p);
-                p.draw();
 
                 return false;
             };

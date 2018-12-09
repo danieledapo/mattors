@@ -5,8 +5,9 @@ export class NeonLines implements ISketch {
 
     public readonly width = 600;
     public readonly height = 600;
-    public readonly gridSize = 20;
+    public readonly loop = false;
 
+    public readonly gridSize = 20;
     public readonly lines = 12;
     public readonly pointsPerLine = 15;
 

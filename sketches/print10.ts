@@ -6,6 +6,7 @@ export class Print10 implements ISketch {
 
     public readonly width = 600;
     public readonly height = 600;
+    public readonly loop = false;
 
     // this should be configurable from a ui
     public readonly step = 20;
