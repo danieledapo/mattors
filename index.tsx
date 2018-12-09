@@ -8,12 +8,13 @@ import "./index.scss";
 import { StaticContext } from "react-router";
 import { Annulus } from "./sketches/annulus";
 import { Astroid } from "./sketches/astroid";
+import { Blankets } from "./sketches/blankets";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
-import { RoughBalls } from "./sketches/rough-balls";
 import { NeonLines } from "./sketches/neon-lines";
 import { Nucleus } from "./sketches/nucleus";
 import { Print10 } from "./sketches/print10";
+import { RoughBalls } from "./sketches/rough-balls";
 import { ISketch } from "./sketches/sketch";
 
 export const SKETCHES = [
@@ -25,6 +26,7 @@ export const SKETCHES = [
     new NeonLines(),
     new Nucleus(),
     new RoughBalls(),
+    new Blankets(),
 ];
 
 const sketchesMap = new Map(
