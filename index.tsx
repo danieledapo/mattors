@@ -17,6 +17,7 @@ import { Print10 } from "./sketches/print10";
 import { RoughBalls } from "./sketches/rough-balls";
 import { ISketch } from "./sketches/sketch";
 import { ChristmasSpiralTree } from "./sketches/spiral-christmas-tree";
+import { LightInACave } from "./sketches/light-in-a-cave";
 
 export const SKETCHES = [
     new Print10(),
@@ -29,6 +30,7 @@ export const SKETCHES = [
     new RoughBalls(),
     new Blankets(),
     new ChristmasSpiralTree(),
+    new LightInACave(),
 ];
 
 const sketchesMap = new Map(
