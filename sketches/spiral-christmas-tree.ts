@@ -12,6 +12,7 @@ export class ChristmasSpiralTree implements ISketch {
 
     public reset(p: p5) {
         p.background("black");
+        p.frameRate(40);
     }
 
     public draw(p: p5) {
@@ -35,8 +36,6 @@ export class ChristmasSpiralTree implements ISketch {
         if (this.startAngle >= p.TWO_PI) {
             this.startAngle = this.startAngle - p.TWO_PI;
         }
-
-        p.frameRate(40);
     }
 
 }
