@@ -11,13 +11,14 @@ import { Astroid } from "./sketches/astroid";
 import { Blankets } from "./sketches/blankets";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
 import { CubicDisarray } from "./sketches/cubic-disarray";
+import { Cuts } from "./sketches/cuts";
+import { LightInACave } from "./sketches/light-in-a-cave";
 import { NeonLines } from "./sketches/neon-lines";
 import { Nucleus } from "./sketches/nucleus";
 import { Print10 } from "./sketches/print10";
 import { RoughBalls } from "./sketches/rough-balls";
 import { ISketch } from "./sketches/sketch";
 import { ChristmasSpiralTree } from "./sketches/spiral-christmas-tree";
-import { LightInACave } from "./sketches/light-in-a-cave";
 
 export const SKETCHES = [
     new Print10(),
@@ -31,6 +32,7 @@ export const SKETCHES = [
     new Blankets(),
     new ChristmasSpiralTree(),
     new LightInACave(),
+    new Cuts(),
 ];
 
 const sketchesMap = new Map(
