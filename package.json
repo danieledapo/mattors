@@ -37,6 +37,6 @@
   "scripts": {
     "build": "webpack --mode production",
     "lint": "tslint --project .",
-    "start": "webpack-dev-server --debug --mode development"
+    "start": "webpack-dev-server --debug --mode development --open"
   }
 }
