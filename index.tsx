@@ -19,6 +19,7 @@ import { Print10 } from "./sketches/print10";
 import { RoughBalls } from "./sketches/rough-balls";
 import { ISketch } from "./sketches/sketch";
 import { ChristmasSpiralTree } from "./sketches/spiral-christmas-tree";
+import { SuperPermutations } from "./sketches/super-permutations";
 import { Walls } from "./sketches/walls";
 
 export const SKETCHES = [
@@ -35,6 +36,7 @@ export const SKETCHES = [
     new LightInACave(),
     new Cuts(),
     new Walls(),
+    new SuperPermutations(),
 ];
 
 const sketchesMap = new Map(
