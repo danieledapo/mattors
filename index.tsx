@@ -18,6 +18,7 @@ import { Nucleus } from "./sketches/nucleus";
 import { Print10 } from "./sketches/print10";
 import { RoughBalls } from "./sketches/rough-balls";
 import { ISketch } from "./sketches/sketch";
+import { SpaceFillingCurves } from "./sketches/space-filling-curves";
 import { ChristmasSpiralTree } from "./sketches/spiral-christmas-tree";
 import { SuperPermutations } from "./sketches/super-permutations";
 import { Walls } from "./sketches/walls";
@@ -37,6 +38,7 @@ export const SKETCHES = [
     new Cuts(),
     new Walls(),
     new SuperPermutations(),
+    new SpaceFillingCurves(),
 ];
 
 const sketchesMap = new Map(
