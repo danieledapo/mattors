@@ -10,6 +10,7 @@ import { Annulus } from "./sketches/annulus";
 import { Astroid } from "./sketches/astroid";
 import { Blankets } from "./sketches/blankets";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
+import { GalaxyMap } from "./sketches/galaxy-map";
 import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Cuts } from "./sketches/cuts";
 import { LightInACave } from "./sketches/light-in-a-cave";
@@ -39,6 +40,7 @@ export const SKETCHES = [
     new Walls(),
     new SuperPermutations(),
     new SpaceFillingCurves(),
+    new GalaxyMap(),
 ];
 
 const sketchesMap = new Map(
