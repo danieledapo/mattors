@@ -10,14 +10,13 @@ export class SpaceFillingCurves implements ISketch {
     private readonly padding = 10;
 
     public reset(p: p5) {
-        p.background("white");
-        // p.background("gray");
+        p.background(80, 80, 80);
     }
 
     public draw(p: p5) {
-        const size = this.width / 2 - 2 * this.padding;
+        p.stroke(200, 200, 200);
 
-        const pgc = new PeanoGosperCurve();
+        const size = this.width / 2 - 2 * this.padding;
 
         p.push();
         p.translate(this.padding, this.padding);
@@ -30,8 +29,8 @@ export class SpaceFillingCurves implements ISketch {
         p.pop();
 
         p.push();
-        p.translate(this.width * 0.09, this.height * 0.58);
-        this.drawLSystem(p, pgc.advance(4), pgc.strokeLen(4, size));
+        p.translate(this.padding, this.height / 2 + this.padding);
+        this.drawQuad(p, size, 1);
         p.pop();
 
         p.push();
@@ -41,13 +40,30 @@ export class SpaceFillingCurves implements ISketch {
     }
 
     private drawQuad(p: p5, size: number, depth: number) {
-        if (p.random() <= depth / 4) {
-            const curves = [new HilbertCurve(), new HilbertCurve2()];
-            const c = p.random(curves);
-            const gens = Math.floor(p.random(2, 6 - depth));
+        if (p.random() <= depth / 3) {
+            const curves = [
+                new HilbertCurve(),
+                new HilbertCurve2(),
+                new PeanoGosperCurve(),
+            ];
+
+            const c: Curve = p.random(curves);
+            const gens = c.randGen(depth);
+
+            // PeanoGosperCurve doesn't start at the top left, adjust translation
+            if (c instanceof PeanoGosperCurve) {
+                const sl = c.strokeLen(gens, size);
+                const hl = Math.sqrt(3) / 2 * sl;
+
+                // I wasn't able to figure out the math to properly translate
+                // the curve, eyeball it. |- T -|
+                p.translate(
+                    hl * ((depth === 1) ? 14 : 2),
+                    hl * ((depth === 1) ? 14 : 7),
+                );
+            }
 
             this.drawLSystem(p, c.advance(gens), c.strokeLen(gens, size));
-
             return;
         }
 
@@ -122,6 +138,8 @@ export class LSystem {
     }
 }
 
+export type Curve = HilbertCurve | HilbertCurve2 | PeanoGosperCurve;
+
 export class HilbertCurve extends LSystem {
     constructor() {
         super("L", new Map([
@@ -132,6 +150,10 @@ export class HilbertCurve extends LSystem {
 
     public strokeLen(gens: number, size: number): number {
         return size / (Math.pow(2, gens) - 1);
+    }
+
+    public randGen(depth: number): number {
+        return Math.floor(2 + Math.random() * (7 - depth));
     }
 }
 
@@ -145,6 +167,10 @@ export class HilbertCurve2 extends LSystem {
 
     public strokeLen(gens: number, size: number): number {
         return size / (Math.pow(3, gens) - 1);
+    }
+
+    public randGen(depth: number): number {
+        return Math.floor(2 + Math.random() * (4 - depth));
     }
 }
 
@@ -161,6 +187,10 @@ export class PeanoGosperCurve extends LSystem {
     }
 
     public strokeLen(gens: number, size: number): number {
-        return size / gens * 0.07;
+        return size / (Math.pow(2.82, gens) - 1);
+    }
+
+    public randGen(depth: number): number {
+        return 3 + Math.max(0, 2 - depth);
     }
 }
