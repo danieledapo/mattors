@@ -10,9 +10,10 @@ import { Annulus } from "./sketches/annulus";
 import { Astroid } from "./sketches/astroid";
 import { Blankets } from "./sketches/blankets";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
-import { GalaxyMap } from "./sketches/galaxy-map";
+import { CliffordAttractors } from "./sketches/clifford-attractors";
 import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Cuts } from "./sketches/cuts";
+import { GalaxyMap } from "./sketches/galaxy-map";
 import { LightInACave } from "./sketches/light-in-a-cave";
 import { NeonLines } from "./sketches/neon-lines";
 import { Nucleus } from "./sketches/nucleus";
@@ -41,6 +42,7 @@ export const SKETCHES = [
     new SuperPermutations(),
     new SpaceFillingCurves(),
     new GalaxyMap(),
+    new CliffordAttractors(),
 ];
 
 const sketchesMap = new Map(
