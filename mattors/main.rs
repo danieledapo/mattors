@@ -15,6 +15,7 @@ use structopt::StructOpt;
 use geo::{PointF64, PointU32};
 
 use matto::art::delaunay;
+use matto::art::dithering;
 use matto::art::dragon;
 use matto::art::fractree;
 use matto::art::julia::{FractalPoint, JuliaGenIter};
@@ -100,6 +101,10 @@ pub enum Command {
     /// Generate some mondrian inspired art.
     #[structopt(name = "mondrian")]
     Mondrian(Mondrian),
+
+    /// Generate some mondrian inspired art.
+    #[structopt(name = "dither")]
+    Dither(Dither),
 }
 
 /// Julia Set settings.
@@ -513,6 +518,27 @@ pub struct Mondrian {
     output_path: PathBuf,
 }
 
+/// Dither a given image.
+#[derive(StructOpt, Debug)]
+pub struct Dither {
+    /// Number of levels of gray.
+    #[structopt(short = "l", long = "gray-levels", default_value = "5")]
+    levels: u8,
+
+    /// Where to write the dithered image.
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "dithered.png",
+        parse(from_os_str)
+    )]
+    output_path: PathBuf,
+
+    /// Image to dither.
+    #[structopt(name = "FILE", parse(from_os_str))]
+    img_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -549,6 +575,7 @@ fn main() {
         Command::Patchwork(ref config) => patchwork(config),
         Command::Stippling(ref config) => stippling(config),
         Command::Mondrian(ref config) => mondrian(config),
+        Command::Dither(ref config) => dither(config),
     }
 }
 
@@ -772,7 +799,8 @@ fn primirs(config: &Primirs) {
             config.nmutations,
             config.dx,
             config.dy,
-        ).map(|prim| {
+        )
+        .map(|prim| {
             let mut upscaled_img =
                 image::RgbaImage::from_pixel(rgba.width(), rgba.height(), prim.dominant_color);
 
@@ -791,7 +819,8 @@ fn primirs(config: &Primirs) {
             config.nmutations,
             config.dx,
             config.dy,
-        ).map(|prim| (prim.best_image, prim.best_error))
+        )
+        .map(|prim| (prim.best_image, prim.best_error))
     };
 
     let (best_image, best_error) = primitized.expect("primirs error");
@@ -954,4 +983,18 @@ fn mondrian(config: &Mondrian) {
     );
 
     img.save(&config.output_path).expect("cannot save image");
+}
+
+fn dither(config: &Dither) {
+    let img = image::open(&config.img_path).expect("cannot load image file");
+
+    let step = u8::max_value() / config.levels;
+
+    let dithered = dithering::dither(&img.to_luma(), |l| image::Luma {
+        data: { [l.data[0] / step * step] },
+    });
+
+    dithered
+        .save(&config.output_path)
+        .expect("cannot save image");
 }

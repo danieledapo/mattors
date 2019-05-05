@@ -78,6 +78,7 @@ pub fn random_point_in_bbox<R: Rng>(rng: &mut R, bbox: &BoundingBox<u32>) -> Poi
 }
 
 pub mod delaunay;
+pub mod dithering;
 pub mod dragon;
 pub mod fractree;
 pub mod julia;
