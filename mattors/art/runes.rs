@@ -24,8 +24,8 @@ impl Simmetry {
             Simmetry::Vertical,
             Simmetry::VerticalAndHorizontal,
         ]
-            .choose(rng)
-            .unwrap()
+        .choose(rng)
+        .unwrap()
     }
 
     fn divide(&self, width: u32, height: u32) -> (u32, u32) {

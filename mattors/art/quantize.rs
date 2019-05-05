@@ -128,7 +128,8 @@ where
                     "quantize: if P::Subpixel -> u64 is possible then \
                      the average subpixel must be convertible to P::Subpixel",
                 )
-            }).collect::<Vec<_>>(),
+            })
+            .collect::<Vec<_>>(),
     ))
 }
 
@@ -167,7 +168,7 @@ mod tests {
         let pixs: Vec<Rgb<u8>> = vec![];
         let expected = QuantizeResult {
             colors: vec![],
-            quantized_pixels: hashmap!{},
+            quantized_pixels: hashmap! {},
         };
         assert_eq!(quantize(pixs.into_iter(), 0), expected);
     }
@@ -180,7 +181,7 @@ mod tests {
         let pixs = vec![black, black, black, black, black];
         let expected = QuantizeResult {
             colors: vec![black],
-            quantized_pixels: hashmap!{ black => black },
+            quantized_pixels: hashmap! { black => black },
         };
 
         assert_eq!(quantize(pixs.into_iter(), divide_steps), expected);
@@ -195,7 +196,7 @@ mod tests {
         let pixs = vec![black, black, black, black, black, red, red, red];
         let expected = QuantizeResult {
             colors: vec![black, red],
-            quantized_pixels: hashmap!{ black => black, red => red },
+            quantized_pixels: hashmap! { black => black, red => red },
         };
 
         assert_eq!(quantize(pixs.into_iter(), divide_steps), expected);
@@ -212,7 +213,7 @@ mod tests {
 
         let expected = QuantizeResult {
             colors: vec![avg_pix],
-            quantized_pixels: hashmap!{ black => avg_pix, red => avg_pix },
+            quantized_pixels: hashmap! { black => avg_pix, red => avg_pix },
         };
 
         assert_eq!(quantize(pixs.into_iter(), divide_steps), expected);
@@ -229,7 +230,7 @@ mod tests {
 
         let expected = QuantizeResult {
             colors: vec![avg_pix],
-            quantized_pixels: hashmap!{ black => avg_pix, red => avg_pix },
+            quantized_pixels: hashmap! { black => avg_pix, red => avg_pix },
         };
 
         assert_eq!(quantize(pixs.into_iter(), divide_steps), expected);
@@ -244,7 +245,7 @@ mod tests {
         let pixs = vec![black, black, red, red, red, black, black];
         let expected = QuantizeResult {
             colors: vec![black, red],
-            quantized_pixels: hashmap!{ black => black, red => red },
+            quantized_pixels: hashmap! { black => black, red => red },
         };
 
         assert_eq!(quantize(pixs.into_iter(), divide_steps), expected);
