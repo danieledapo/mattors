@@ -521,9 +521,13 @@ pub struct Mondrian {
 /// Dither a given image.
 #[derive(StructOpt, Debug)]
 pub struct Dither {
-    /// Number of levels of gray.
-    #[structopt(short = "l", long = "gray-levels", default_value = "5")]
+    /// Number of colors in the resulting image.
+    #[structopt(short = "c", long = "colors", default_value = "5")]
     levels: u8,
+
+    /// Convert the image to rgb before dithering.
+    #[structopt(long = "rgb")]
+    rgb: bool,
 
     /// Where to write the dithered image.
     #[structopt(
@@ -990,11 +994,27 @@ fn dither(config: &Dither) {
 
     let step = u8::max_value() / config.levels;
 
-    let dithered = dithering::dither(&img.to_luma(), |l| image::Luma {
-        data: { [l.data[0] / step * step] },
-    });
+    if config.rgb {
+        let dithered = dithering::dither(&img.to_rgb(), |l| image::Rgb {
+            data: {
+                [
+                    l.data[0] / step * step,
+                    l.data[1] / step * step,
+                    l.data[2] / step * step,
+                ]
+            },
+        });
 
-    dithered
-        .save(&config.output_path)
-        .expect("cannot save image");
+        dithered
+            .save(&config.output_path)
+            .expect("cannot save image");
+    } else {
+        let dithered = dithering::dither(&img.to_luma(), |l| image::Luma {
+            data: { [l.data[0] / step * step] },
+        });
+
+        dithered
+            .save(&config.output_path)
+            .expect("cannot save image");
+    }
 }

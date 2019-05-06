@@ -91,5 +91,6 @@ cargo run -- mondrian -w 800 -h 800
 
 # misc
 cargo run -- runes -p 3 -c 26
-cargo run -- dither -l 2 images/desert.jpeg
+cargo run -- dither -c 2 images/desert.jpeg
+cargo run -- dither -c 5 --rgb images/desert.jpeg
 ```
