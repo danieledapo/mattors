@@ -1,4 +1,4 @@
-//! TODO
+//! Generate 2d tangled webs inspired by https://inconvergent.net/2019/a-tangle-of-webs/
 
 use std::collections::HashSet;
 
@@ -14,8 +14,8 @@ struct Vertex {
     neighbors: HashSet<usize>,
 }
 
-/// TODO
-pub fn generate(img: &mut image::RgbImage) {
+/// generate a random image that can vaguely resemble a spider web.
+pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: u8) {
     let mut rng = rand::thread_rng();
     let mut drawer = Drawer::new_with_no_blending(img);
 
@@ -31,16 +31,14 @@ pub fn generate(img: &mut image::RgbImage) {
         )
     };
 
-    let n = 30_u8;
-
     let mut edges = HashSet::new();
     let mut vertices = vec![Vertex::new(PointF64::new(
         width / 2.0 + scale,
         height / 2.0,
     ))];
 
-    for i in 1..n {
-        let a = 360.0 / f64::from(n) * f64::from(i);
+    for i in 1..circle_divisions {
+        let a = 360.0 / f64::from(circle_divisions) * f64::from(i);
         let a = a.to_radians();
 
         let id = usize::from(i);
@@ -57,16 +55,20 @@ pub fn generate(img: &mut image::RgbImage) {
         vertices[prev_id].neighbors.insert(id);
         edges.insert((prev_id, id));
     }
-    vertices[0].neighbors.insert(usize::from(n) - 1);
-    vertices[usize::from(n) - 1].neighbors.insert(0);
+    vertices[0]
+        .neighbors
+        .insert(usize::from(circle_divisions) - 1);
+    vertices[usize::from(circle_divisions) - 1]
+        .neighbors
+        .insert(0);
     edges.insert((vertices.len() - 1, 0));
 
     let mut center = Vertex::new(PointF64::new(width / 2.0, height / 2.0));
-    center.neighbors.extend(0..usize::from(n));
+    center.neighbors.extend(0..vertices.len());
     vertices.push(center);
-    edges.extend((0..n).map(|c| (n.into(), c.into())));
+    edges.extend((0..vertices.len()).map(|c| (vertices.len() - 1, c)));
 
-    for it in 0..600 {
+    for it in 0..iterations {
         let a0 = rng.gen_range(0.0, 360.0_f64.to_radians());
         let r0 = rng.gen_range(scale / 2.0, scale);
         let p0 = PointF64::new(width / 2.0 + a0.cos() * r0, height / 2.0 + a0.sin() * r0);

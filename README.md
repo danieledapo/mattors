@@ -51,6 +51,12 @@ inspired by `Composition in Red, Blue and Yellow` by Mondrian.
 ![mondrian1](images/mondrian1.png)
 ![mondrian2](images/mondrian2.png)
 
+## Tangled webs
+
+inspired by https://www.inconvergent.net/2019/a-tangle-of-webs/.
+
+![tangled-webs](images/tangled-web.png)
+
 # Examples
 
 ```
@@ -88,6 +94,9 @@ cargo run -- stippling rects --iterations 1500
 
 # Mondrian
 cargo run -- mondrian -w 800 -h 800
+
+# tangled webs
+cargo run -- tangled-web
 
 # misc
 cargo run -- runes -p 3 -c 26

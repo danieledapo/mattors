@@ -106,7 +106,7 @@ pub enum Command {
     #[structopt(name = "dither")]
     Dither(Dither),
 
-    /// TODO
+    /// Generate some spider web likes shapes.
     #[structopt(name = "tangled-web")]
     TangledWeb(TangledWeb),
 }
@@ -547,7 +547,7 @@ pub struct Dither {
     img_path: PathBuf,
 }
 
-/// TODO
+/// Generate 2d tangled webs inspired by https://inconvergent.net/2019/a-tangle-of-webs/
 #[derive(StructOpt, Debug)]
 pub struct TangledWeb {
     /// Width of the image.
@@ -558,7 +558,15 @@ pub struct TangledWeb {
     #[structopt(short = "h", long = "height", default_value = "1080")]
     height: u32,
 
-    /// TODO
+    /// Number of iterations to divive the given image of.
+    #[structopt(short = "i", long = "iterations", default_value = "600")]
+    iterations: usize,
+
+    /// Number of divisions to break the initial circle into.
+    #[structopt(short = "d", long = "circle-divisions", default_value = "30")]
+    circle_divisions: u8,
+
+    /// Where to write the dithered image.
     #[structopt(
         short = "o",
         long = "output",
@@ -1048,7 +1056,7 @@ fn dither(config: &Dither) {
 fn tangled_web(config: &TangledWeb) {
     let mut img = image::RgbImage::new(config.width, config.height);
 
-    matto::art::tangled_web::generate(&mut img);
+    matto::art::tangled_web::generate(&mut img, config.iterations, config.circle_divisions);
 
     img.save(&config.output_path).expect("cannot save image");
 }
