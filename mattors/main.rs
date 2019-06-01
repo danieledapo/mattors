@@ -105,6 +105,10 @@ pub enum Command {
     /// Generate some mondrian inspired art.
     #[structopt(name = "dither")]
     Dither(Dither),
+
+    /// TODO
+    #[structopt(name = "tangled-web")]
+    TangledWeb(TangledWeb),
 }
 
 /// Julia Set settings.
@@ -543,6 +547,27 @@ pub struct Dither {
     img_path: PathBuf,
 }
 
+/// TODO
+#[derive(StructOpt, Debug)]
+pub struct TangledWeb {
+    /// Width of the image.
+    #[structopt(short = "w", long = "width", default_value = "1920")]
+    width: u32,
+
+    /// Height of the image.
+    #[structopt(short = "h", long = "height", default_value = "1080")]
+    height: u32,
+
+    /// TODO
+    #[structopt(
+        short = "o",
+        long = "output",
+        default_value = "tangled-web.png",
+        parse(from_os_str)
+    )]
+    output_path: PathBuf,
+}
+
 fn main() {
     let command = Command::from_args();
 
@@ -580,6 +605,7 @@ fn main() {
         Command::Stippling(ref config) => stippling(config),
         Command::Mondrian(ref config) => mondrian(config),
         Command::Dither(ref config) => dither(config),
+        Command::TangledWeb(ref config) => tangled_web(config),
     }
 }
 
@@ -1017,4 +1043,12 @@ fn dither(config: &Dither) {
             .save(&config.output_path)
             .expect("cannot save image");
     }
+}
+
+fn tangled_web(config: &TangledWeb) {
+    let mut img = image::RgbImage::new(config.width, config.height);
+
+    matto::art::tangled_web::generate(&mut img);
+
+    img.save(&config.output_path).expect("cannot save image");
 }

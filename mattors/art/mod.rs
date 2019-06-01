@@ -89,4 +89,5 @@ pub mod quantize;
 pub mod runes;
 pub mod sierpinski;
 pub mod stippling;
+pub mod tangled_web;
 pub mod voronoi;
