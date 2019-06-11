@@ -209,6 +209,14 @@ class Sketch extends React.Component<ISketchIProps, {}> {
                     p.noLoop();
                 } else if (p.key === "p" && sketch.loop) {
                     p.loop();
+                } else if (p.key === "d") {
+                    if (sketch.loop) {
+                        p.noLoop();
+                    }
+                    p.save(`${sketch.name}.png`);
+                    if (sketch.loop) {
+                        p.loop();
+                    }
                 } else {
                     return;
                 }
