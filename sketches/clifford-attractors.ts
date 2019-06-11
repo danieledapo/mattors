@@ -3,8 +3,8 @@ import { ISketch } from "./sketch";
 export class CliffordAttractors implements ISketch {
     public readonly name = "Clifford Attractors";
 
-    public readonly width = 800;
-    public readonly height = 800;
+    public readonly width = 1920;
+    public readonly height = 1080;
     public readonly loop = true;
 
     private a = -1.4;
@@ -17,7 +17,7 @@ export class CliffordAttractors implements ISketch {
     private alreadySeen = new Set<string>();
 
     public reset(p: p5) {
-        p.background("white");
+        p.background("black");
 
         // this.a = -2;
         // this.b = 1.6;
@@ -41,10 +41,10 @@ export class CliffordAttractors implements ISketch {
             const nx = (Math.sin(this.a * this.y) + this.c * Math.cos(this.a * this.x));
             const ny = (Math.sin(this.b * this.x) + this.d * Math.cos(this.b * this.y));
 
-            p.stroke(0, 0, 0, 50);
-            p.fill(0, 0, 0, 50);
+            p.stroke(255, 255, 255, 50);
+            p.fill(255, 255, 255, 50);
 
-            p.point(nx * 150, ny * 150);
+            p.point(nx * 200, ny * 200);
 
             // some attractors form very small loops which are not particularly
             // interesting to render, just skip them

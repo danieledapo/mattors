@@ -3,8 +3,8 @@ import { ISketch } from "./sketch";
 export class Blankets implements ISketch {
     public readonly name = "Blankets";
 
-    public readonly width = 800;
-    public readonly height = 800;
+    public readonly width = 1920;
+    public readonly height = 1080;
     public readonly loop = true;
 
     public readonly gridSize = 10;

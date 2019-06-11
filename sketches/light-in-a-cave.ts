@@ -3,8 +3,8 @@ import { ISketch } from "./sketch";
 export class LightInACave implements ISketch {
     public readonly name = "Light in a Cave";
 
-    public readonly width = 600;
-    public readonly height = 600;
+    public readonly width = 1920;
+    public readonly height = 1080;
     public readonly loop = true;
 
     private maxIterations = 0;
