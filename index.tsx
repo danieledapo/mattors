@@ -24,6 +24,7 @@ import { SpaceFillingCurves } from "./sketches/space-filling-curves";
 import { ChristmasSpiralTree } from "./sketches/spiral-christmas-tree";
 import { SuperPermutations } from "./sketches/super-permutations";
 import { Walls } from "./sketches/walls";
+import { Isolines } from "./sketches/isolines";
 
 export const SKETCHES = [
     new Print10(),
@@ -43,6 +44,7 @@ export const SKETCHES = [
     new SpaceFillingCurves(),
     new GalaxyMap(),
     new CliffordAttractors(),
+    new Isolines(),
 ];
 
 const sketchesMap = new Map(
