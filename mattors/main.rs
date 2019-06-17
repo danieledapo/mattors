@@ -559,7 +559,7 @@ pub struct TangledWeb {
     height: u32,
 
     /// Number of iterations to divive the given image of.
-    #[structopt(short = "i", long = "iterations", default_value = "600")]
+    #[structopt(short = "i", long = "iterations", default_value = "1000")]
     iterations: usize,
 
     /// Number of divisions to break the initial circle into.

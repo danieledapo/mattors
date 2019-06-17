@@ -16,6 +16,9 @@ struct Vertex {
 
 /// generate a random image that can vaguely resemble a spider web.
 pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: u8) {
+    use std::f64::consts::PI;
+    const TWO_PI: f64 = PI * 2.0;
+
     let mut rng = rand::thread_rng();
     let mut drawer = Drawer::new_with_no_blending(img);
 
@@ -24,13 +27,6 @@ pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: 
     let height = f64::from(height);
     let scale = width.min(height) * 0.5;
 
-    let line_pt = |p: PointF64| -> PointU32 {
-        PointU32::new(
-            p.x.max(0.0).min(width) as u32,
-            p.y.max(0.0).min(width) as u32,
-        )
-    };
-
     let mut edges = HashSet::new();
     let mut vertices = vec![Vertex::new(PointF64::new(
         width / 2.0 + scale,
@@ -38,8 +34,7 @@ pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: 
     ))];
 
     for i in 1..circle_divisions {
-        let a = 360.0 / f64::from(circle_divisions) * f64::from(i);
-        let a = a.to_radians();
+        let a = f64::from(i) * TWO_PI / f64::from(circle_divisions - 1);
 
         let id = usize::from(i);
         let prev_id = usize::from(id - 1);
@@ -63,22 +58,13 @@ pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: 
         .insert(0);
     edges.insert((vertices.len() - 1, 0));
 
-    let mut center = Vertex::new(PointF64::new(width / 2.0, height / 2.0));
-    center.neighbors.extend(0..vertices.len());
-    vertices.push(center);
-    edges.extend((0..vertices.len()).map(|c| (vertices.len() - 1, c)));
-
-    for it in 0..iterations {
-        let a0 = rng.gen_range(0.0, 360.0_f64.to_radians());
+    for _ in 0..iterations {
+        let a0 = rng.gen_range(0.0, TWO_PI);
         let r0 = rng.gen_range(scale / 2.0, scale);
         let p0 = PointF64::new(width / 2.0 + a0.cos() * r0, height / 2.0 + a0.sin() * r0);
 
-        let a1 = rng.gen_range(0.0, 360.0_f64.to_radians());
-        let d1 = if it < 1000 {
-            (width.powi(2) + height.powi(2)).sqrt()
-        } else {
-            rng.gen_range(-0.5, 0.5) * scale
-        };
+        let a1 = rng.gen_range(0.0, TWO_PI);
+        let d1 = (width.powi(2) + height.powi(2)).sqrt();
         let p1 = PointF64::new(p0.x + a1.cos() * d1, p0.y + a1.sin() * d1);
 
         let mut intersections = edges
@@ -151,6 +137,12 @@ pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: 
         vertices = new_vertices;
     }
 
+    let line_pt = |p: PointF64| -> PointU32 {
+        PointU32::new(
+            p.x.max(0.0).min(width) as u32,
+            p.y.max(0.0).min(width) as u32,
+        )
+    };
     for (v0, v1) in &edges {
         drawer.line(
             line_pt(vertices[*v0].position),
