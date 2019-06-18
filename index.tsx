@@ -5,26 +5,27 @@ import { HashRouter, Link, Route, RouteComponentProps, withRouter } from "react-
 
 import "./index.scss";
 
-import { StaticContext } from "react-router";
 import { Annulus } from "./sketches/annulus";
 import { Astroid } from "./sketches/astroid";
 import { Blankets } from "./sketches/blankets";
 import { BloodySpiderWeb } from "./sketches/bloody-spider-web";
+import { ChristmasSpiralTree } from "./sketches/spiral-christmas-tree";
 import { CliffordAttractors } from "./sketches/clifford-attractors";
 import { CubicDisarray } from "./sketches/cubic-disarray";
 import { Cuts } from "./sketches/cuts";
 import { GalaxyMap } from "./sketches/galaxy-map";
+import { ISketch } from "./sketches/sketch";
+import { Isolines } from "./sketches/isolines";
 import { LightInACave } from "./sketches/light-in-a-cave";
 import { NeonLines } from "./sketches/neon-lines";
 import { Nucleus } from "./sketches/nucleus";
 import { Print10 } from "./sketches/print10";
 import { RoughBalls } from "./sketches/rough-balls";
-import { ISketch } from "./sketches/sketch";
 import { SpaceFillingCurves } from "./sketches/space-filling-curves";
-import { ChristmasSpiralTree } from "./sketches/spiral-christmas-tree";
+import { StaticContext } from "react-router";
 import { SuperPermutations } from "./sketches/super-permutations";
 import { Walls } from "./sketches/walls";
-import { Isolines } from "./sketches/isolines";
+import { Roses } from "./sketches/roses";
 
 export const SKETCHES = [
     new Print10(),
@@ -45,6 +46,7 @@ export const SKETCHES = [
     new GalaxyMap(),
     new CliffordAttractors(),
     new Isolines(),
+    new Roses(),
 ];
 
 const sketchesMap = new Map(
