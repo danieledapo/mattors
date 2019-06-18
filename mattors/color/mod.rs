@@ -134,7 +134,7 @@ impl Hsv {
     }
 
     /// Convert a color from Hsv color space to Rgb.
-    #[cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+    #[allow(clippy::many_single_char_names)]
     pub fn to_rgb(&self) -> [u8; 3] {
         // HACK: this algorithm doesn't work for h == 0 or h == 1
         let hue = match (self.0).0 {

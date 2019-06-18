@@ -43,8 +43,7 @@ pub fn random_patchwork(
             if fill_polygons {
                 for poly in polygons {
                     let poly =
-                        Polygon::new(poly.points().into_iter().map(|p| p.try_cast().unwrap()))
-                            .unwrap();
+                        Polygon::new(poly.points().iter().map(|p| p.try_cast().unwrap())).unwrap();
 
                     drawer.polygon(&poly, &BLACK_MATTERHORN);
                 }
@@ -56,7 +55,7 @@ pub fn random_patchwork(
         i += 1;
 
         let new_polygons = polygons
-            .into_iter()
+            .iter()
             .flat_map(|poly| patchwork_step(&mut drawer, &poly, npoints, k, !fill_polygons))
             .collect::<Vec<_>>();
 

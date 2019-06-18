@@ -37,7 +37,7 @@ pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: 
         let a = f64::from(i) * TWO_PI / f64::from(circle_divisions - 1);
 
         let id = usize::from(i);
-        let prev_id = usize::from(id - 1);
+        let prev_id = id - 1;
 
         let mut v = Vertex::new(PointF64::new(
             width / 2.0 + a.cos() * scale,
