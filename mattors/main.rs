@@ -566,6 +566,10 @@ pub struct TangledWeb {
     #[structopt(short = "d", long = "circle-divisions", default_value = "30")]
     circle_divisions: u8,
 
+    /// Whether to save the image as an svg or png.
+    #[structopt(long = "svg")]
+    svg: bool,
+
     /// Where to write the dithered image.
     #[structopt(
         short = "o",
@@ -1054,9 +1058,21 @@ fn dither(config: &Dither) {
 }
 
 fn tangled_web(config: &TangledWeb) {
-    let mut img = image::RgbImage::new(config.width, config.height);
+    if !config.svg {
+        let mut img = image::RgbImage::new(config.width, config.height);
 
-    matto::art::tangled_web::generate(&mut img, config.iterations, config.circle_divisions);
+        matto::art::tangled_web::generate_img(&mut img, config.iterations, config.circle_divisions);
 
-    img.save(&config.output_path).expect("cannot save image");
+        img.save(&config.output_path).expect("cannot save image");
+        return;
+    }
+
+    let mut f = std::fs::File::create(config.output_path.with_extension("svg")).unwrap();
+    matto::art::tangled_web::generate_svg(
+        &mut f,
+        (config.width, config.height),
+        config.iterations,
+        config.circle_divisions,
+    )
+    .expect("error writing svg");
 }

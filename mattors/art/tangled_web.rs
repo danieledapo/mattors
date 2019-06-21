@@ -8,21 +8,87 @@ use geo::point::{PointF64, PointU32};
 
 use crate::drawing::Drawer;
 
+/// A Vertex of a tangled web. It is a node of the graph.
 #[derive(Debug, Clone)]
-struct Vertex {
+pub struct Vertex {
     position: PointF64,
     neighbors: HashSet<usize>,
 }
 
 /// generate a random image that can vaguely resemble a spider web.
-pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: u8) {
+pub fn generate_img(img: &mut image::RgbImage, iterations: usize, circle_divisions: u8) {
+    let (vertices, edges) = generate_tangled_web(img.dimensions(), iterations, circle_divisions);
+
+    let width = f64::from(img.width());
+    let height = f64::from(img.height());
+    let mut drawer = Drawer::new_with_no_blending(img);
+
+    let line_pt = |p: PointF64| -> PointU32 {
+        PointU32::new(
+            p.x.max(0.0).min(width) as u32,
+            p.y.max(0.0).min(height) as u32,
+        )
+    };
+
+    for (v0, v1) in &edges {
+        let v0 = vertices[*v0].position;
+        let v1 = vertices[*v1].position;
+
+        drawer.line(
+            line_pt(v0),
+            line_pt(v1),
+            &image::Rgb {
+                data: [154, 154, 154],
+            },
+        );
+    }
+}
+
+/// generate a random svg that can vaguely resemble a spider web.
+pub fn generate_svg(
+    out: &mut impl std::io::Write,
+    (width, height): (u32, u32),
+    iterations: usize,
+    circle_divisions: u8,
+) -> std::io::Result<()> {
+    let (vertices, edges) = generate_tangled_web((width, height), iterations, circle_divisions);
+
+    write!(
+        out,
+        r##"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 {w} {h}">
+<path fill="none" stroke="#9a9a9a" d="
+"##,
+        w = width,
+        h = height
+    )?;
+
+    for (v0, v1) in &edges {
+        let v0 = vertices[*v0].position;
+        let v1 = vertices[*v1].position;
+
+        writeln!(out, "M {},{} L {},{} Z", v0.x, v0.y, v1.x, v1.y)?;
+    }
+
+    write!(
+        out,
+        r#"" />
+</svg>"#
+    )
+}
+
+/// generate a graph of connected points that resemble a spider web.
+pub fn generate_tangled_web(
+    (width, height): (u32, u32),
+    iterations: usize,
+    circle_divisions: u8,
+) -> (Vec<Vertex>, HashSet<(usize, usize)>) {
     use std::f64::consts::PI;
     const TWO_PI: f64 = PI * 2.0;
 
     let mut rng = rand::thread_rng();
-    let mut drawer = Drawer::new_with_no_blending(img);
 
-    let (width, height) = drawer.dimensions();
     let width = f64::from(width);
     let height = f64::from(height);
     let scale = width.min(height) * 0.5;
@@ -137,21 +203,7 @@ pub fn generate(img: &mut image::RgbImage, iterations: usize, circle_divisions: 
         vertices = new_vertices;
     }
 
-    let line_pt = |p: PointF64| -> PointU32 {
-        PointU32::new(
-            p.x.max(0.0).min(width) as u32,
-            p.y.max(0.0).min(width) as u32,
-        )
-    };
-    for (v0, v1) in &edges {
-        drawer.line(
-            line_pt(vertices[*v0].position),
-            line_pt(vertices[*v1].position),
-            &image::Rgb {
-                data: [255, 255, 255],
-            },
-        );
-    }
+    (vertices, edges)
 }
 
 impl Vertex {
