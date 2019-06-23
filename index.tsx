@@ -26,6 +26,7 @@ import { StaticContext } from "react-router";
 import { SuperPermutations } from "./sketches/super-permutations";
 import { Walls } from "./sketches/walls";
 import { Roses } from "./sketches/roses";
+import { CairoTiling } from "./sketches/cairo-tiling";
 
 export const SKETCHES = [
     new Print10(),
@@ -47,6 +48,7 @@ export const SKETCHES = [
     new CliffordAttractors(),
     new Isolines(),
     new Roses(),
+    new CairoTiling(),
 ];
 
 const sketchesMap = new Map(
