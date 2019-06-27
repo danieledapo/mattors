@@ -3,25 +3,23 @@ import { ISketch } from "./sketch";
 export class NeonLines implements ISketch {
     public readonly name = "Neon Lines";
 
-    public readonly width = 600;
-    public readonly height = 600;
-    public readonly loop = false;
+    public readonly width = 1920;
+    public readonly height = 1080;
+    public readonly loop = true;
 
-    public readonly gridSize = 20;
-    public readonly lines = 12;
-    public readonly pointsPerLine = 15;
+    public readonly gridSize = 40;
+
+    public backgroundColor: p5.Color = "cannot happen" as unknown as p5.Color;
 
     public reset(p: p5) {
-        p.background("white");
+        this.backgroundColor = p.color("rgb(0,46,99)");
+        p.background(this.backgroundColor);
+
+        p.frameRate(3);
     }
 
     public draw(p: p5) {
-        const backgroundColor = p.color("rgb(0,46,99)");
-        p.background(backgroundColor);
-
-        for (let i = 0; i < this.lines; ++i) {
-            this.drawLine(p, backgroundColor);
-        }
+        this.drawLine(p, this.backgroundColor);
     }
 
     private drawLine(p: p5, backgroundColor: p5.Color) {
@@ -38,7 +36,7 @@ export class NeonLines implements ISketch {
 
         let prev: [number, number] | null = null;
 
-        for (const [x, y] of this.randomWalk(p, this.pointsPerLine)) {
+        for (const [x, y] of this.randomWalk(p, p.random(10, 50))) {
             if (prev !== null) {
                 p.line(prev[0], prev[1], x, y);
             }
@@ -47,7 +45,16 @@ export class NeonLines implements ISketch {
         }
 
         if (prev !== null) {
-            p.ellipse(prev[0], prev[1], 10, 10);
+            if (p.random() > 0.5) {
+                p.noFill();
+
+                p.strokeWeight(p.random(3, 10));
+
+                const s = p.random(50, 150);
+                p.ellipse(prev[0], prev[1], s, s);
+            } else {
+                p.ellipse(prev[0], prev[1], 30, 30);
+            }
         }
     }
 

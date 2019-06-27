@@ -3,8 +3,8 @@ import { ISketch } from "./sketch";
 export class SuperPermutations implements ISketch {
     public readonly name = "Super Permutation of 5";
 
-    public readonly width = 600;
-    public readonly height = 600;
+    public readonly width = 1920;
+    public readonly height = 1080;
     public readonly loop = true;
 
     private i = 0;
