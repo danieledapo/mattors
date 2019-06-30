@@ -27,6 +27,7 @@ import { SuperPermutations } from "./sketches/super-permutations";
 import { Walls } from "./sketches/walls";
 import { Roses } from "./sketches/roses";
 import { CairoTiling } from "./sketches/cairo-tiling";
+import { PenroseTiling } from "./sketches/penrose-tiling";
 
 export const SKETCHES = [
     new Print10(),
@@ -49,6 +50,7 @@ export const SKETCHES = [
     new Isolines(),
     new Roses(),
     new CairoTiling(),
+    new PenroseTiling(),
 ];
 
 const sketchesMap = new Map(
