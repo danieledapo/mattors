@@ -28,6 +28,7 @@ import { Walls } from "./sketches/walls";
 import { Roses } from "./sketches/roses";
 import { CairoTiling } from "./sketches/cairo-tiling";
 import { PenroseTiling } from "./sketches/penrose-tiling";
+import { TruchetTiles } from "./sketches/truchet-tiles";
 
 export const SKETCHES = [
     new Print10(),
@@ -51,6 +52,7 @@ export const SKETCHES = [
     new Roses(),
     new CairoTiling(),
     new PenroseTiling(),
+    new TruchetTiles(),
 ];
 
 const sketchesMap = new Map(
