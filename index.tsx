@@ -30,6 +30,7 @@ import { CairoTiling } from "./sketches/cairo-tiling";
 import { PenroseTiling } from "./sketches/penrose-tiling";
 import { TruchetTiles } from "./sketches/truchet-tiles";
 
+// from older to most recent
 export const SKETCHES = [
     new Print10(),
     new CubicDisarray(),
@@ -59,34 +60,23 @@ const sketchesMap = new Map(
     SKETCHES.map((s) => [s.name, s] as [string, ISketch]),
 );
 
-interface ISketchSelectorState {
-    selectedSketch: string;
-}
-
 class SketchSelector extends
-    React.Component<
-    RouteComponentProps<any, StaticContext, any>,
-    ISketchSelectorState
-    > {
-    constructor(props: Readonly<RouteComponentProps<any, StaticContext, any>>) {
-        super(props);
-
-        this.changeSketch = this.changeSketch.bind(this);
-        this.startSketch = this.startSketch.bind(this);
-
-        this.state = {
-            selectedSketch: SKETCHES[0].name,
-        };
-    }
+    React.PureComponent<RouteComponentProps<any, StaticContext, any>> {
 
     public render() {
         const sketches = [];
-
         for (const sketchName of sketchesMap.keys()) {
             sketches.push(
-                <option value={sketchName} key={sketchName}>{sketchName}</option>,
+                <li className="menu-item" key={sketchName}>
+                    <Link to={`sketch/${sketchName}`}>
+                        {sketchName}
+                    </Link>
+                </li>,
             );
         }
+
+        // show from latest to older
+        sketches.reverse();
 
         return (
             <div className="container">
@@ -104,35 +94,13 @@ class SketchSelector extends
                             It also uses the p5js library.
                         </p>
 
-                        <div className="input-group">
-                            <select
-                                className="form-select"
-                                onChange={this.changeSketch}
-                                value={this.state.selectedSketch}
-                            >
-                                ${sketches}
-                            </select>
-                            <button
-                                className="btn input-group-btn"
-                                onClick={this.startSketch}
-                            >
-                                Start Sketch
-                        </button>
-                        </div>
+                        <ul className="menu">
+                            {sketches}
+                        </ul>
                     </div>
                 </div>
             </div>
         );
-    }
-
-    private changeSketch(evt: React.ChangeEvent<HTMLSelectElement>) {
-        this.setState({
-            selectedSketch: evt.target.value,
-        });
-    }
-
-    private startSketch() {
-        this.props.history.push(`/sketch/${this.state.selectedSketch}`);
     }
 }
 

@@ -2,9 +2,13 @@
 // Spectre.css customization
 //
 
-$primary-color: green;
+$primary-color: #4d3b51;
 
 @import "node_modules/spectre.css/src/spectre.scss";
+
+.menu-item > a {
+    padding: 0.05rem 0.4rem;
+}
 
 //
 // General
