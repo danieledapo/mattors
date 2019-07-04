@@ -26,7 +26,7 @@ export class TruchetTiles implements ISketch {
         const h1 = p.random(0, 360);
         p.background(h1, 80, 80);
 
-        let h2 = (360 - h1 + 360) % 360;
+        let h2 = (h1 + 180) % 360;
         p.fill(h2, 80, 80);
         p.stroke(h2, 80, 80);
 
