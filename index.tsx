@@ -29,6 +29,7 @@ import { Roses } from "./sketches/roses";
 import { CairoTiling } from "./sketches/cairo-tiling";
 import { PenroseTiling } from "./sketches/penrose-tiling";
 import { TruchetTiles } from "./sketches/truchet-tiles";
+import { TriangularMaze } from "./sketches/triangular-maze";
 
 // from older to most recent
 export const SKETCHES = [
@@ -54,23 +55,18 @@ export const SKETCHES = [
     new CairoTiling(),
     new PenroseTiling(),
     new TruchetTiles(),
+    new TriangularMaze(),
 ];
 
-const sketchesMap = new Map(
-    SKETCHES.map((s) => [s.name, s] as [string, ISketch]),
-);
+const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
 
-class SketchSelector extends
-    React.PureComponent<RouteComponentProps<any, StaticContext, any>> {
-
+class SketchSelector extends React.PureComponent<RouteComponentProps<any, StaticContext, any>> {
     public render() {
         const sketches = [];
         for (const sketchName of sketchesMap.keys()) {
             sketches.push(
                 <li className="menu-item" key={sketchName}>
-                    <Link to={`sketch/${sketchName}`}>
-                        {sketchName}
-                    </Link>
+                    <Link to={`sketch/${sketchName}`}>{sketchName}</Link>
                 </li>,
             );
         }
@@ -82,21 +78,17 @@ class SketchSelector extends
             <div className="container">
                 <h1 className="text-center">
                     <ul className="breadcrumb">
-                        <li className="breadcrumb-item">
-                            Matto
-                        </li>
+                        <li className="breadcrumb-item">Matto</li>
                     </ul>
                 </h1>
                 <div className="columns">
                     <div className={"column col-4 col-sm-8 col-mx-auto"}>
                         <p>
-                            Matto is a generative art playground built on top of Typescript and Rust.
-                            It also uses the p5js library.
+                            Matto is a generative art playground built on top of Typescript and Rust. It also uses the
+                            p5js library.
                         </p>
 
-                        <ul className="menu">
-                            {sketches}
-                        </ul>
+                        <ul className="menu">{sketches}</ul>
                     </div>
                 </div>
             </div>
@@ -107,8 +99,8 @@ class SketchSelector extends
 interface ISketchIProps {
     match: {
         params: {
-            sketchId: string,
-        },
+            sketchId: string;
+        };
     };
 }
 
@@ -123,15 +115,13 @@ class Sketch extends React.Component<ISketchIProps, {}> {
                         <li className="breadcrumb-item">
                             <Link to="/">Matto</Link>
                         </li>
-                        <li className="breadcrumb-item">
-                            {this.props.match.params.sketchId}
-                        </li>
+                        <li className="breadcrumb-item">{this.props.match.params.sketchId}</li>
                     </ul>
                 </h1>
                 <div className="columns">
                     <div className={"column col-10 col-sm-12 col-mx-auto"}>
                         <div>
-                            <div id={Sketch.CANVAS_ID}></div>
+                            <div id={Sketch.CANVAS_ID} />
                         </div>
                     </div>
                 </div>
@@ -150,7 +140,6 @@ class Sketch extends React.Component<ISketchIProps, {}> {
         }
 
         return new (p5 as any)((p: p5) => {
-
             p.setup = () => {
                 p.createCanvas(sketch.width, sketch.height);
 
@@ -201,17 +190,17 @@ class Sketch extends React.Component<ISketchIProps, {}> {
 
                 return false;
             };
-
         }, Sketch.CANVAS_ID);
     }
 }
 
 const mountNode = document.getElementById("app");
-render((
+render(
     <HashRouter>
         <div>
             <Route path="/sketch/:sketchId" component={Sketch} />
             <Route exact path="/" component={withRouter(SketchSelector)} />
         </div>
-    </HashRouter>
-), mountNode);
+    </HashRouter>,
+    mountNode,
+);
