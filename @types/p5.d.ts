@@ -8527,7 +8527,7 @@ declare namespace p5 {
      *   between.
      *   @return the lerped value
      */
-    static lerp(v1: p5.Vector, v2: p5.Vector, amt: number): number
+    static lerp(v1: p5.Vector, v2: p5.Vector, amt: number): p5.Vector
 
     /**
      *   Return a representation of this vector as a float
