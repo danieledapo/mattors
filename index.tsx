@@ -30,6 +30,7 @@ import { CairoTiling } from "./sketches/cairo-tiling";
 import { PenroseTiling } from "./sketches/penrose-tiling";
 import { TruchetTiles } from "./sketches/truchet-tiles";
 import { TriangularMaze } from "./sketches/triangular-maze";
+import { CircularMaze } from "./sketches/circular-maze";
 
 // from older to most recent
 export const SKETCHES = [
@@ -56,6 +57,7 @@ export const SKETCHES = [
     new PenroseTiling(),
     new TruchetTiles(),
     new TriangularMaze(),
+    new CircularMaze(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
