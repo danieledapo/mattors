@@ -2,7 +2,6 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const dist = path.resolve(__dirname, "dist");
-const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
@@ -28,11 +27,6 @@ module.exports = {
             filename: "[name].css",
             chunkFilename: "[id].css"
         }),
-
-        // TODO: uncomment when wasm-pack supports workspaces
-        // new WasmPackPlugin({
-        //     crateDirectory: path.resolve(__dirname, "geo")
-        // }),
     ],
 
     resolve: {

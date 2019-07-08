@@ -10,10 +10,5 @@ crate-type = ["cdylib", "lib"]
 [dependencies]
 num = "0.2"
 
-# wasm-pack doesn't work with workspaces, see
-# https://github.com/rustwasm/wasm-pack/issues/252 and
-# https://github.com/rustwasm/wasm-pack/issues/305
-wasm-bindgen = "0.2"
-
 [dev-dependencies]
-proptest = "0.8.4"
+proptest = "0.9"
