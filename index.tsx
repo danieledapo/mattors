@@ -31,6 +31,7 @@ import { PenroseTiling } from "./sketches/penrose-tiling";
 import { TruchetTiles } from "./sketches/truchet-tiles";
 import { TriangularMaze } from "./sketches/triangular-maze";
 import { CircularMaze } from "./sketches/circular-maze";
+import { Dla } from "./sketches/dla";
 
 // from older to most recent
 export const SKETCHES = [
@@ -58,6 +59,7 @@ export const SKETCHES = [
     new TruchetTiles(),
     new TriangularMaze(),
     new CircularMaze(),
+    new Dla(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
@@ -86,8 +88,8 @@ class SketchSelector extends React.PureComponent<RouteComponentProps<any, Static
                 <div className="columns">
                     <div className={"column col-4 col-sm-8 col-mx-auto"}>
                         <p>
-                            Matto is a generative art playground built on top of Typescript and Rust. It also uses the
-                            p5js library.
+                            Matto is a generative art playground built on top of Typescript and
+                            Rust. It also uses the p5js library.
                         </p>
 
                         <ul className="menu">{sketches}</ul>
