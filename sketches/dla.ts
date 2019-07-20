@@ -53,6 +53,7 @@ export class Dla implements ISketch {
     private particles: Particle[] = [];
     private particlesBbox: Bbox = new Bbox(new p5.Vector(), new p5.Vector());
     private containerRadius = 0;
+    private stickiness = 1;
 
     public reset(p: p5) {
         p.background("black");
@@ -78,6 +79,7 @@ export class Dla implements ISketch {
         }
 
         this.containerRadius = Math.min(this.width / 2, this.height / 2) - 50 * 2;
+        this.stickiness = p.random(1);
     }
 
     public draw(p: p5) {
@@ -112,7 +114,7 @@ export class Dla implements ISketch {
                 return e.position.dist(particle!.position) < e.radius + particle!.radius;
             });
 
-            if (neighbor === undefined) {
+            if (neighbor === undefined || p.random() > this.stickiness) {
                 particle.position.add(p5.Vector.random2D().mult(particle.radius));
                 continue;
             }
