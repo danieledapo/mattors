@@ -32,6 +32,7 @@ import { TruchetTiles } from "./sketches/truchet-tiles";
 import { TriangularMaze } from "./sketches/triangular-maze";
 import { CircularMaze } from "./sketches/circular-maze";
 import { Dla } from "./sketches/dla";
+import { ParallelBands } from "./sketches/parallel-bands";
 
 // from older to most recent
 export const SKETCHES = [
@@ -60,6 +61,7 @@ export const SKETCHES = [
     new TriangularMaze(),
     new CircularMaze(),
     new Dla(),
+    new ParallelBands(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
