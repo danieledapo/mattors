@@ -33,6 +33,7 @@ import { TriangularMaze } from "./sketches/triangular-maze";
 import { CircularMaze } from "./sketches/circular-maze";
 import { Dla } from "./sketches/dla";
 import { ParallelBands } from "./sketches/parallel-bands";
+import { GooglyEyes } from "./sketches/eyes";
 
 // from older to most recent
 export const SKETCHES = [
@@ -62,6 +63,7 @@ export const SKETCHES = [
     new CircularMaze(),
     new Dla(),
     new ParallelBands(),
+    new GooglyEyes(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
