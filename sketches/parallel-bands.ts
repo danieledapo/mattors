@@ -44,14 +44,14 @@ export class ParallelBands implements ISketch {
             this.rects = newRects;
         }
 
-        p.strokeWeight(6);
         for (const r of this.rects) {
             p.fill(p.random(palette));
             p.rect(r.x, r.y, r.width, r.height);
         }
 
-        p.stroke(360, 0, 100, 0.5);
-        p.strokeWeight(2);
+        p.smooth();
+        p.stroke(360, 0, 100);
+        p.strokeWeight(6);
         for (const r of this.rects) {
             if (p.random() > 0.8) {
                 continue;
@@ -60,7 +60,7 @@ export class ParallelBands implements ISketch {
             const a = p.random(p.TWO_PI);
             const d = Math.pow(r.width / 2, 2) + Math.pow(r.height / 2, 2);
 
-            const nparallel = p.random(10, 300);
+            const nparallel = 300;
             for (let di = 0; di < nparallel; ++di) {
                 const t = di / (nparallel - 1);
 
@@ -83,7 +83,7 @@ export class ParallelBands implements ISketch {
 
         // redraw borders
         p.stroke("black");
-        p.strokeWeight(6);
+        p.strokeWeight(8);
         p.noFill();
         for (const r of this.rects) {
             p.rect(r.x, r.y, r.width, r.height);
