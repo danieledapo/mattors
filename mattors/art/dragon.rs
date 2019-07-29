@@ -93,7 +93,7 @@ pub fn dragon_to_image(
     {
         let mut drawer = drawing::Drawer::new_with_no_blending(&mut img);
 
-        let pix = image::Rgb { data: rgb_color };
+        let pix = image::Rgb(rgb_color);
 
         let mut x = start_x;
         let mut y = start_y;

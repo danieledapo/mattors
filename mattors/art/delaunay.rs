@@ -32,9 +32,7 @@ pub fn random_triangulation<R: Rng>(
             let p2 = PointU32::new(p2.x.ceil() as u32, p2.y.ceil() as u32);
             let p3 = PointU32::new(p3.x.ceil() as u32, p3.y.ceil() as u32);
 
-            let pix = image::Rgba {
-                data: random_color(color_config).to_rgba(alpha),
-            };
+            let pix = image::Rgba(random_color(color_config).to_rgba(alpha));
 
             drawer.triangle(p1, p2, p3, &pix);
         }

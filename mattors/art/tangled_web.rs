@@ -34,13 +34,7 @@ pub fn generate_img(img: &mut image::RgbImage, iterations: usize, circle_divisio
         let v0 = vertices[*v0].position;
         let v1 = vertices[*v1].position;
 
-        drawer.line(
-            line_pt(v0),
-            line_pt(v1),
-            &image::Rgb {
-                data: [154, 154, 154],
-            },
-        );
+        drawer.line(line_pt(v0), line_pt(v1), &image::Rgb([154, 154, 154]));
     }
 }
 

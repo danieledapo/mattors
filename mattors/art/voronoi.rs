@@ -38,13 +38,11 @@ pub fn gradient_voronoi(
         let (closest_point, _) = points.nearest_neighbor(PointU32::new(x, y)).unwrap();
 
         let c = f64::from(closest_point.x) / f64::from(img_width);
-        *pix = image::Rgb {
-            data: [
-                (f64::from(color1[0]) + c * dr) as u8,
-                (f64::from(color1[1]) + c * dg) as u8,
-                (f64::from(color1[2]) + c * db) as u8,
-            ],
-        };
+        *pix = image::Rgb([
+            (f64::from(color1[0]) + c * dr) as u8,
+            (f64::from(color1[1]) + c * dg) as u8,
+            (f64::from(color1[2]) + c * db) as u8,
+        ]);
     }
 }
 
@@ -66,14 +64,7 @@ pub fn random_voronoi<R: Rng>(
 
     let points = random_points
         .iter()
-        .map(|pt| {
-            (
-                *pt,
-                image::Rgb {
-                    data: random_color(color_config).to_rgb(),
-                },
-            )
-        })
+        .map(|pt| (*pt, image::Rgb(random_color(color_config).to_rgb())))
         .collect();
 
     let points = kdtree::KdTree::from_vector(points);

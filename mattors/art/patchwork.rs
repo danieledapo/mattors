@@ -8,13 +8,8 @@ use geo::{convex_hull, kmeans, BoundingBox, Point, Polygon};
 use crate::art::random_point_in_bbox;
 use crate::drawing::{Blender, Drawer};
 
-const WHITE_EGG: image::Rgb<u8> = image::Rgb {
-    data: [0xFD, 0xFD, 0xFF],
-};
-
-const BLACK_MATTERHORN: image::Rgb<u8> = image::Rgb {
-    data: [0x52, 0x4B, 0x4B],
-};
+const WHITE_EGG: image::Rgb<u8> = image::Rgb([0xFD, 0xFD, 0xFF]);
+const BLACK_MATTERHORN: image::Rgb<u8> = image::Rgb([0x52, 0x4B, 0x4B]);
 
 /// Generate random shapes according to the PatchWork algorithm.
 pub fn random_patchwork(

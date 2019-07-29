@@ -19,7 +19,7 @@ path = "mattors/main.rs"
 [dependencies]
 geo = { path = "./geo" }
 
-image = "0.21"
+image = "0.22"
 num = "0.2"
 rand = "0.7"
 structopt = "0.2"

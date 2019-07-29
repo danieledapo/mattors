@@ -104,6 +104,6 @@ fn draw_borders(
     ];
 
     for border in &borders {
-        drawer.rect(border, &image::Rgb { data: [0, 0, 0] });
+        drawer.rect(border, &image::Rgb([0, 0, 0]));
     }
 }

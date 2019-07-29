@@ -109,7 +109,7 @@ where
         return None;
     }
 
-    let mut chans_sum = vec![0; From::from(P::channel_count())];
+    let mut chans_sum = vec![0; From::from(P::CHANNEL_COUNT)];
     let mut total_freq = 0;
 
     for &(pix, freq) in pixels_freqs {
@@ -144,7 +144,7 @@ where
         return None;
     }
 
-    let mut ranges = vec![(u64::max_value(), u64::min_value()); From::from(P::channel_count())];
+    let mut ranges = vec![(u64::max_value(), u64::min_value()); From::from(P::CHANNEL_COUNT)];
 
     for &(pix, _) in pixels_freqs {
         for (i, ch) in pix.channels().iter().enumerate() {
@@ -175,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_same_color() {
-        let black = Rgb { data: [0_u8, 0, 0] };
+        let black = Rgb([0_u8, 0, 0]);
 
         let divide_steps = 0;
         let pixs = vec![black, black, black, black, black];
@@ -189,8 +189,8 @@ mod tests {
 
     #[test]
     fn test_less_pixels_than_wanted() {
-        let black = Rgb { data: [0_u8, 0, 0] };
-        let red = Rgb { data: [255, 0, 0] };
+        let black = Rgb([0_u8, 0, 0]);
+        let red = Rgb([255, 0, 0]);
 
         let divide_steps = 10;
         let pixs = vec![black, black, black, black, black, red, red, red];
@@ -204,12 +204,12 @@ mod tests {
 
     #[test]
     fn test_50_50() {
-        let black = Rgb { data: [0_u8, 0, 0] };
-        let red = Rgb { data: [255, 0, 0] };
+        let black = Rgb([0_u8, 0, 0]);
+        let red = Rgb([255, 0, 0]);
 
         let divide_steps = 0;
         let pixs = vec![black, black, red, red];
-        let avg_pix = Rgb { data: [127, 0, 0] };
+        let avg_pix = Rgb([127, 0, 0]);
 
         let expected = QuantizeResult {
             colors: vec![avg_pix],
@@ -221,12 +221,12 @@ mod tests {
 
     #[test]
     fn test_different_freqs() {
-        let black = Rgb { data: [0_u8, 0, 0] };
-        let red = Rgb { data: [255, 0, 0] };
+        let black = Rgb([0_u8, 0, 0]);
+        let red = Rgb([255, 0, 0]);
 
         let divide_steps = 0;
         let pixs = vec![black, black, red, red, red, black, black];
-        let avg_pix = Rgb { data: [109, 0, 0] };
+        let avg_pix = Rgb([109, 0, 0]);
 
         let expected = QuantizeResult {
             colors: vec![avg_pix],
@@ -238,8 +238,8 @@ mod tests {
 
     #[test]
     fn test_different_freqs_but_few_colors() {
-        let black = Rgb { data: [0_u8, 0, 0] };
-        let red = Rgb { data: [255, 0, 0] };
+        let black = Rgb([0_u8, 0, 0]);
+        let red = Rgb([255, 0, 0]);
 
         let divide_steps = 1;
         let pixs = vec![black, black, red, red, red, black, black];

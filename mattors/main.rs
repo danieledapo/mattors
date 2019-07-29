@@ -745,8 +745,8 @@ fn overlap_images(lhs: &image::RgbImage, rhs: &image::RgbImage) -> Option<image:
 
     for x in 0..lhs.width() {
         for y in 0..lhs.height() {
-            let lhs_pix = lhs.get_pixel(x, y).data;
-            let rhs_pix = rhs.get_pixel(x, y).data;
+            let lhs_pix = lhs.get_pixel(x, y).0;
+            let rhs_pix = rhs.get_pixel(x, y).0;
 
             let new_pix = [
                 (lhs_pix[0].saturating_add(rhs_pix[0])) / 2,
@@ -780,13 +780,8 @@ fn quantize_image(config: &Quantize) {
 }
 
 fn spawn_sierpinski(config: &Sierpinski) {
-    let mut img = image::RgbImage::from_pixel(
-        config.width,
-        config.height,
-        image::Rgb {
-            data: [0x40, 0xbe, 0xcd],
-        },
-    );
+    let mut img =
+        image::RgbImage::from_pixel(config.width, config.height, image::Rgb([0x40, 0xbe, 0xcd]));
 
     if config.fancy {
         sierpinski::fancy_sierpinski(
@@ -794,18 +789,10 @@ fn spawn_sierpinski(config: &Sierpinski) {
             config.divide_steps,
             false,
             &[
-                image::Rgb {
-                    data: [0x02, 0x44, 0x0c],
-                },
-                image::Rgb {
-                    data: [0x78, 0x94, 0x00],
-                },
-                image::Rgb {
-                    data: [0xe4, 0xd5, 0x65],
-                },
-                image::Rgb {
-                    data: [0xf3, 0xf5, 0xe7],
-                },
+                image::Rgb([0x02, 0x44, 0x0c]),
+                image::Rgb([0x78, 0x94, 0x00]),
+                image::Rgb([0xe4, 0xd5, 0x65]),
+                image::Rgb([0xf3, 0xf5, 0xe7]),
             ],
         );
     } else {
@@ -813,9 +800,7 @@ fn spawn_sierpinski(config: &Sierpinski) {
             &mut img,
             config.divide_steps,
             true,
-            &[image::Rgb {
-                data: [0xf3, 0xf5, 0xe7],
-            }],
+            &[image::Rgb([0xf3, 0xf5, 0xe7])],
         );
     }
 
@@ -875,8 +860,7 @@ fn primirs(config: &Primirs) {
 }
 
 fn fractal_tree(config: &FractalTree) {
-    let mut img =
-        image::GrayImage::from_pixel(config.width, config.height, image::Luma { data: [0] });
+    let mut img = image::GrayImage::from_pixel(config.width, config.height, image::Luma([0]));
 
     fractree::fractal_tree(
         &mut img,
@@ -886,15 +870,15 @@ fn fractal_tree(config: &FractalTree) {
         config.branching_angle_step,
         f64::from(config.height) / 3.0,
         config.branch_len_factor,
-        &image::Luma { data: [0xFF] },
+        &image::Luma([0xFF]),
     );
 
     img.save(&config.output_path).expect("cannot save image");
 }
 
 fn runes(config: &Runes) {
-    let white_pix = image::Luma { data: [0xFF] };
-    let black_pix = image::Luma { data: [0] };
+    let white_pix = image::Luma([0xFF]);
+    let black_pix = image::Luma([0]);
 
     let mut imgbuf =
         image::GrayImage::from_pixel(config.ntiles * config.width, config.height, white_pix);
@@ -917,9 +901,7 @@ fn delaunay(config: &Delaunay) {
     let mut img = image::RgbaImage::from_pixel(
         config.width,
         config.height,
-        image::Rgba {
-            data: matto::color::random_color(&mut color_config).to_rgba(alpha),
-        },
+        image::Rgba(matto::color::random_color(&mut color_config).to_rgba(alpha)),
     );
 
     delaunay::random_triangulation(&mut img, &mut color_config, config.grid_size, alpha);
@@ -939,8 +921,8 @@ fn voronoi(config: &Voronoi) {
 
         voronoi::gradient_voronoi(
             &mut img,
-            image::Rgb { data: color1 },
-            image::Rgb { data: color2 },
+            image::Rgb(color1),
+            image::Rgb(color2),
             config.npoints,
         )
     } else {
@@ -965,13 +947,8 @@ fn patchwork(config: &Patchwork) {
 }
 
 fn stippling(config: &Stippling) {
-    let mut img = image::RgbImage::from_pixel(
-        config.width,
-        config.height,
-        image::Rgb {
-            data: [0xFF, 0xFF, 0xFF],
-        },
-    );
+    let mut img =
+        image::RgbImage::from_pixel(config.width, config.height, image::Rgb([0xFF, 0xFF, 0xFF]));
 
     match config.command {
         StipplingCommand::Gradient(ref gradient_config) => {
@@ -980,7 +957,7 @@ fn stippling(config: &Stippling) {
                 gradient_config.bands,
                 gradient_config.first_band_points,
                 gradient_config.grow_coeff,
-                image::Rgb { data: [0, 0, 0] },
+                image::Rgb([0, 0, 0]),
                 stippling::Direction::TopToBottom,
             );
         }
@@ -990,7 +967,7 @@ fn stippling(config: &Stippling) {
                 rects_config.iterations,
                 rects_config.points,
                 rects_config.minimum_area,
-                image::Rgb { data: [0, 0, 0] },
+                image::Rgb([0, 0, 0]),
             );
         }
     }
@@ -1002,24 +979,16 @@ fn mondrian(config: &Mondrian) {
     let mut img = image::RgbImage::new(config.width, config.height);
 
     let fill_palette = [
-        image::Rgb {
-            data: [0x8d, 0x22, 0x02],
-        },
-        image::Rgb {
-            data: [0x0b, 0x18, 0x3b],
-        },
-        image::Rgb {
-            data: [0xd0, 0x95, 0x02],
-        },
+        image::Rgb([0x8d, 0x22, 0x02]),
+        image::Rgb([0x0b, 0x18, 0x3b]),
+        image::Rgb([0xd0, 0x95, 0x02]),
     ];
 
     mondrian::generate(
         &mut img,
         config.iterations,
         config.minimum_area,
-        image::Rgb {
-            data: [0xe6, 0xeb, 0xc3],
-        },
+        image::Rgb([0xe6, 0xeb, 0xc3]),
         &fill_palette,
         10,
     );
@@ -1033,23 +1002,19 @@ fn dither(config: &Dither) {
     let step = u8::max_value() / config.levels;
 
     if config.rgb {
-        let dithered = dithering::dither(&img.to_rgb(), |l| image::Rgb {
-            data: {
-                [
-                    l.data[0] / step * step,
-                    l.data[1] / step * step,
-                    l.data[2] / step * step,
-                ]
-            },
+        let dithered = dithering::dither(&img.to_rgb(), |l| {
+            image::Rgb([
+                l.0[0] / step * step,
+                l.0[1] / step * step,
+                l.0[2] / step * step,
+            ])
         });
 
         dithered
             .save(&config.output_path)
             .expect("cannot save image");
     } else {
-        let dithered = dithering::dither(&img.to_luma(), |l| image::Luma {
-            data: { [l.data[0] / step * step] },
-        });
+        let dithered = dithering::dither(&img.to_luma(), |l| image::Luma([l.0[0] / step * step]));
 
         dithered
             .save(&config.output_path)
