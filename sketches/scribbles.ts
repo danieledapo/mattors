@@ -9,6 +9,47 @@ interface Particle {
     alive: boolean;
 }
 
+interface Container {
+    contains: (x: number, y: number) => boolean;
+    random: (p: p5) => [number, number];
+}
+
+class Rect implements Container {
+    constructor(
+        public readonly x: number,
+        public readonly y: number,
+        public readonly width: number,
+        public readonly height: number) {}
+
+    public contains(x: number, y: number): boolean {
+        return this.x <= x && this.y <= y && this.x + this.width >= x && this.y + this.height >= y;
+    }
+
+    public random(p: p5): [number, number] {
+        return [p.random(this.x, this.x + this.width), p.random(this.y, this.y + this.height)];
+    }
+
+}
+
+class Circle implements Container {
+    constructor(
+        public readonly x: number,
+        public readonly y: number,
+        public readonly radius: number) {}
+
+    public contains(x: number, y: number): boolean {
+        return Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2) <= Math.pow(this.radius, 2);
+    }
+
+    public random(p: p5): [number, number] {
+        const a = p.random(p.TWO_PI);
+        const r = p.random(this.radius);
+
+        return [this.x + Math.cos(a) * r, this.y + Math.sin(a) * r];
+    }
+
+}
+
 export class Scribbles implements ISketch {
     public readonly name = "Scribbles";
 
@@ -17,18 +58,24 @@ export class Scribbles implements ISketch {
     public readonly loop = true;
 
     private particles: Particle[] = [];
+    private container: Container = new Rect(0,0,0,0);
 
     public reset(p: p5) {
         p.colorMode(p.HSB);
 
-        this.particles = [
-            this.genParticle(p, this.width / 2, this.height / 2),
-        ];
+        const cp = p.random();
 
-        const n = p.random(8);
+        if (cp > 0.5) {
+            this.container = new Rect(0, 0, this.width, this.height);
+        } else {
+            this.container = new Circle(this.width/2, this.height/2, 300);
+        }
+
+        this.particles = [];
+
+        const n = p.random(1, 9);
         for (let i = 0; i < n; ++i) {
-            this.particles.push(this.genParticle(p));
-
+            this.particles.push(this.genParticle(p, ...this.container.random(p)));
         }
     }
 
@@ -39,17 +86,12 @@ export class Scribbles implements ISketch {
 
         p.strokeWeight(5);
         p.rect(0, 0, this.width, this.height);
-        // p.ellipse(this.width/2, this.height/2, 600, 600);
         p.strokeWeight(1);
 
         for (const particle of this.particles) {
-            if (particle.alive &&
-                // (particle.position.x < 0 || particle.position.x > this.width
-                //     || particle.position.y < 0 || particle.position.y > this.height)
-                (particle.position.dist(p.createVector(this.width/2, this.height/2)) > 300)
-            ) {
+            if (particle.alive && !this.container.contains(particle.position.x, particle.position.y)) {
                 particle.alive = false;
-                this.particles.push(this.genParticle(p));
+                this.particles.push(this.genParticle(p, ...this.container.random(p)));
             }
 
             if (particle.alive) {
@@ -73,10 +115,7 @@ export class Scribbles implements ISketch {
         }
     }
 
-    private genParticle(p: p5, x?: number, y?: number): Particle {
-        x = (x !== undefined) ? x : p.random(this.width);
-        y = (y !== undefined) ? y : p.random(this.height);
-
+    private genParticle(p: p5, x: number, y: number): Particle {
         return {
             acceleration: p.random(),
             alive: true,
