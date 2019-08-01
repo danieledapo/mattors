@@ -28,7 +28,6 @@ class Rect implements Container {
     public random(p: p5): [number, number] {
         return [p.random(this.x, this.x + this.width), p.random(this.y, this.y + this.height)];
     }
-
 }
 
 class Circle implements Container {
@@ -47,7 +46,42 @@ class Circle implements Container {
 
         return [this.x + Math.cos(a) * r, this.y + Math.sin(a) * r];
     }
+}
 
+class Triangle implements Container {
+    constructor(
+        public readonly a: p5.Vector,
+        public readonly b: p5.Vector,
+        public readonly c: p5.Vector) {}
+
+    public contains(x: number, y: number): boolean {
+        const sign = (p1: p5.Vector, p2: p5.Vector, p3: p5.Vector) => {
+            return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+        };
+
+        const xy = this.a.copy();
+        xy.set(x, y);
+
+        const d1 = sign(xy, this.a, this.b);
+        const d2 = sign(xy, this.b, this.c);
+        const d3 = sign(xy, this.c, this.a);
+
+        const has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+        const has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+        return !(has_neg && has_pos);
+    }
+
+    public random(p: p5): [number, number] {
+        const r1 = p.random();
+        const r2 = p.random();
+
+        const pt = this.a.copy().mult(1 - Math.sqrt(r1))
+            .add(this.b.copy().mult((1 - r2) * Math.sqrt(r1)))
+            .add(this.c.copy().mult(r2 * Math.sqrt(r1)));
+
+        return [pt.x, pt.y];
+    }
 }
 
 export class Scribbles implements ISketch {
@@ -65,10 +99,19 @@ export class Scribbles implements ISketch {
 
         const cp = p.random();
 
-        if (cp > 0.5) {
+        if (cp < 0.33) {
             this.container = new Rect(0, 0, this.width, this.height);
-        } else {
+        } else if (cp < 0.66) {
             this.container = new Circle(this.width/2, this.height/2, 300);
+        } else {
+            const t = p.createVector(p.random(this.width/2), p.random(this.height/2));
+            const l = p.createVector(p.random(this.width/2, this.width),
+                                     p.random(this.height/2));
+            // c   = (t + l + r) / 3 =>
+            // 3*c = t + l + r       =>
+            // r   = 3*c - t - l
+            const r = p.createVector(this.width/2, this.height/2).mult(3).sub(t).sub(l);
+            this.container = new Triangle(t, l, r);
         }
 
         this.particles = [];
