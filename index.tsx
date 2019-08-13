@@ -36,6 +36,7 @@ import { ParallelBands } from "./sketches/parallel-bands";
 import { GooglyEyes } from "./sketches/eyes";
 import { Scribbles } from "./sketches/scribbles";
 import { FocusEye } from "./sketches/focus-eye";
+import { Sorting } from "./sketches/sorting";
 
 // from older to most recent
 export const SKETCHES = [
@@ -68,6 +69,7 @@ export const SKETCHES = [
     new GooglyEyes(),
     new Scribbles(),
     new FocusEye(),
+    new Sorting(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
