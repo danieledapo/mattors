@@ -39,6 +39,7 @@ import { FocusEye } from "./sketches/focus-eye";
 import { Sorting } from "./sketches/sorting";
 import { BlackWhiteRain } from "./sketches/bw-rain";
 import { Rots } from "./sketches/rots";
+import { NoiseQuads } from "./sketches/noise-quads";
 
 // from older to most recent
 export const SKETCHES = [
@@ -74,6 +75,7 @@ export const SKETCHES = [
     new Sorting(),
     new BlackWhiteRain(),
     new Rots(),
+    new NoiseQuads(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
