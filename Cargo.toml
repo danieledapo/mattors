@@ -22,7 +22,7 @@ geo = { path = "./geo" }
 image = "0.22"
 num = "0.2"
 rand = "0.7"
-structopt = "0.2"
+structopt = "0.3"
 
 [dev-dependencies]
 maplit = "1.0"

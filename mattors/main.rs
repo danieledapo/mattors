@@ -168,7 +168,7 @@ pub enum JuliaSet {
         end: PointF64,
 
         /// The C constant in a Julia set.
-        #[structopt(short = "c", parse(try_from_str = "parse_complex"))]
+        #[structopt(short = "c", parse(try_from_str = parse_complex))]
         c: Complex64,
 
         /// Name of the fractal.
