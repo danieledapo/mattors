@@ -175,13 +175,16 @@ def dump_svg(filename, dimensions, polygons, cuts):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--width", default=1920, help="width of the svg")
-    parser.add_argument("--height", default=1080, help="height of the svg")
+    parser.add_argument(
+        "-w", "--width", default=1920, help="width of the svg", type=int
+    )
+    parser.add_argument("--height", default=1080, help="height of the svg", type=int)
     parser.add_argument(
         "-n",
         "--iterations",
         default=None,
         help="number of iterations of the algorithm, random if not specified",
+        type=int,
     )
     parser.add_argument(
         "-s",
