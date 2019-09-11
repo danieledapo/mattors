@@ -67,14 +67,13 @@ def main():
     seed = random.random()
 
     quads = []
-    for p in range(args.particles):
-        t = p / (args.particles - 1)
+    for _ in range(args.particles):
         x, y = (
             random.randrange(padding, args.width - padding),
             random.randrange(padding, args.height - padding),
         )
 
-        for i in range(args.steps):
+        for _ in range(args.steps):
             z = 0.5 + 0.5 * noise.snoise2(x / args.width, y / args.height, base=seed)
 
             if random.random() > 0.6:
@@ -82,14 +81,6 @@ def main():
 
             x += math.cos(z * 2 * math.pi) * 10
             y += math.sin(z * 2 * math.pi) * 10
-
-            if (
-                x < padding
-                or x >= args.width - padding
-                or y < padding
-                or y >= args.height - padding
-            ):
-                break
 
     theme = THEMES[args.theme]
     dump_svg(
