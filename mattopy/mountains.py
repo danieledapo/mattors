@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import math
 import random
 
@@ -7,20 +8,36 @@ import noise
 
 
 THEMES = {
-    "flames": {
+    "flame": {
         "palette": [
-            "rgba(255,   0, 0, 1)",
-            "rgba(255,  48, 0, 1)",
-            "rgba(255,  71, 0, 1)",
-            "rgba(255,  88, 0, 1)",
-            "rgba(255, 103, 0, 1)",
-            "rgba(255, 117, 0, 1)",
-            "rgba(255, 130, 0, 1)",
-            "rgba(255, 142, 0, 1)",
-            "rgba(255, 154, 0, 1)",
-            "rgba(255, 165, 0, 1)",
+            "rgb(255,  48, 0)",
+            "rgb(255,  71, 0)",
+            "rgb(255,  88, 0)",
+            "rgb(255, 103, 0)",
+            "rgb(255, 117, 0)",
+            "rgb(255, 130, 0)",
+            "rgb(255, 142, 0)",
+            "rgb(255, 154, 0)",
+            "rgb(255, 165, 0)",
         ],
-        "background": "crimson",
+        "background": "rgb(255, 0, 0)",
+        "connect_bottom": True,
+        "padding": 0,
+        "stroke": "none",
+    },
+    "ocean": {
+        "palette": [
+            "rgb(68, 44, 253)",
+            "rgb(94, 70, 251)",
+            "rgb(113, 92, 249)",
+            "rgb(129, 113, 246)",
+            "rgb(141, 134, 243)",
+            "rgb(151, 154, 241)",
+            "rgb(160, 175, 237)",
+            "rgb(167, 195, 234)",
+            "rgb(173, 216, 230)",
+        ],
+        "background": "rgb(0, 0, 255)",
         "connect_bottom": True,
         "padding": 0,
         "stroke": "none",
@@ -29,36 +46,43 @@ THEMES = {
         "palette": ["none"],
         "background": "white",
         "connect_bottom": False,
-        "padding": 20,
+        "padding": 0.08,
         "stroke": "black",
     },
 }
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--width", default=1920, type=int)
+    parser.add_argument("--height", default=1080, type=int)
+    parser.add_argument("--points", default=20, type=int)
+    parser.add_argument("--lines", default=20, type=int)
+    parser.add_argument("-t", "--theme", choices=list(THEMES.keys()), default="flame")
+
+    return parser.parse_args()
+
+
 def main():
-    width = 1920 / 4
-    height = 1080 / 4
-    padding = 20
-    npoints = 20
-    nlines = 20
+    args = parse_args()
     seed = random.random()
 
-    theme = THEMES["flames"]
+    theme = THEMES[args.theme]
     palette = theme["palette"]
-    padding = theme["padding"]
+    padding = min(args.width, args.height) * theme["padding"]
 
-    h = height - padding * 2
-    w = width - padding * 2
-    bh = h / nlines
+    h = args.height - padding * 2
+    w = args.width - padding * 2
+    bh = h / args.lines
 
     segs = []
-    for i in range(nlines):
-        y = padding + (i + 0.5) / nlines * h
+    for i in range(args.lines):
+        y = padding + (i + 0.5) / args.lines * h
 
         def noiseval(x):
             return noise.snoise2(
-                x / (npoints - 1),
-                i / nlines,
+                x / (args.points - 1),
+                i / args.lines,
                 base=seed,
                 octaves=4,
                 lacunarity=2,
@@ -66,15 +90,15 @@ def main():
             )
 
         knots = [
-            (padding + (x / (npoints - 1) * w), y + bh * 3 * noiseval(x))
-            for x in range(npoints)
+            (padding + (x / (args.points - 1) * w), y + bh * 3 * noiseval(x))
+            for x in range(args.points)
         ]
-        col = palette[math.floor(i / nlines * len(palette))]
+        col = palette[math.floor(i / args.lines * len(palette))]
         segs.append((knots, col))
 
     dump_svg(
         "mountains.svg",
-        (width, height),
+        (args.width, args.height),
         segs,
         background=theme["background"],
         stroke=theme["stroke"],
