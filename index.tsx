@@ -40,6 +40,7 @@ import { Sorting } from "./sketches/sorting";
 import { BlackWhiteRain } from "./sketches/bw-rain";
 import { Rots } from "./sketches/rots";
 import { NoiseQuads } from "./sketches/noise-quads";
+import { Voronoi } from "./sketches/vornoi";
 
 // from older to most recent
 export const SKETCHES = [
@@ -76,6 +77,7 @@ export const SKETCHES = [
     new BlackWhiteRain(),
     new Rots(),
     new NoiseQuads(),
+    new Voronoi(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
