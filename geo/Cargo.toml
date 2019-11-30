@@ -4,9 +4,6 @@ version = "0.1.0"
 authors = ["Daniele D'Orazio <d.dorazio96@gmail.com>"]
 edition = "2018"
 
-[lib]
-crate-type = ["cdylib", "lib"]
-
 [dependencies]
 num = "0.2"
 
