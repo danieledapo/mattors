@@ -42,6 +42,7 @@ import { Rots } from "./sketches/rots";
 import { NoiseQuads } from "./sketches/noise-quads";
 import { Voronoi } from "./sketches/vornoi";
 import { NoiseSymmetry } from "./sketches/symmetry";
+import { SpiralNoise } from "./sketches/spiral-noise";
 
 // from older to most recent
 export const SKETCHES = [
@@ -80,6 +81,7 @@ export const SKETCHES = [
     new NoiseQuads(),
     new Voronoi(),
     new NoiseSymmetry(),
+    new SpiralNoise(),
 ];
 
 const sketchesMap = new Map(SKETCHES.map(s => [s.name, s] as [string, ISketch]));
