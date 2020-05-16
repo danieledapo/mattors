@@ -20,7 +20,7 @@ export class SpiralNoise implements ISketch {
         const deltaRadius = p.random(8, 10);
 
         const baseShape = [];
-        for (let i = 0; i < nVertices; ++i) {
+        for (let i = 0; i < nVertices - 1; ++i) {
             const a = i / nVertices * p.TWO_PI;
             const l = p.noise(this.t, i);
 
