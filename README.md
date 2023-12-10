@@ -1,4 +1,4 @@
-# Matto [![Build Status](https://travis-ci.org/d-dorazio/mattors.svg?branch=master)](https://travis-ci.org/d-dorazio/mattors)
+# Matto [![Build Status](https://travis-ci.org/danieledapo/mattors.svg?branch=master)](https://travis-ci.org/danieledapo/mattors)
 
 Have some fun visualizing math.
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Generative art playground",
   "main": "index.js",
-  "repository": "git@github.com:d-dorazio/mattors.git",
+  "repository": "git@github.com:danieledapo/mattors.git",
   "author": "Daniele D'Orazio <d.dorazio96@gmail.com>",
   "license": "MIT",
   "devDependencies": {
